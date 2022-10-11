@@ -1,18 +1,24 @@
 import type { ObjectId } from 'mongodb';
 import type { Color } from './Sudoku';
 
+export type GameValues = string[][];
+export type Cornermarks = string[][];
+export type Centermarks = string[][];
+export type Notes = string[][];
+export type GameColors = Color[][][];
+
 /** A single step on the way to a solution */
 export type SolutionStep = {
   /** Values on the solution step */
-  values: string[][];
+  values: GameValues;
   /** Cornermarks on the solution step */
-  cornermarks: string[][];
+  cornermarks: Cornermarks;
   /** Centermarks on the solution step */
-  centermarks: string[][];
+  centermarks: Centermarks;
   /** Notes on the solution step */
-  notes: string[][];
+  notes: Notes;
   /** A list of colors on each cell */
-  colors: Color[][][];
+  colors: GameColors;
 };
 
 /** A single step on the way to a solution */

@@ -14,14 +14,6 @@
     "skipLibCheck": true,
     "sourceMap": true,
     "strictNullChecks": true,
-    "target": "es2020",
-    "paths": {
-      "$server": ["src/server"],
-      "$server/*": ["src/server/*"],
-      "$models": ["src/models"],
-      "$models/*": ["src/models/*"],
-      "$lib": ["src/lib"],
-      "$lib/*": ["src/lib/*"]
-    }
+    "target": "es2020"
   }
 }

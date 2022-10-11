@@ -8,7 +8,20 @@ const config = {
       postcss: true
     })
   ],
-  kit: { adapter: adapter() }
+  kit: {
+    adapter: adapter(),
+    alias: {
+      $constants: 'src/constants.ts',
+      $types: 'src/types.ts',
+      $ui: 'src/ui',
+      $utils: 'src/utils',
+      $icons: 'src/icons',
+      $components: 'src/components',
+      $stores: 'src/stores',
+      $server: 'src/server',
+      $models: 'src/models'
+    }
+  }
 };
 
 export default config;

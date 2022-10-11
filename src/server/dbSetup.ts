@@ -1,5 +1,7 @@
 import { MONGODB_URI } from '$env/static/private';
 import type { Sudoku } from '$models/Sudoku';
+import type { User } from '$models/User';
+import type { Walkthrough } from '$models/Walkthrough';
 import { MongoClient } from 'mongodb';
 import type { Label } from '../models/Label';
 
@@ -9,3 +11,5 @@ export const database = mongoClient.db('octopuzzles');
 
 export const labelCollection = database.collection<Label>('labels');
 export const sudokuCollection = database.collection<Sudoku>('sudokus');
+export const userCollection = database.collection<User>('users');
+export const walkthroughCollection = database.collection<Walkthrough>('walkthroughs');

@@ -1,6 +1,6 @@
 import type { ObjectId } from 'mongodb';
 
-type Margins = {
+export type Margins = {
   /** The width of the left edge of the frame */
   left: number;
   /** The width of the right edge of the frame */
@@ -110,7 +110,7 @@ export type BorderClueType =
   | 'Quadruple'
   | 'Border';
 
-export type Shape = 'Circle' | 'Square' | 'Diamond' | 'Star' | 'Lin';
+export type Shape = 'Circle' | 'Square' | 'Diamond' | 'Star' | 'Line';
 
 export type Borderclue = {
   positions: [Position, Position];
@@ -197,6 +197,20 @@ export type SudokuSymbol = {
   color: Color;
 };
 
+export type Cells = boolean[][];
+export type Givens = string[][];
+export type Cornerclues = (Cornerclue | null)[][];
+export type EditorColors = (Color | null)[][];
+export type Regions = Region[];
+export type Borders = Line[];
+export type KillerCages = Position[][];
+export type Extendedcages = Extendedcage[];
+export type Paths = Path[];
+export type Borderclues = Borderclue[];
+export type Cellclues = Cellclue[];
+export type SudokuSymbols = (SudokuSymbol[] | null)[][];
+export type Solution = string[][];
+
 export type Sudoku = {
   /** The id of the user who created the sudoku */
   user_id?: ObjectId;
@@ -213,33 +227,33 @@ export type Sudoku = {
   /** The dimensions of the sudoku, i.e. the number of rows and columns */
   dimensions: Dimensions;
   /** The cells that are interactable in the sudoku. */
-  cells: boolean[][];
+  cells: Cells;
   /** The givens in the sudoku.  */
-  givens: string[][];
+  givens: Givens;
   /** OBSOLETE: The cornerclues in the sudoku. Migrated to Cellclues when the puzzle is loaded in the client */
-  cornerclues?: (Cornerclue | null)[][];
+  cornerclues?: Cornerclues;
   /** The colors in the cells of the sudoku. */
-  colors: (Color | null)[][];
+  colors: EditorColors;
   /** The regions of the sudoku. */
-  regions?: Region[];
+  regions?: Regions;
   /** OBSOLETE: The borders of the sudoku. */
-  borders?: Line[];
+  borders?: Borders;
   /** OBSOLETE: The dotted boxes (killer cages) in the grid. Migrated to Extendedcages when the puzzle is loaded in the client */
-  killercages?: Position[][];
+  killercages?: KillerCages;
   /** The dotted boxes (killer cages) in the grid, with optional rendering settings */
-  extendedcages?: Extendedcage[];
+  extendedcages?: Extendedcages;
   /** The paths in the sudoku, i.e. thermometers, etc. */
-  paths: Path[];
+  paths: Paths;
   /** The borderclues of the sudoku. That is, a clue lying on a border. If null, there are no border clues */
-  borderclues: Borderclue[];
+  borderclues: Borderclues;
   /** The cellclues of the sudoku. That is, a clue contained within a cell. If null, there are no cell clues */
-  cellclues?: Cellclue[];
+  cellclues?: Cellclues;
   /** OBSOLETE: The symbols in the grid. If null, there are no symbols */
-  symbols?: (SudokuSymbol[] | null)[][];
+  symbols?: SudokuSymbols;
   /** The global sudoku logic in the grid. */
   logic?: Logic;
   /** The solution to the puzzle if any is given */
-  solution?: string[][];
+  solution?: Solution;
   /** A list of labels on this sudoku */
   labels: ObjectId[];
   /** The time when the user was created */
