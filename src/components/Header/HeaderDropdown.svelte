@@ -1,42 +1,30 @@
 <script lang="ts">
-  import { mutation, graphql, query } from '$houdini';
-  import type { Logout, Me } from '$houdini';
   import { navigating } from '$app/stores';
   import { goto } from '$app/navigation';
   import { UserCircle } from 'phosphor-svelte';
   import { authMode } from '$stores/authStore';
   import Button from '$ui/Button.svelte';
   import AuthDrawer from '$components/Drawer/AuthDrawer/index.svelte';
+  import trpc from '$lib/client/trpc';
   import { me } from '$stores/meStore';
+  import { onMount } from 'svelte';
 
-  const {
-    data: meData,
-    refetch,
-    error
-  } = query<Me>(graphql`
-    query Me {
-      me {
-        id
-        username
-      }
-    }
-  `);
+  let loading = false;
 
-  $: if ($error != null) {
-    $me = null;
-  } else {
-    $me = $meData?.me ?? null;
+  async function getMe() {
+    loading = true;
+    const res = await trpc().query('users:me');
+    me.set(res);
+    loading = false;
   }
 
-  const logout = mutation<Logout>(graphql`
-    mutation Logout {
-      logout
-    }
-  `);
+  onMount(() => {
+    getMe();
+  });
 
   const handleLogout = async (): Promise<void> => {
-    await logout(null);
-    await refetch();
+    await trpc().mutation('users:logout');
+    await getMe();
     await goto('/');
   };
 
@@ -67,21 +55,23 @@
       <ul class="py-1">
         <li class="w-full">
           <a
-            sveltekit:prefetch
+            data-sveltekit-prefetch
             href="/sudoku/editor"
             class="block py-1 px-2 hover:bg-gray-200 w-full">Create sudoku</a
           >
         </li>
         <li class="w-full">
           <a
-            sveltekit:prefetch
-            href="/user/{$me.id}"
+            data-sveltekit-prefetch
+            href="/user/{$me._id}"
             class="block py-1 px-2 hover:bg-gray-200 w-full">Profile</a
           >
         </li>
         <li class="w-full">
-          <a sveltekit:prefetch href="/settings" class="block py-1 px-2 hover:bg-gray-200 w-full"
-            >Settings</a
+          <a
+            data-sveltekit-prefetch
+            href="/settings"
+            class="block py-1 px-2 hover:bg-gray-200 w-full">Settings</a
           >
         </li>
       </ul>

@@ -1,6 +1,5 @@
 <script lang="ts">
   import { page } from '$app/stores';
-
   import Logo from '$icons/Logo.svelte';
   import classNames from 'classnames';
   import HeaderDropdown from './HeaderDropdown.svelte';

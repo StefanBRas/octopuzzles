@@ -1,43 +1,42 @@
 <script lang="ts">
-  import { graphql, mutation } from '$houdini';
-  import type { Login } from '$houdini';
   import Button from '$ui/Button.svelte';
   import Logo from '$icons/Logo.svelte';
   import Input from '$ui/Input.svelte';
   import { authMode } from '$stores/authStore';
-  import toErrorMap from '$utils/toErrorMap';
+  import trpc, { type InferMutationInput } from '$lib/client/trpc';
   import { me } from '$stores/meStore';
 
   let usernameOrEmail = '';
   let password = '';
+  let loading = false;
 
   let errors: Record<string, string> = {};
 
-  const login = mutation<Login>(graphql`
-    mutation Login($usernameOrEmail: String!, $password: String!) {
-      login(usernameOrEmail: $usernameOrEmail, password: $password) {
-        errors {
-          field
-          message
-        }
-        user {
-          id
-          username
-        }
-      }
-    }
-  `);
+  async function login(data: InferMutationInput<'users:login'>) {
+    return await trpc().mutation('users:login', data);
+  }
 
   async function handleLogin(): Promise<void> {
-    const res = await login({ usernameOrEmail, password });
-    if (res?.login.errors) {
-      errors = toErrorMap(res.login.errors);
-    } else if (res?.login.user) {
-      me.set(res.login.user);
+    try {
+      loading = true;
+      const res = await login({ usernameOrEmail, password });
+      me.set(res);
       authMode.setAuthMode();
       usernameOrEmail = '';
       password = '';
+    } catch (e) {
+      console.log({ e });
+    } finally {
+      loading = false;
     }
+    // if (res?.login.errors) {
+    //   errors = toErrorMap(res.login.errors);
+    // } else if (res?.login.user) {
+    //   me.set(res.login.user);
+    //   authMode.setAuthMode();
+    //   usernameOrEmail = '';
+    //   password = '';
+    // }
   }
 </script>
 
@@ -63,7 +62,7 @@
     <Input label="Password" type="password" bind:value={password}>
       <p slot="error">{errors.password ?? ''}</p>
     </Input>
-    <Button variant="primary" class="mt-4 w-full">Log In</Button>
+    <Button variant="primary" class="mt-4 w-full" {loading}>Log In</Button>
   </form>
 
   <hr class="mt-6 mb-2" />

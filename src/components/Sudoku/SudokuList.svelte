@@ -23,8 +23,9 @@
   } from '$utils/defaults';
   import type { Sudoku } from '$models/Sudoku';
   import type { ObjectId, WithId } from 'mongodb';
+  import type { User } from '$models/User';
 
-  export let sudokus: WithId<Sudoku>[] | null;
+  export let sudokus: (WithId<Sudoku> & { creator: WithId<User> | null })[] | null;
   export let hasNextPage: boolean;
   export let loading: boolean;
   export let loadNextPage: () => Promise<void>;
@@ -43,7 +44,7 @@
         <a
           class="shadow-md items-center col-span-1 flex flex-col border rounded-md m-4 overflow-hidden cursor-pointer"
           href="/sudoku/{sudoku._id}"
-          sveltekit:prefetch
+          data-sveltekit-prefetch
         >
           <div class="h-96 w-full p-4 justify-center">
             <SudokuDisplay
@@ -74,16 +75,16 @@
                   {sudoku.title ?? '[untitled]'}
                 </h2>
                 <div class="flex text-sm text-gray-500">
-                  <!-- {#if sudoku.creator}
+                  {#if sudoku.creator}
                     <a
                       class="cursor-pointer hover:text-gray-800"
-                      href={`/user/${sudoku.creator.id}`}
+                      href={`/user/${sudoku.creator._id}`}
                     >
                       {sudoku.creator.username}
                     </a>
                   {:else}
                     <p class="text-sm text-gray-500">[deleted]</p>
-                  {/if} -->
+                  {/if}
                   <span class="mx-1">•</span>
                   <p class="">
                     {sudoku.points ?? 0} point{Math.abs(sudoku.points) !== 1 ? 's' : ''}

@@ -1,46 +1,43 @@
 <script lang="ts">
-  import { graphql, mutation } from '$houdini';
-  import type { Register } from '$houdini';
   import Button from '$ui/Button.svelte';
   import Logo from '$icons/Logo.svelte';
   import Input from '$ui/Input.svelte';
   import { authMode } from '$stores/authStore';
-  import toErrorMap from '$utils/toErrorMap';
+  import type { InferMutationInput } from '$lib/client/trpc';
+  import trpc from '$lib/client/trpc';
 
   let username = '';
   let email = '';
   let password = '';
+
+  let loading = false;
 
   let errors: Record<string, string> = {};
 
   /** If the signup was successful */
   let registerCompleted = false;
 
-  const register = mutation<Register>(graphql`
-    mutation Register($username: String!, $email: String!, $password: String!) {
-      register(username: $username, email: $email, password: $password) {
-        errors {
-          field
-          message
-        }
-        user {
-          id
-          username
-        }
-      }
-    }
-  `);
+  async function register(data: InferMutationInput<'users:register'>) {
+    return await trpc().mutation('users:register', data);
+  }
 
   const handleRegister = async (): Promise<void> => {
-    const res = await register({ username, email, password });
-    if (res?.register.errors) {
-      errors = toErrorMap(res.register.errors);
-    } else if (res?.register.user) {
-      registerCompleted = true;
-      username = '';
-      email = '';
-      password = '';
+    try {
+      loading = true;
+      const res = await register({ username, email, password });
+      loading = false;
+      console.log({ res });
+    } catch (e) {
+      console.log({ e });
     }
+    // if (res?.register.errors) {
+    //   errors = toErrorMap(res.register.errors);
+    // } else if (res?.register.user) {
+    //   registerCompleted = true;
+    //   username = '';
+    //   email = '';
+    //   password = '';
+    // }
   };
 </script>
 
