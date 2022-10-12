@@ -13,7 +13,9 @@
     rotationNames,
     symbolTypeNames
   } from '$constants';
-  import { Trash, CaretUp, CaretDown } from 'phosphor-svelte';
+  import CaretUp from 'phosphor-svelte/lib/CaretUp/CaretUp.svelte';
+  import CaretDown from 'phosphor-svelte/lib/CaretDown/CaretDown.svelte';
+  import Trash from 'phosphor-svelte/lib/Trash/Trash.svelte';
   import {
     editorHistory,
     handleArrows,

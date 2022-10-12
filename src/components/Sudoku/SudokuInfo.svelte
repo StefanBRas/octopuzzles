@@ -3,14 +3,19 @@
   import type { Vote } from '$houdini';
   import type { SudokuInfo } from '$houdini';
   import classNames from 'classnames';
-  import { CaretUp, CaretDown } from 'phosphor-svelte';
+  import CaretUp from 'phosphor-svelte/lib/CaretUp/CaretUp.svelte';
+  import CaretDown from 'phosphor-svelte/lib/CaretDown/CaretDown.svelte';
+  import FacebookLogo from 'phosphor-svelte/lib/FacebookLogo/FacebookLogo.svelte';
+  import RedditLogo from 'phosphor-svelte/lib/RedditLogo/RedditLogo.svelte';
+  import TwitterLogo from 'phosphor-svelte/lib/TwitterLogo/TwitterLogo.svelte';
+  import WhatsappLogo from 'phosphor-svelte/lib/WhatsappLogo/WhatsappLogo.svelte';
+  import Image from 'phosphor-svelte/lib/Image/Image.svelte';
   import { formatDistanceToNowStrict } from 'date-fns';
   import PuzzleLabel from '$ui/PuzzleLabel.svelte';
   import TwitterLink from '$components/shareButtons/TwitterLink.svelte';
   import FacebookLink from '$components/shareButtons/FacebookLink.svelte';
   import WhatsAppLink from '$components/shareButtons/WhatsAppLink.svelte';
   import RedditLink from '$components/shareButtons/RedditLink.svelte';
-  import { TwitterLogo, FacebookLogo, WhatsappLogo, RedditLogo, Image } from 'phosphor-svelte';
 
   export let sudoku: SudokuInfo;
   export let takeScreenshot: () => void;

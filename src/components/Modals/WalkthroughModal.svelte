@@ -3,7 +3,8 @@
   import { editorHistory, gameHistory } from '$stores/sudokuStore';
   import SudokuDisplay from '$components/Sudoku/Display/index.svelte';
   import Button from '$ui/Button.svelte';
-  import { ArrowsCounterClockwise, Trash } from 'phosphor-svelte';
+  import ArrowsCounterClockwise from 'phosphor-svelte/lib/ArrowsCounterClockwise/ArrowsCounterClockwise.svelte';
+  import Trash from 'phosphor-svelte/lib/Trash/Trash.svelte';
 
   export let editable = false;
   export let isOpen: boolean;

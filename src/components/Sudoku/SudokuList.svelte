@@ -2,7 +2,8 @@
   import SudokuDisplay from './Display/index.svelte';
   import { formatDistanceToNowStrict } from 'date-fns';
   import Button from '$ui/Button.svelte';
-  import { Trash, NotePencil } from 'phosphor-svelte';
+  import Trash from 'phosphor-svelte/lib/Trash/Trash.svelte';
+  import NotePencil from 'phosphor-svelte/lib/NotePencil/NotePencil.svelte';
   import LoadingIndicator from '$ui/LoadingIndicator.svelte';
   import {
     getAllBorderClues,

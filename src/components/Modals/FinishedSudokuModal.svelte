@@ -3,7 +3,11 @@
   import RedditLink from '$components/shareButtons/RedditLink.svelte';
   import TwitterLink from '$components/shareButtons/TwitterLink.svelte';
   import WhatsAppLink from '$components/shareButtons/WhatsAppLink.svelte';
-  import { FacebookLogo, RedditLogo, TwitterLogo, WhatsappLogo, Image } from 'phosphor-svelte';
+  import FacebookLogo from 'phosphor-svelte/lib/FacebookLogo/FacebookLogo.svelte';
+  import RedditLogo from 'phosphor-svelte/lib/RedditLogo/RedditLogo.svelte';
+  import TwitterLogo from 'phosphor-svelte/lib/TwitterLogo/TwitterLogo.svelte';
+  import WhatsappLogo from 'phosphor-svelte/lib/WhatsappLogo/WhatsappLogo.svelte';
+  import Image from 'phosphor-svelte/lib/Image/Image.svelte';
   import { closeModal } from '$stores/modalStore';
   import Button from '$ui/Button.svelte';
 

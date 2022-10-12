@@ -1,6 +1,6 @@
 <script lang="ts">
   import SquareButton from '$ui/SquareButton.svelte';
-  import { Backspace } from 'phosphor-svelte';
+  import Backspace from 'phosphor-svelte/lib/Backspace/Backspace.svelte';
   import { editorHistory, gameHistory, selectedCells } from '$stores/sudokuStore';
   import deepCopy from '$utils/deepCopy';
   import { get } from 'svelte/store';

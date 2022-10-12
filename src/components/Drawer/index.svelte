@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { X } from 'phosphor-svelte';
+  import X from 'phosphor-svelte/lib/X/X.svelte';
   import { fade, fly } from 'svelte/transition';
 
   // PROPS //

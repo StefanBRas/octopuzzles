@@ -1,7 +1,7 @@
 <script lang="ts">
   import { navigating } from '$app/stores';
   import { goto } from '$app/navigation';
-  import { UserCircle } from 'phosphor-svelte';
+  import UserCircle from 'phosphor-svelte/lib/UserCircle/UserCircle.svelte';
   import { authMode } from '$stores/authStore';
   import Button from '$ui/Button.svelte';
   import AuthDrawer from '$components/Drawer/AuthDrawer/index.svelte';

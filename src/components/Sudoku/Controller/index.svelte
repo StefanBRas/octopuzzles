@@ -15,7 +15,13 @@
   import NotesIcon from '$icons/Notes.svelte';
   import Numbers from './components/Numbers.svelte';
   import Regions from './components/Regions.svelte';
-  import { ArrowUUpLeft, ArrowUUpRight, ArrowCounterClockwise } from 'phosphor-svelte';
+  import ArrowUUpLeft from 'phosphor-svelte/lib/ArrowUUpLeft/ArrowUUpLeft.svelte';
+  import ArrowUUpRight from 'phosphor-svelte/lib/ArrowUUpRight/ArrowUUpRight.svelte';
+  import ArrowCounterClockwise from 'phosphor-svelte/lib/ArrowCounterClockwise/ArrowCounterClockwise.svelte';
+  import FileArrowUp from 'phosphor-svelte/lib/FileArrowUp/FileArrowUp.svelte';
+  import FileArrowDown from 'phosphor-svelte/lib/FileArrowDown/FileArrowDown.svelte';
+  import PersonSimpleWalk from 'phosphor-svelte/lib/PersonSimpleWalk/PersonSimpleWalk.svelte';
+  import Question from 'phosphor-svelte/lib/Question/Question.svelte';
   import Givens from './components/Givens.svelte';
   import classNames from 'classnames';
   import BorderClues from './components/BorderClues.svelte';
@@ -32,8 +38,6 @@
   import Logic from './components/Logic.svelte';
   import CornerMarks from './components/CornerMarks.svelte';
   import CenterMarks from './components/CenterMarks.svelte';
-  import { Question } from 'phosphor-svelte';
-  import { FileArrowUp, FileArrowDown } from 'phosphor-svelte';
   import { openModal } from '$stores/modalStore';
   import ControllerHelpModal from '$components/Modals/ControllerHelpModal.svelte';
   import { get } from 'svelte/store';
@@ -41,7 +45,6 @@
   import { isCommandKey } from '$utils/isCommandKey';
   import ImportFromFPuzzles from '$components/Modals/ImportFromFPuzzles.svelte';
   import ExportToFPuzzles from '$components/Modals/exportToFPuzzles.svelte';
-  import { PersonSimpleWalk } from 'phosphor-svelte';
   import WalkthroughModal from '$components/Modals/WalkthroughModal.svelte';
   import { page } from '$app/stores';
   import { mode } from '$stores/sudokuStore';

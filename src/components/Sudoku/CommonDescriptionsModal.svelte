@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Plus } from 'phosphor-svelte';
+  import Plus from 'phosphor-svelte/lib/Plus/Plus.svelte';
 
   import { closeModal } from '$stores/modalStore';
   import { labels } from '$stores/sudokuStore';
