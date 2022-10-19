@@ -4,7 +4,7 @@ import { TRPCError } from '@trpc/server';
 import * as argon2 from 'argon2';
 import * as trpc from '@trpc/server';
 import type { TRPCContext } from '.';
-import { ObjectId, type Filter } from 'mongodb';
+import type { Filter } from 'mongodb';
 import { sendVerifyUserMail } from '$server/email';
 import pick from 'lodash/pick';
 import type { User } from '$models/User';
@@ -38,7 +38,7 @@ export default trpc
           verified: false
         });
 
-        const token = ObjectId.generate().toString();
+        const token = crypto.randomUUID();
 
         sendVerifyUserMail(input.username, input.email, token);
 
@@ -46,8 +46,6 @@ export default trpc
 
         return true;
       } catch (e) {
-        console.log(e);
-
         return false;
       }
     }
@@ -88,8 +86,9 @@ export default trpc
       }
       if (!user.verified) {
         throw new TRPCError({
-          message:
-            'Please verify your account. We have send you an email with a verification link.',
+          message: `Please verify your account. We have send you an email with a verification link. 
+            
+            If you didn't get a verification email, you can request a new one at www.octopuzzles.com/resend-verification-email`,
           code: 'BAD_REQUEST'
         });
       }
@@ -114,6 +113,51 @@ export default trpc
           return pick(user, ['_id', 'email', 'role', 'username']);
         }
       }
+
+      return null;
+    }
+  })
+  .mutation('verify', {
+    input: z.string(),
+    resolve: async ({ ctx, input }) => {
+      const session = ctx.session;
+      const token = await tokenCollection.findOneAndDelete({ token: input });
+      if (token.value == null) {
+        throw new TRPCError({ message: 'That token has expired', code: 'PRECONDITION_FAILED' });
+      }
+      const user = await userCollection.findOneAndUpdate(
+        { _id: token.value?.user_id },
+        { $set: { verified: true } }
+      );
+
+      if (user.value == null) {
+        throw new TRPCError({ message: 'Could not find that user', code: 'PRECONDITION_FAILED' });
+      }
+      session.set({ role: user.value.role, userId: user.value._id });
+
+      return pick(user.value, ['_id', 'email', 'role', 'username']);
+    }
+  })
+  .mutation('resend-verification', {
+    input: z.object({
+      email: z.string().email()
+    }),
+    resolve: async ({ input }) => {
+      const user = await userCollection.findOne({ email: input.email });
+      if (user == null) {
+        throw new TRPCError({
+          message: 'We could not find the user you want to verify',
+          code: 'BAD_REQUEST'
+        });
+      } else if (user.verified) {
+        throw new TRPCError({ code: 'BAD_REQUEST', message: 'The user is already verified' });
+      }
+
+      const token = crypto.randomUUID();
+
+      sendVerifyUserMail(user.username, input.email, token);
+
+      tokenCollection.insertOne({ kind: 'VERIFY_EMAIL', token: token, user_id: user._id });
 
       return null;
     }

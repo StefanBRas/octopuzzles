@@ -5,18 +5,20 @@
   import { authMode } from '$stores/authStore';
   import trpc, { type InferMutationInput } from '$lib/client/trpc';
   import { me } from '$stores/meStore';
+  import type { TRPCError } from '@trpc/server';
 
   let usernameOrEmail = '';
   let password = '';
   let loading = false;
 
-  let errors: Record<string, string> = {};
+  let errors: TRPCError | undefined;
 
   async function login(data: InferMutationInput<'users:login'>) {
     return await trpc().mutation('users:login', data);
   }
 
   async function handleLogin(): Promise<void> {
+    errors = undefined;
     try {
       loading = true;
       const res = await login({ usernameOrEmail, password });
@@ -25,18 +27,10 @@
       usernameOrEmail = '';
       password = '';
     } catch (e) {
-      console.log({ e });
+      errors = e;
     } finally {
       loading = false;
     }
-    // if (res?.login.errors) {
-    //   errors = toErrorMap(res.login.errors);
-    // } else if (res?.login.user) {
-    //   me.set(res.login.user);
-    //   authMode.setAuthMode();
-    //   usernameOrEmail = '';
-    //   password = '';
-    // }
   }
 </script>
 
@@ -46,22 +40,11 @@
 </div>
 <div class="mt-6 relative flex-1 px-4 sm:px-6">
   <form on:submit|preventDefault={handleLogin}>
-    {#if errors.form}
-      {errors.form}
-
-      <p>
-        If you didn't get a verification email, you can request a new one <a
-          class="text-blue-500 underline"
-          href="/resend-verification-email">here</a
-        >
-      </p>
+    {#if errors}
+      <p class="text-sm text-red-500">{errors.message}</p>
     {/if}
-    <Input label="Username or Email" bind:value={usernameOrEmail}>
-      <p slot="error">{errors.usernameOrEmail ?? ''}</p>
-    </Input>
-    <Input label="Password" type="password" bind:value={password}>
-      <p slot="error">{errors.password ?? ''}</p>
-    </Input>
+    <Input label="Username or Email" bind:value={usernameOrEmail} />
+    <Input label="Password" type="password" bind:value={password} />
     <Button variant="primary" class="mt-4 w-full" {loading}>Log In</Button>
   </form>
 

@@ -5,6 +5,7 @@
   import { authMode } from '$stores/authStore';
   import type { InferMutationInput } from '$lib/client/trpc';
   import trpc from '$lib/client/trpc';
+  import type { TRPCError } from '@trpc/server';
 
   let username = '';
   let email = '';
@@ -12,7 +13,7 @@
 
   let loading = false;
 
-  let errors: Record<string, string> = {};
+  let errors: TRPCError | undefined;
 
   /** If the signup was successful */
   let registerCompleted = false;
@@ -22,22 +23,18 @@
   }
 
   const handleRegister = async (): Promise<void> => {
+    errors = undefined;
     try {
       loading = true;
-      const res = await register({ username, email, password });
+      await register({ username, email, password });
       loading = false;
-      console.log({ res });
+      registerCompleted = true;
+      username = '';
+      email = '';
+      password = '';
     } catch (e) {
-      console.log({ e });
+      errors = e;
     }
-    // if (res?.register.errors) {
-    //   errors = toErrorMap(res.register.errors);
-    // } else if (res?.register.user) {
-    //   registerCompleted = true;
-    //   username = '';
-    //   email = '';
-    //   password = '';
-    // }
   };
 </script>
 
@@ -60,17 +57,15 @@
     </div>
   {:else}
     <form on:submit|preventDefault={handleRegister}>
-      <Input label="Username" bind:value={username}>
-        <p slot="error">{errors.username ?? ''}</p>
-      </Input>
-      <Input label="Email" bind:value={email}>
-        <p slot="error">{errors.email ?? ''}</p>
-      </Input>
-      <Input label="Password" type="password" bind:value={password} hideHelpSlot={!errors.password}>
+      {#if errors}
+        <p class="text-sm text-red-500">{errors.message}</p>
+      {/if}
+      <Input label="Username" bind:value={username} />
+      <Input label="Email" bind:value={email} />
+      <Input label="Password" type="password" bind:value={password}>
         <p slot="help">Your password should be at least 10 characters long</p>
-        <p slot="error">{errors.password ?? ''}</p>
       </Input>
-      <Button variant="primary" class="mt-4 w-full">Sign up</Button>
+      <Button variant="primary" class="mt-4 w-full" {loading}>Sign up</Button>
     </form>
     <p class="text-xs text-gray-500 mt-4">
       By signing up, you agree to our <a
