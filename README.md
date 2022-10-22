@@ -12,7 +12,11 @@ We use mongoDB as database. To be able to run transaction when running locally, 
 docker run -d -p 27017:27017 -p 27018:27018 -p 27019:27019 candis/mongo-replica-set
 ```
 
-This might take a while to start. After that is done, you can now start the website locally by running
+This might take a while to start.
+
+Alternatively, you could also setup your own mongoDB atlas instance.
+
+After that is done, you can now start the website locally by running
 
 ```
 npm run dev
