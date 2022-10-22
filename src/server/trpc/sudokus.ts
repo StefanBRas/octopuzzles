@@ -5,7 +5,6 @@ import { ObjectId, type Filter, type WithId } from 'mongodb';
 import {
   NewSudokuValidator,
   SolutionValidator,
-  SudokuValidator,
   UpdateSudokuValidator,
   type Sudoku
 } from '$models/Sudoku';

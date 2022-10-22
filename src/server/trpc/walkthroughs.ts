@@ -1,4 +1,4 @@
-import { WalkthroughStepValidator, WalkthroughValidator } from '$models/Walkthrough';
+import { WalkthroughValidator } from '$models/Walkthrough';
 import * as trpc from '@trpc/server';
 import { TRPCError } from '@trpc/server';
 import { ObjectId } from 'mongodb';
