@@ -4,7 +4,7 @@
   "description": "octopuzzles",
   "scripts": {
     "dev": "vite dev",
-    "build": "vite build",
+    "build": "npm run migrate:up && vite build",
     "preview": "vite preview",
     "check": "svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-check --tsconfig ./tsconfig.json --watch",
