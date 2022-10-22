@@ -11,24 +11,23 @@
   import SudokuList from '$components/Sudoku/SudokuList.svelte';
   import type { ObjectId } from 'mongodb';
   import trpc from '$lib/client/trpc';
+  import type { PageData } from './$types';
 
   export let data: PageData;
 
-  let currentCursor: Date | undefined = undefined;
   let nextCursor: Date | undefined = undefined;
-  $: nextCursor = data.sudokuData.nextCursor;
+  $: nextCursor = data.sudokus.nextCursor;
 
   let loading = false;
 
   async function loadNextPage() {
     loading = true;
-    currentCursor = nextCursor;
     let sudokuData = await trpc().query('sudokus:search', {
       labels: [],
       limit: 24,
       cursor: nextCursor
     });
-    data.sudokuData = sudokuData;
+    data.sudokus = sudokuData;
     nextCursor = sudokuData.nextCursor;
     loading = false;
   }
@@ -50,16 +49,16 @@
 </script>
 
 <svelte:head>
-  <title>{$data?.user.username} | OctoPuzzles</title>
-  <meta name="description" content="Sudokus made by {$data?.user.username}" />
+  <title>{data.user.username} | OctoPuzzles</title>
+  <meta name="description" content="Sudokus made by {data.user.username}" />
   <meta property="og:image" content="https://octopuzzles.com/favicon.png" />
-  <meta property="og:description" content="Sudokus made by {$data?.user.username}" />
-  <meta property="og:title" content="{$data?.user.username} | OctoPuzzles" />
+  <meta property="og:description" content="Sudokus made by {data.user.username}" />
+  <meta property="og:title" content="{data.user.username} | OctoPuzzles" />
 </svelte:head>
 
-{#if $data}
+{#if data}
   <h1 class="text-center text-4xl font-bold mb-4">
-    Sudokus by {$data.user.username == data.me?.username ? 'you' : $data.user.username}
+    Sudokus by {data.user.username == data.me?.username ? 'you' : data.user.username}
   </h1>
 {/if}
 <SudokuList
