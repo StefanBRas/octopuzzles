@@ -26,7 +26,7 @@
   import type { ObjectId, WithId } from 'mongodb';
   import type { User } from '$models/User';
 
-  export let sudokus: (WithId<Sudoku> & { creator: WithId<User> | null })[] | null;
+  export let sudokus: (WithId<Sudoku> & { creator?: WithId<User> })[] | null;
   export let hasNextPage: boolean;
   export let loading: boolean;
   export let loadNextPage: () => Promise<void>;

@@ -1,25 +1,23 @@
 import { mongoClient, sudokuCollection, voteCollection } from '../dbSetup';
-import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
 import * as trpc from '@trpc/server';
 import type { TRPCContext } from '.';
-import { ObjectId } from 'mongodb';
 import { intervalToDuration } from 'date-fns';
 import { rankingAlgorithm } from '$utils/rankingAlgorithm';
-import type { Vote } from '$models/Vote';
+import { VoteValidator, type Vote } from '$models/Vote';
 
 export default trpc.router<TRPCContext>().mutation('vote', {
-  input: z.object({
-    sudokuId: z.instanceof(ObjectId),
-    value: z.number().int().max(1).min(-1)
-  }),
+  input: VoteValidator.pick({ sudoku_id: true, value: true }),
   resolve: async ({ input, ctx }): Promise<Vote | undefined> => {
-    // This can, abd should be massively simplified, but maybe the vote architecture should be re-throught anyways
+    // This resolver can, and should, be massively simplified, but maybe the vote architecture should be re-throught anyways
+    if (ctx.session.data.userId == null) {
+      throw new TRPCError({ message: 'You are not logged in', code: 'UNAUTHORIZED' });
+    }
     const userId = ctx.session.data.userId;
 
     const [sudoku, oldVote] = await Promise.all([
-      sudokuCollection.findOne({ _id: input.sudokuId }),
-      voteCollection.findOne({ sudoku_id: input.sudokuId, user_id: userId })
+      sudokuCollection.findOne({ _id: input.sudoku_id }),
+      voteCollection.findOne({ sudoku_id: input.sudoku_id, user_id: userId })
     ]);
 
     if (sudoku == null) {
@@ -62,11 +60,11 @@ export default trpc.router<TRPCContext>().mutation('vote', {
         const newPoints = sudoku.points + input.value;
         await Promise.all([
           voteCollection.insertOne(
-            { sudoku_id: input.sudokuId, user_id: userId, value: input.value },
+            { sudoku_id: input.sudoku_id, user_id: userId, value: input.value },
             { session }
           ),
           sudokuCollection.updateOne(
-            { _id: input.sudokuId },
+            { _id: input.sudoku_id },
             { $set: { points: newPoints, rank: rankingAlgorithm(newPoints, publicSince) } },
             { session }
           )
@@ -74,7 +72,7 @@ export default trpc.router<TRPCContext>().mutation('vote', {
 
         await session.commitTransaction();
 
-        return { sudoku_id: input.sudokuId, user_id: userId, value: input.value };
+        return { sudoku_id: input.sudoku_id, user_id: userId, value: input.value };
       } catch (e) {
         throw new TRPCError({ message: e.message, code: 'INTERNAL_SERVER_ERROR' });
       }
@@ -89,11 +87,11 @@ export default trpc.router<TRPCContext>().mutation('vote', {
           const newPoints = sudoku.points - oldVote.value;
           await Promise.all([
             voteCollection.deleteOne(
-              { sudoku_id: input.sudokuId, user_id: userId, value: input.value },
+              { sudoku_id: input.sudoku_id, user_id: userId, value: input.value },
               { session }
             ),
             sudokuCollection.updateOne(
-              { _id: input.sudokuId },
+              { _id: input.sudoku_id },
               { $set: { points: newPoints, rank: rankingAlgorithm(newPoints, publicSince) } },
               { session }
             )
@@ -101,7 +99,7 @@ export default trpc.router<TRPCContext>().mutation('vote', {
 
           await session.commitTransaction();
 
-          return { sudoku_id: input.sudokuId, user_id: userId, value: input.value };
+          return { sudoku_id: input.sudoku_id, user_id: userId, value: input.value };
         } catch (e) {
           throw new TRPCError({ message: e.message, code: 'INTERNAL_SERVER_ERROR' });
         }
@@ -117,12 +115,12 @@ export default trpc.router<TRPCContext>().mutation('vote', {
           const newPoints = sudoku.points + input.value - oldVote.value;
           await Promise.all([
             voteCollection.updateOne(
-              { sudoku_id: input.sudokuId, user_id: userId, value: input.value },
+              { sudoku_id: input.sudoku_id, user_id: userId, value: input.value },
               { $set: { value: input.value } },
               { session }
             ),
             sudokuCollection.updateOne(
-              { _id: input.sudokuId },
+              { _id: input.sudoku_id },
               { $set: { points: newPoints, rank: rankingAlgorithm(newPoints, publicSince) } },
               { session }
             )
@@ -130,7 +128,7 @@ export default trpc.router<TRPCContext>().mutation('vote', {
 
           await session.commitTransaction();
 
-          return { sudoku_id: input.sudokuId, user_id: userId, value: input.value };
+          return { sudoku_id: input.sudoku_id, user_id: userId, value: input.value };
         } catch (e) {
           throw new TRPCError({ message: e.message, code: 'INTERNAL_SERVER_ERROR' });
         }

@@ -1,4 +1,5 @@
 import trpc from '$lib/client/trpc';
+import { error } from '@sveltejs/kit';
 import type { PageLoad } from './$types';
 
 export const load: PageLoad = async ({ fetch, params }) => {
@@ -8,5 +9,8 @@ export const load: PageLoad = async ({ fetch, params }) => {
     trpcClient.query('sudokus:get', { id: sudokuId }),
     trpcClient.query('walkthrougs:get', { sudokuId })
   ]);
+  if (sudoku == null) {
+    throw error(404, 'Not found');
+  }
   return { sudoku, walkthrough };
 };

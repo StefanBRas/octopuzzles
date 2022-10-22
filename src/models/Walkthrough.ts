@@ -1,39 +1,52 @@
-import type { ObjectId } from 'mongodb';
-import type { Color } from './Sudoku';
+import { ObjectId } from 'mongodb';
+import { z } from 'zod';
+import { ColorValidator } from './Sudoku';
 
-export type GameValues = string[][];
-export type Cornermarks = string[][];
-export type Centermarks = string[][];
-export type Notes = string[][];
-export type GameColors = Color[][][];
+export const GameValuesValidator = z.array(z.array(z.string()));
+export type GameValues = z.infer<typeof GameValuesValidator>;
+
+export const CornermarksValidator = z.array(z.array(z.string()));
+export type Cornermarks = z.infer<typeof CornermarksValidator>;
+
+export const CentermarksValidator = z.array(z.array(z.string()));
+export type Centermarks = z.infer<typeof CentermarksValidator>;
+
+export const NotesValidator = z.array(z.array(z.string()));
+export type Notes = z.infer<typeof NotesValidator>;
+
+export const GameColorsValidator = z.array(z.array(z.array(ColorValidator)));
+export type GameColors = z.infer<typeof GameColorsValidator>;
 
 /** A single step on the way to a solution */
-export type SolutionStep = {
+export const SolutionStepValidator = z.object({
   /** Values on the solution step */
-  values: GameValues;
+  values: GameValuesValidator,
   /** Cornermarks on the solution step */
-  cornermarks: Cornermarks;
+  cornermarks: CornermarksValidator,
   /** Centermarks on the solution step */
-  centermarks: Centermarks;
+  centermarks: CentermarksValidator,
   /** Notes on the solution step */
-  notes: Notes;
+  notes: NotesValidator,
   /** A list of colors on each cell */
-  colors: GameColors;
-};
+  colors: GameColorsValidator
+});
+export type SolutionStep = z.infer<typeof SolutionStepValidator>;
 
 /** A single step on the way to a solution */
-export type WalkthroughStep = {
+export const WalkthroughStepValidator = z.object({
   /** A description of the logic used etc. */
-  description: string;
+  description: z.string(),
   /** The actual important step */
-  step: SolutionStep;
-};
+  step: SolutionStepValidator
+});
+export type WalkthroughStep = z.infer<typeof WalkthroughStepValidator>;
 
-export type Walkthrough = {
+export const WalkthroughValidator = z.object({
   /** The sudoku this walkthrough is made on */
-  sudoku_id: ObjectId;
+  sudoku_id: z.instanceof(ObjectId),
   /** The user that made this walkthrough */
-  user_id: ObjectId;
+  user_id: z.instanceof(ObjectId),
   /** The steps on the way to the solution */
-  steps: WalkthroughStep[];
-};
+  steps: z.array(WalkthroughStepValidator)
+});
+export type Walkthrough = z.infer<typeof WalkthroughValidator>;

@@ -3,7 +3,7 @@
   import Logo from '$icons/Logo.svelte';
   import Input from '$ui/Input.svelte';
   import { authMode } from '$stores/authStore';
-  import trpc, { type InferMutationInput } from '$lib/client/trpc';
+  import trpc from '$lib/client/trpc';
   import { me } from '$stores/meStore';
   import type { TRPCError } from '@trpc/server';
 
@@ -13,15 +13,11 @@
 
   let errors: TRPCError | undefined;
 
-  async function login(data: InferMutationInput<'users:login'>) {
-    return await trpc().mutation('users:login', data);
-  }
-
   async function handleLogin(): Promise<void> {
     errors = undefined;
     try {
       loading = true;
-      const res = await login({ usernameOrEmail, password });
+      const res = await trpc().mutation('users:login', { usernameOrEmail, password });
       me.set(res);
       authMode.setAuthMode();
       usernameOrEmail = '';

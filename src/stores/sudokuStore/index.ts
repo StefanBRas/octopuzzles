@@ -32,6 +32,7 @@ import type {
   InputMode,
   Mode
 } from '$types';
+import type { WithId } from 'mongodb';
 
 // WRITABLES
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
@@ -298,7 +299,7 @@ function createGameHistoryStore() {
 
 export const sudokuTitle = writable('');
 export const description = writable('');
-export const labels = writable<{ label: Label; selected: boolean }[]>([]);
+export const labels = writable<{ label: WithId<Label>; selected: boolean }[]>([]);
 
 export const gameHistory = createGameHistoryStore();
 

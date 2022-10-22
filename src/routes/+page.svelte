@@ -140,9 +140,11 @@
   </div>
 {/if}
 
-<SudokuList
-  hasNextPage={data.sudokuData.nextCursor != null}
-  {loadNextPage}
-  {loading}
-  sudokus={data.sudokuData.sudokus ?? null}
-/>
+{#if data.sudokuData != null}
+  <SudokuList
+    hasNextPage={data.sudokuData.nextCursor != null}
+    {loadNextPage}
+    {loading}
+    sudokus={data.sudokuData.sudokus ?? null}
+  />
+{/if}

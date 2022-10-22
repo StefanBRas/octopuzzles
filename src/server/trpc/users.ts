@@ -7,23 +7,13 @@ import type { TRPCContext } from '.';
 import type { Filter } from 'mongodb';
 import { sendVerifyUserMail } from '$server/email';
 import pick from 'lodash/pick';
-import type { User } from '$models/User';
+import { UserValidator, type User } from '$models/User';
+import { ObjectId } from 'mongodb';
 
 export default trpc
   .router<TRPCContext>()
   .mutation('register', {
-    input: z.object({
-      username: z
-        .string()
-        .max(32, 'Username is too long, it should be at most 32 characters long')
-        .min(1, "Username can't be empty")
-        .regex(
-          /^[a-zA-Z0-9]+(?:-[a-zA-Z0-9]+)*$/,
-          'Username may only contain alphanumeric characters or single hyphens, and cannot begin or end with a hyphen'
-        ),
-      email: z.string().email(),
-      password: z.string().min(10).max(64)
-    }),
+    input: UserValidator.pick({ username: true, email: true, password: true }),
     resolve: async ({ input }) => {
       const hashedPassword = await argon2.hash(input.password);
 
@@ -118,7 +108,7 @@ export default trpc
     }
   })
   .mutation('verify', {
-    input: z.string(),
+    input: z.string(), // the token
     resolve: async ({ ctx, input }) => {
       const session = ctx.session;
       const token = await tokenCollection.findOneAndDelete({ token: input });
@@ -160,5 +150,15 @@ export default trpc
       tokenCollection.insertOne({ kind: 'VERIFY_EMAIL', token: token, user_id: user._id });
 
       return null;
+    }
+  })
+  .query('get', {
+    input: z.object({
+      id: z.instanceof(ObjectId)
+    }),
+    resolve: async ({ input }) => {
+      const user = await userCollection.findOne({ _id: input.id });
+
+      return user;
     }
   });

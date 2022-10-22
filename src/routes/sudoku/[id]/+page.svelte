@@ -23,20 +23,15 @@
   } from '$utils/migration';
   import type { PageData } from './$types';
   import { walkthroughStore } from '$stores/walkthroughStore';
+  import { fillWalkthroughStore } from '$utils/fillWalkthroughStore';
 
   export let data: PageData;
 
   $: if (data.walkthrough?.steps) {
     // Just so ts will shut up
-    fillWalkthroughStore();
+    fillWalkthroughStore(data.walkthrough);
   } else {
     walkthroughStore.set([]);
-  }
-
-  function fillWalkthroughStore(): void {
-    if (data.walkthrough?.steps && $walkthroughStore.length === 0) {
-      walkthroughStore.set(data.walkthrough?.steps);
-    }
   }
 
   // TIMER: one that does not run when the tab is inactive, but runs as if it had.
@@ -113,9 +108,12 @@
   function checkSolution(numbers: string[][]): boolean {
     $wrongCells = [];
     let solution = data.sudoku?.solution;
-    if (solution == null) return false;
+    if (solution?.numbers == null) return false;
 
-    if (solution.length !== numbers.length || solution[0].length !== numbers[0].length) {
+    if (
+      solution.numbers.length !== numbers.length ||
+      solution.numbers[0].length !== numbers[0].length
+    ) {
       return false;
     }
 
@@ -128,7 +126,7 @@
 
     userSolution.forEach((row, rowIndex) => {
       row.forEach((cell, columnIndex) => {
-        if (solution && solution[rowIndex][columnIndex] !== cell) {
+        if (solution && solution.numbers[rowIndex][columnIndex] !== cell) {
           if (cell.length > 0) {
             $wrongCells = [...$wrongCells, { row: rowIndex, column: columnIndex }];
           }
