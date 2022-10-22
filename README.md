@@ -40,3 +40,19 @@ Below is a list of our stack, and why we have chosen them
   - We use mongoDB since we have a lot of nested structure. A relational database like postgres would be somewhat cumbersome to use for this. We might consider other databases in the future.
 - trpc
   - We use trpc for end to end type safety. It is primarily designed for next, but we use the sveltekit wrapper for this site. It does not have build-in query hooks with something like tanstack query, but might in the future.
+
+## Migrations
+
+Though migrations is not directly a thing in MongoDB, we can still do migrations against the DB with tools like [this](https://www.npmjs.com/package/migrate-mongo).
+
+To make a new migration run
+
+```
+npm run migrate:create name_of_migration
+```
+
+Then fill out the migration script, and to run it, run
+
+```
+npm run migrate:up
+```
