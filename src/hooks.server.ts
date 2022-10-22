@@ -1,10 +1,11 @@
 import { createContext, router } from './server/trpc';
 import { createTRPCHandle } from 'trpc-sveltekit';
 import { handleSession } from 'svelte-kit-cookie-session';
+import { SESSION_SECRET } from '$env/static/private';
 
 export const handle = handleSession(
   {
-    secret: 'SOME_COMPLEX_SECRET_AT_LEAST_32_CHARS'
+    secret: SESSION_SECRET
   },
   async ({ event, resolve }) => {
     // event.locals is populated with the session `event.locals.session`
