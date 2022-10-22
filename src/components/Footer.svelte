@@ -10,6 +10,14 @@
     <h6 class="text-xl">Links</h6>
     <nav>
       <ul>
+        <li>
+          <a
+            class="hover:underline"
+            href="https://github.com/OctoPuzzles/octopuzzles"
+            target="_blank"
+            rel="noopener noreferrer">GitHub / Open Source</a
+          >
+        </li>
         <li><a class="hover:underline" href="/sudoku/editor">Create a sudoku</a></li>
         <li><a class="hover:underline" href="/sudoku/editor?import=true">Import a sudoku</a></li>
         <li><a class="hover:underline" href="/terms-and-conditions">Terms and conditions</a></li>
