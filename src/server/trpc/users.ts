@@ -9,6 +9,8 @@ import { sendVerifyUserMail } from '$server/email';
 import pick from 'lodash/pick';
 import { UserValidator, type User } from '$models/User';
 import { ObjectId } from 'mongodb';
+import { setCookie } from '$utils/jwt/setCookie';
+import { getJwt } from '$utils/jwt/getJwt';
 
 export default trpc
   .router<TRPCContext>()
@@ -82,26 +84,29 @@ export default trpc
           code: 'BAD_REQUEST'
         });
       }
-
-      await ctx.session.set({ userId: user._id, role: user.role });
+      setCookie(user, ctx);
 
       return pick(user, ['_id', 'email', 'role', 'username']);
     }
   })
   .mutation('logout', {
     resolve: async ({ ctx }) => {
-      await ctx.session.destroy();
+      ctx.event.cookies.delete('token');
+
+      return;
     }
   })
   .query('me', {
     resolve: async ({ ctx }) => {
-      const session = ctx.session.data;
+      const jwtToken = getJwt(ctx);
 
-      if (session) {
-        const user = await userCollection.findOne({ _id: session.userId });
-        if (user) {
-          return pick(user, ['_id', 'email', 'role', 'username']);
-        }
+      if (!jwtToken) {
+        return null;
+      }
+
+      const user = await userCollection.findOne({ _id: jwtToken._id });
+      if (user) {
+        return pick(user, ['_id', 'email', 'role', 'username']);
       }
 
       return null;
@@ -110,7 +115,6 @@ export default trpc
   .mutation('verify', {
     input: z.string(), // the token
     resolve: async ({ ctx, input }) => {
-      const session = ctx.session;
       const token = await tokenCollection.findOneAndDelete({ token: input });
       if (token.value == null) {
         throw new TRPCError({ message: 'That token has expired', code: 'PRECONDITION_FAILED' });
@@ -123,7 +127,7 @@ export default trpc
       if (user.value == null) {
         throw new TRPCError({ message: 'Could not find that user', code: 'PRECONDITION_FAILED' });
       }
-      session.set({ role: user.value.role, userId: user.value._id });
+      setCookie(user.value, ctx);
 
       return pick(user.value, ['_id', 'email', 'role', 'username']);
     }
@@ -143,11 +147,15 @@ export default trpc
         throw new TRPCError({ code: 'BAD_REQUEST', message: 'The user is already verified' });
       }
 
-      const token = crypto.randomUUID();
+      const verificationToken = crypto.randomUUID();
 
-      sendVerifyUserMail(user.username, input.email, token);
+      sendVerifyUserMail(user.username, input.email, verificationToken);
 
-      tokenCollection.insertOne({ kind: 'VERIFY_EMAIL', token: token, user_id: user._id });
+      tokenCollection.insertOne({
+        kind: 'VERIFY_EMAIL',
+        token: verificationToken,
+        user_id: user._id
+      });
 
       return null;
     }

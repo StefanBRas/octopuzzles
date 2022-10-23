@@ -17,6 +17,7 @@ import {
   validateCorrectDimension,
   validateCorrectDimensionsOfSudokuClues
 } from '$utils/validation';
+import { getJwt } from '$utils/jwt/getJwt';
 
 export default trpc
   .router<TRPCContext>()
@@ -69,7 +70,8 @@ export default trpc
       id: z.string() // TODO: make this `z.instanceof(ObjectId)`
     }),
     resolve: async ({ input, ctx }) => {
-      const userId = ctx.session.data.userId;
+      const jwtToken = getJwt(ctx);
+      const userId = jwtToken?._id;
       const sudokus = (await sudokuCollection
         .aggregate([
           { $match: { _id: input.id } },
@@ -124,7 +126,8 @@ export default trpc
       id: z.instanceof(ObjectId)
     }),
     resolve: async ({ input, ctx }) => {
-      if (ctx.session.data.userId == null) {
+      const jwtToken = getJwt(ctx);
+      if (jwtToken == null) {
         throw new TRPCError({ message: 'You are not logged in', code: 'UNAUTHORIZED' });
       }
       const session = mongoClient.startSession();
@@ -135,7 +138,7 @@ export default trpc
         const sudoku = await sudokuCollection.findOneAndDelete(
           {
             _id: sudokuId,
-            user_id: ctx.session.data.userId
+            user_id: jwtToken._id
           },
           { session }
         );
@@ -162,7 +165,8 @@ export default trpc
       public: z.boolean()
     }),
     resolve: async ({ input, ctx }) => {
-      if (ctx.session.data.userId == null) {
+      const jwtToken = getJwt(ctx);
+      if (jwtToken == null) {
         throw new TRPCError({ message: 'You are not logged in', code: 'UNAUTHORIZED' });
       }
       // First check if the user has permission to update the sudoku.
@@ -172,7 +176,7 @@ export default trpc
           message: 'We could not find the sudoku you are trying to update',
           code: 'BAD_REQUEST'
         });
-      } else if (sudoku.user_id !== ctx.session.data.userId) {
+      } else if (sudoku.user_id !== jwtToken._id) {
         throw new TRPCError({
           message: 'You are not allowed to edit this sudoku',
           code: 'UNAUTHORIZED'
@@ -221,7 +225,8 @@ export default trpc
       solution: SolutionValidator.optional()
     }),
     resolve: async ({ input, ctx }) => {
-      if (ctx.session.data.userId == null) {
+      const jwtToken = getJwt(ctx);
+      if (jwtToken == null) {
         throw new TRPCError({ message: 'You are not logged in', code: 'UNAUTHORIZED' });
       }
       // First check if the user has permission to make a solution for the sudoku.
@@ -231,7 +236,7 @@ export default trpc
           message: 'We could not find the sudoku you are trying to update',
           code: 'BAD_REQUEST'
         });
-      } else if (sudoku.user_id == null || sudoku.user_id != ctx.session.data.userId) {
+      } else if (sudoku.user_id == null || sudoku.user_id != jwtToken._id) {
         throw new TRPCError({
           message: 'You are not allowed to provide a solution to this sudoku',
           code: 'BAD_REQUEST'
@@ -266,7 +271,8 @@ export default trpc
       sudoku: NewSudokuValidator
     }),
     resolve: async ({ input, ctx }) => {
-      if (ctx.session.data.userId == null) {
+      const jwtToken = getJwt(ctx);
+      if (jwtToken == null) {
         throw new TRPCError({ message: 'You are not logged in', code: 'UNAUTHORIZED' });
       }
       validateCorrectDimensionsOfSudokuClues(input.sudoku);
@@ -275,7 +281,7 @@ export default trpc
         ...input.sudoku,
         created_at: new Date(),
         updated_at: new Date(),
-        user_id: ctx.session.data.userId,
+        user_id: jwtToken._id,
         rank: 0,
         points: 0
       };
@@ -300,7 +306,8 @@ export default trpc
       sudokuUpdates: UpdateSudokuValidator
     }),
     resolve: async ({ input, ctx }) => {
-      if (ctx.session.data.userId == null) {
+      const jwtToken = getJwt(ctx);
+      if (jwtToken == null) {
         throw new TRPCError({ message: 'You are not logged in', code: 'UNAUTHORIZED' });
       }
       // First check if the user has permission to update the sudoku.
@@ -310,7 +317,7 @@ export default trpc
           message: 'We could not find the sudoku you are trying to update',
           code: 'BAD_REQUEST'
         });
-      } else if (oldSudoku.user_id == null || oldSudoku.user_id !== ctx.session.data.userId) {
+      } else if (oldSudoku.user_id == null || oldSudoku.user_id !== jwtToken._id) {
         throw new TRPCError({
           message: 'You are not allowed to edit this sudoku',
           code: 'BAD_REQUEST'

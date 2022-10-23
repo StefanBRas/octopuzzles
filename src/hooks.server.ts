@@ -1,23 +1,23 @@
 import { createContext, router } from './server/trpc';
 import { createTRPCHandle } from 'trpc-sveltekit';
-import { handleSession } from 'svelte-kit-cookie-session';
-import { SESSION_SECRET } from '$env/static/private';
+import type { Handle } from '@sveltejs/kit';
 
-export const handle = handleSession(
-  {
-    secret: SESSION_SECRET
-  },
-  async ({ event, resolve }) => {
-    // event.locals is populated with the session `event.locals.session`
+export const handle: Handle = async ({ event, resolve }) => {
+  // Do anything you want here
+  const response = await createTRPCHandle({
+    router,
+    createContext,
+    responseMeta: ({ ctx }) => {
+      const token = ctx?.event.cookies.get('token');
+      return {
+        headers: {
+          'set-cookie': `token=${token ?? ''}`
+        }
+      };
+    },
+    event,
+    resolve
+  });
 
-    // Do anything you want here
-    const response = await createTRPCHandle({
-      router,
-      createContext,
-      event,
-      resolve
-    });
-
-    return response;
-  }
-);
+  return response;
+};

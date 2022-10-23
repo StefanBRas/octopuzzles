@@ -5,15 +5,17 @@ import type { TRPCContext } from '.';
 import { intervalToDuration } from 'date-fns';
 import { rankingAlgorithm } from '$utils/rankingAlgorithm';
 import { VoteValidator, type Vote } from '$models/Vote';
+import { getJwt } from '$utils/jwt/getJwt';
 
 export default trpc.router<TRPCContext>().mutation('vote', {
   input: VoteValidator.pick({ sudoku_id: true, value: true }),
   resolve: async ({ input, ctx }): Promise<Vote | undefined> => {
     // This resolver can, and should, be massively simplified, but maybe the vote architecture should be re-throught anyways
-    if (ctx.session.data.userId == null) {
+    const jwtToken = getJwt(ctx);
+    if (jwtToken == null) {
       throw new TRPCError({ message: 'You are not logged in', code: 'UNAUTHORIZED' });
     }
-    const userId = ctx.session.data.userId;
+    const userId = jwtToken._id;
 
     const [sudoku, oldVote] = await Promise.all([
       sudokuCollection.findOne({ _id: input.sudoku_id }),
