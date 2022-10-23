@@ -1,7 +1,7 @@
 import * as jwt from 'jsonwebtoken';
 import { JWT_SECRET } from '$env/static/private';
 import type { User } from '$models/User';
-import { pick } from 'lodash';
+import pick from 'lodash/pick';
 import type { RequestEvent } from '@sveltejs/kit';
 
 export function setCookie(
