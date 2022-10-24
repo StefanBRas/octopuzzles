@@ -1,4 +1,4 @@
-import { sign } from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 import { JWT_SECRET } from '$env/static/private';
 import type { User } from '$models/User';
 import pick from 'lodash/pick';
@@ -10,7 +10,7 @@ export function setCookie(
     event: RequestEvent<Partial<Record<string, string>>>;
   }
 ): void {
-  const token = sign(pick(user, ['_id', 'role']), JWT_SECRET, {
+  const token = jwt.sign(pick(user, ['_id', 'role']), JWT_SECRET, {
     expiresIn: `${15 * 60 * 1000}`
   });
   ctx.event.cookies.set('token', `Bearer ${token}`, {

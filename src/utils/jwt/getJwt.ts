@@ -1,4 +1,4 @@
-import { decode } from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 import type { Role } from '$models/User';
 import type { RequestEvent } from '@sveltejs/kit';
 import type { ObjectId } from 'mongodb';
@@ -10,7 +10,7 @@ export function getJwt(ctx: { event: RequestEvent<Partial<Record<string, string>
     return null;
   }
 
-  const jwtToken = decode(token.replace('Bearer ', '')) as {
+  const jwtToken = jwt.decode(token.replace('Bearer ', '')) as {
     _id: ObjectId;
     role: Role;
   } | null;
