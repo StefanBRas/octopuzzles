@@ -6,6 +6,7 @@ import type { ObjectId } from 'mongodb';
 export function getJwt(ctx: { event: RequestEvent<Partial<Record<string, string>>> }) {
   const token = ctx.event.cookies.get('token');
 
+  console.log('getJWT', { token });
   if (!token) {
     return null;
   }
@@ -14,6 +15,7 @@ export function getJwt(ctx: { event: RequestEvent<Partial<Record<string, string>
     _id: ObjectId;
     role: Role;
   } | null;
+  console.log('getJWT', { jwtToken });
 
   return jwtToken;
 }
