@@ -12,7 +12,7 @@ export const handle: Handle = async ({ event, resolve }) => {
       console.log({ token });
       return {
         headers: {
-          'set-cookie': `token=${token ?? ''}`
+          'set-cookie': `token=${token ?? ''}; SameSite=Lax; Path=/; Max-Age=${60 * 60 * 24}`
         }
       };
     },
