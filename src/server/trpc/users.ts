@@ -106,6 +106,7 @@ export default trpc
       }
 
       const user = await userCollection.findOne({ _id: jwtToken._id });
+      console.log({ meUser: user });
       if (user) {
         return pick(user, ['_id', 'email', 'role', 'username']);
       }

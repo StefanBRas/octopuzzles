@@ -14,6 +14,7 @@
   async function getMe() {
     loading = true;
     const res = await trpc().query('users:me');
+    console.log({ HeaderDropdown: res });
     me.set(res);
     loading = false;
   }
