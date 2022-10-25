@@ -99,6 +99,7 @@ export default trpc
   .query('me', {
     resolve: async ({ ctx }) => {
       const jwtToken = getJwt(ctx);
+      console.log({ tokenInMe: jwtToken });
 
       if (!jwtToken) {
         return null;
