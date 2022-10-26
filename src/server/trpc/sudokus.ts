@@ -70,6 +70,7 @@ export default trpc
       id: z.string() // TODO: make this `z.instanceof(ObjectId)`
     }),
     resolve: async ({ input, ctx }) => {
+      console.log('Getting', input);
       const jwtToken = getJwt(ctx);
       const userId = jwtToken?._id;
       const sudokus = (await sudokuCollection
