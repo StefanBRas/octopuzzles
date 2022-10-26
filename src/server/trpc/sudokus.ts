@@ -67,7 +67,7 @@ export default trpc
   })
   .query('get', {
     input: z.object({
-      id: z.string() // TODO: make this `z.instanceof(ObjectId)`
+      id: z.instanceof(ObjectId) // TODO: make this `z.instanceof(ObjectId)`
     }),
     resolve: async ({ input, ctx }) => {
       console.log('Getting', input);
@@ -76,7 +76,7 @@ export default trpc
       console.log({ userId });
       const sudokus = (await sudokuCollection
         .aggregate([
-          { $match: { _id: new ObjectId(input.id) } },
+          { $match: { _id: input.id } },
           { $lookup: { from: 'users', localField: 'user_id', foreignField: '_id', as: 'creator' } },
           {
             $lookup: {

@@ -1,5 +1,6 @@
 import trpc from '$lib/client/trpc';
 import { error } from '@sveltejs/kit';
+import { ObjectId } from 'mongodb';
 import type { PageLoad } from './$types';
 
 export const load: PageLoad = async ({ fetch, params }) => {
@@ -7,7 +8,7 @@ export const load: PageLoad = async ({ fetch, params }) => {
   const trpcClient = trpc(fetch);
   const sudokuId = params.id;
   const [sudoku, walkthrough] = await Promise.all([
-    trpcClient.query('sudokus:get', { id: sudokuId }),
+    trpcClient.query('sudokus:get', { id: new ObjectId(sudokuId) }),
     trpcClient.query('walkthrougs:get', { sudokuId })
   ]);
   console.log('Sudoku', sudoku);
