@@ -73,6 +73,7 @@ export default trpc
       console.log('Getting', input);
       const jwtToken = getJwt(ctx);
       const userId = jwtToken?._id;
+      console.log({ userId });
       const sudokus = (await sudokuCollection
         .aggregate([
           { $match: { _id: input.id } },
@@ -101,6 +102,7 @@ export default trpc
         userVote: WithId<Vote>[];
         fullLabels: WithId<Label>[];
       })[];
+      console.log({ sudokus });
       if (sudokus.length === 0) {
         throw new TRPCError({ code: 'NOT_FOUND' });
       } else {
