@@ -11,7 +11,7 @@ export const load: PageLoad = async ({ fetch, params }) => {
     trpcClient.query('sudokus:get', { id: sudokuId }),
     trpcClient.query('walkthrougs:get', { sudokuId })
   ]);
-  console.log('Sudoku', sudoku);
+  console.log({ walkthrough, sudoku });
   if (sudoku == null) {
     throw error(404, 'Not found');
   }
