@@ -76,7 +76,7 @@ export default trpc
       console.log({ userId });
       const sudokus = (await sudokuCollection
         .aggregate([
-          { $match: { _id: input.id } },
+          { $match: { _id: new ObjectId(input.id) } },
           { $lookup: { from: 'users', localField: 'user_id', foreignField: '_id', as: 'creator' } },
           {
             $lookup: {
