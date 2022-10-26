@@ -99,15 +99,12 @@ export default trpc
   .query('me', {
     resolve: async ({ ctx }) => {
       const jwtToken = getJwt(ctx);
-      console.log({ tokenInMe: jwtToken });
 
       if (!jwtToken) {
         return null;
       }
-      console.log(typeof jwtToken._id);
 
       const user = await userCollection.findOne({ _id: new ObjectId(jwtToken._id) });
-      console.log({ meUser: user });
       if (user) {
         return pick(user, ['_id', 'email', 'role', 'username']);
       }

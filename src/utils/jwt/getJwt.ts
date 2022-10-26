@@ -1,21 +1,21 @@
 import jwt from 'jsonwebtoken';
 import type { Role } from '$models/User';
 import type { RequestEvent } from '@sveltejs/kit';
-import type { ObjectId } from 'mongodb';
+import { ObjectId } from 'mongodb';
 
 export function getJwt(ctx: { event: RequestEvent<Partial<Record<string, string>>> }) {
   const token = ctx.event.cookies.get('token');
 
-  console.log('getJWT', { token });
   if (!token) {
     return null;
   }
 
-  const jwtToken = jwt.decode(token.replace('Bearer ', '')) as {
-    _id: ObjectId;
+  const decodedToken = jwt.decode(token.replace('Bearer ', '')) as {
+    _id: string;
     role: Role;
   } | null;
-  console.log('getJWT', { jwtToken });
+  const jwtToken =
+    decodedToken != null ? { ...decodedToken, _id: new ObjectId(decodedToken._id) } : null;
 
   return jwtToken;
 }

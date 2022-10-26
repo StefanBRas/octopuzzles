@@ -10,7 +10,6 @@ export const handle: Handle = async ({ event, resolve }) => {
     createContext,
     responseMeta: ({ ctx }) => {
       const token = ctx?.event.cookies.get('token');
-      console.log({ token });
       const secure = dev ? '' : 'Secure';
       return {
         headers: {
