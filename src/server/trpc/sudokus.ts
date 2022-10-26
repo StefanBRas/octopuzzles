@@ -67,7 +67,7 @@ export default trpc
   })
   .query('get', {
     input: z.object({
-      id: z.instanceof(ObjectId) // TODO: make this `z.instanceof(ObjectId)`
+      id: z.string()
     }),
     resolve: async ({ input, ctx }) => {
       console.log('Getting', input);
