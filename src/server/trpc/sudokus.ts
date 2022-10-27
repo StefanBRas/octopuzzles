@@ -74,6 +74,8 @@ export default trpc
       const userId = jwtToken?._id;
       console.log('Getting sudoku', { id: input.id, userId });
       try {
+        const sud = await sudokuCollection.findOne({ _id: new ObjectId(input.id) });
+        console.log({ sud });
         const sudokus = (await sudokuCollection
           .aggregate([
             { $match: { _id: input.id } },
