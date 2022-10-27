@@ -73,53 +73,59 @@ export default trpc
       const jwtToken = getJwt(ctx);
       const userId = jwtToken?._id;
       console.log('Getting sudoku', { id: input.id, userId });
-      const sudokus = (await sudokuCollection
-        .aggregate([
-          { $match: { _id: input.id } },
-          { $lookup: { from: 'users', localField: 'user_id', foreignField: '_id', as: 'creator' } },
-          {
-            $lookup: {
-              from: 'votes',
-              // localField: '_id',
-              // foreignField: 'sudoku_id',
-              as: 'userVote',
-              pipeline: [{ $match: { user_id: userId?.toString() } }]
-            }
-          },
-          {
-            $lookup: {
-              from: 'labels',
-              localField: 'labels',
-              foreignField: '_id',
-              as: 'fullLabels'
-            }
-          }
-        ])
-        .limit(1)
-        .toArray()) as (WithId<Sudoku> & {
-        creator: WithId<User>[];
-        userVote: WithId<Vote>[];
-        fullLabels: WithId<Label>[];
-      })[];
-      if (sudokus.length === 0) {
-        throw new TRPCError({ code: 'NOT_FOUND' });
-      } else {
-        const sudokuWithUser:
-          | (WithId<Sudoku> & {
-              creator?: WithId<User>;
-              userVote?: WithId<Vote>;
-              fullLabels: WithId<Label>[];
-            })
-          | null =
-          sudokus.length > 0
-            ? {
-                ...sudokus[0],
-                creator: sudokus[0].creator[0],
-                userVote: sudokus[0].userVote[0] ?? undefined
+      try {
+        const sudokus = (await sudokuCollection
+          .aggregate([
+            { $match: { _id: input.id } },
+            {
+              $lookup: { from: 'users', localField: 'user_id', foreignField: '_id', as: 'creator' }
+            },
+            {
+              $lookup: {
+                from: 'votes',
+                // localField: '_id',
+                // foreignField: 'sudoku_id',
+                as: 'userVote',
+                pipeline: [{ $match: { user_id: userId?.toString() } }]
               }
-            : null;
-        console.log('Returning', { sudokuWithUser });
-        return sudokuWithUser;
+            },
+            {
+              $lookup: {
+                from: 'labels',
+                localField: 'labels',
+                foreignField: '_id',
+                as: 'fullLabels'
+              }
+            }
+          ])
+          .limit(1)
+          .toArray()) as (WithId<Sudoku> & {
+          creator: WithId<User>[];
+          userVote: WithId<Vote>[];
+          fullLabels: WithId<Label>[];
+        })[];
+        if (sudokus.length === 0) {
+          throw new TRPCError({ code: 'NOT_FOUND' });
+        } else {
+          const sudokuWithUser:
+            | (WithId<Sudoku> & {
+                creator?: WithId<User>;
+                userVote?: WithId<Vote>;
+                fullLabels: WithId<Label>[];
+              })
+            | null =
+            sudokus.length > 0
+              ? {
+                  ...sudokus[0],
+                  creator: sudokus[0].creator[0],
+                  userVote: sudokus[0].userVote[0] ?? undefined
+                }
+              : null;
+          console.log('Returning', { sudokuWithUser });
+          return sudokuWithUser;
+        }
+      } catch (e) {
+        console.log(e);
       }
     }
   })
