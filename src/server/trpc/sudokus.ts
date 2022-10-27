@@ -70,13 +70,11 @@ export default trpc
       id: z.string()
     }),
     resolve: async ({ input, ctx }) => {
-      console.log('Getting', input);
       const jwtToken = getJwt(ctx);
       const userId = jwtToken?._id;
-      console.log({ userId });
       const sudokus = (await sudokuCollection
         .aggregate([
-          { $match: { _id: new ObjectId(input.id) } },
+          { $match: { _id: input.id } },
           { $lookup: { from: 'users', localField: 'user_id', foreignField: '_id', as: 'creator' } },
           {
             $lookup: {
@@ -102,7 +100,6 @@ export default trpc
         userVote: WithId<Vote>[];
         fullLabels: WithId<Label>[];
       })[];
-      console.log({ sudokus });
       if (sudokus.length === 0) {
         throw new TRPCError({ code: 'NOT_FOUND' });
       } else {
