@@ -14,12 +14,10 @@ export default trpc
       sudokuId: z.string()
     }),
     resolve: async ({ input }) => {
-      console.log('Getting walkthrough with id', input.sudokuId);
       const walkthrough = await walkthroughCollection.findOne({
         sudoku_id: new ObjectId(input.sudokuId)
       });
 
-      console.log({ walkthrough });
       return walkthrough;
     }
   })

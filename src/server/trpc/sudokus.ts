@@ -1,4 +1,10 @@
-import { labelCollection, mongoClient, sudokuCollection, voteCollection } from '../dbSetup';
+import {
+  labelCollection,
+  mongoClient,
+  sudokuCollection,
+  userCollection,
+  voteCollection
+} from '../dbSetup';
 import * as trpc from '@trpc/server';
 import { z } from 'zod';
 import { ObjectId, type Filter, type WithId } from 'mongodb';
@@ -72,63 +78,20 @@ export default trpc
     resolve: async ({ input, ctx }) => {
       const jwtToken = getJwt(ctx);
       const userId = jwtToken?._id;
-      console.log('Getting sudoku', { id: input.id, userId });
-      try {
-        const sud = await sudokuCollection.findOne({ _id: new ObjectId(input.id) });
-        console.log({ sud });
-        const sudokus = (await sudokuCollection
-          .aggregate([
-            { $match: { _id: input.id } },
-            {
-              $lookup: { from: 'users', localField: 'user_id', foreignField: '_id', as: 'creator' }
-            },
-            {
-              $lookup: {
-                from: 'votes',
-                // localField: '_id',
-                // foreignField: 'sudoku_id',
-                as: 'userVote',
-                pipeline: [{ $match: { user_id: userId?.toString() } }]
-              }
-            },
-            {
-              $lookup: {
-                from: 'labels',
-                localField: 'labels',
-                foreignField: '_id',
-                as: 'fullLabels'
-              }
-            }
-          ])
-          .limit(1)
-          .toArray()) as (WithId<Sudoku> & {
-          creator: WithId<User>[];
-          userVote: WithId<Vote>[];
-          fullLabels: WithId<Label>[];
-        })[];
-        if (sudokus.length === 0) {
-          throw new TRPCError({ code: 'NOT_FOUND' });
-        } else {
-          const sudokuWithUser:
-            | (WithId<Sudoku> & {
-                creator?: WithId<User>;
-                userVote?: WithId<Vote>;
-                fullLabels: WithId<Label>[];
-              })
-            | null =
-            sudokus.length > 0
-              ? {
-                  ...sudokus[0],
-                  creator: sudokus[0].creator[0],
-                  userVote: sudokus[0].userVote[0] ?? undefined
-                }
-              : null;
-          console.log('Returning', { sudokuWithUser });
-          return sudokuWithUser;
-        }
-      } catch (e) {
-        console.log(e);
+      const sudoku = await sudokuCollection.findOne({ _id: input.id as any });
+      if (sudoku == null) {
+        throw new TRPCError({ code: 'NOT_FOUND' });
       }
+      const user = await userCollection.findOne({ _id: sudoku?.user_id });
+      const labels = await labelCollection.find({ _id: { $in: sudoku?.labels ?? [] } }).toArray();
+      const userVote = userId != null ? await voteCollection.findOne({ user_id: userId }) : null;
+
+      return {
+        ...sudoku,
+        creator: user,
+        userVote,
+        fullLabels: labels
+      };
     }
   })
   .mutation('delete', {

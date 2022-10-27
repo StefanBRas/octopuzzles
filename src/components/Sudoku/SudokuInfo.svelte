@@ -21,14 +21,14 @@
   import trpc from '$lib/client/trpc';
 
   export let sudoku: WithId<Sudoku> & {
-    creator?: WithId<User>;
-    userVote?: WithId<Vote>;
+    creator?: WithId<User> | null;
+    userVote?: WithId<Vote> | null;
     fullLabels: WithId<Label>[];
   };
   export let takeScreenshot: () => void;
 
   async function vote(value: number) {
-    return await trpc().mutation('votes:vote', { sudokuId: sudoku._id, value });
+    return await trpc().mutation('votes:vote', { sudoku_id: sudoku._id, value });
   }
 
   $: pointsWithoutUserVote = (sudoku.points ?? 0) - (sudoku.userVote?.value ?? 0);
