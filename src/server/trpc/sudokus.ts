@@ -83,7 +83,7 @@ export default trpc
               // localField: '_id',
               // foreignField: 'sudoku_id',
               as: 'userVote',
-              pipeline: [{ $match: { user_id: userId } }]
+              pipeline: [{ $match: { user_id: userId?.toString() } }]
             }
           },
           {
