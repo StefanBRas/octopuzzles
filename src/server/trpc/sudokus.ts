@@ -72,6 +72,7 @@ export default trpc
     resolve: async ({ input, ctx }) => {
       const jwtToken = getJwt(ctx);
       const userId = jwtToken?._id;
+      console.log('Getting sudoku', { id: input.id, userId });
       const sudokus = (await sudokuCollection
         .aggregate([
           { $match: { _id: input.id } },
@@ -117,6 +118,7 @@ export default trpc
                 userVote: sudokus[0].userVote[0] ?? undefined
               }
             : null;
+        console.log('Returning', { sudokuWithUser });
         return sudokuWithUser;
       }
     }
