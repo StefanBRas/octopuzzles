@@ -79,6 +79,7 @@ export default trpc
       const jwtToken = getJwt(ctx);
       const userId = jwtToken?._id;
       const sudoku = await sudokuCollection.findOne({ _id: input.id as any });
+      console.log({ sudoku });
       if (sudoku == null) {
         throw new TRPCError({ code: 'NOT_FOUND' });
       }
