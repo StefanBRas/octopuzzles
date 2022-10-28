@@ -17,8 +17,7 @@ import {
 import type { TRPCContext } from '.';
 import type { User } from '$models/User';
 import { TRPCError } from '@trpc/server';
-import type { Vote } from '$models/Vote';
-import type { Label } from '$models/Label';
+
 import {
   validateCorrectDimension,
   validateCorrectDimensionsOfSudokuClues
@@ -32,7 +31,7 @@ export default trpc
       labels: z.array(z.instanceof(ObjectId)),
       limit: z.number().min(1).max(100).nullish(),
       cursor: z.date().nullish(),
-      userId: z.instanceof(ObjectId).optional()
+      userId: z.string().optional()
     }),
     resolve: async ({ input }) => {
       const limit = input.limit ?? 24;
@@ -44,7 +43,7 @@ export default trpc
         filter.labels = { $in: input.labels };
       }
       if (input.userId != null) {
-        filter.user_id = { $eq: input.userId };
+        filter.user_id = { $eq: new ObjectId(input.userId) };
       }
       const sudokusAgg = (await sudokuCollection
         .aggregate([
@@ -79,7 +78,6 @@ export default trpc
       const jwtToken = getJwt(ctx);
       const userId = jwtToken?._id;
       const sudoku = await sudokuCollection.findOne({ _id: new ObjectId(input.id) });
-      console.log({ sudoku });
       if (sudoku == null) {
         throw new TRPCError({ code: 'NOT_FOUND' });
       }

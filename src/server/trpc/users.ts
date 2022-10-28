@@ -162,10 +162,10 @@ export default trpc
   })
   .query('get', {
     input: z.object({
-      id: z.instanceof(ObjectId)
+      id: z.string()
     }),
     resolve: async ({ input }) => {
-      const user = await userCollection.findOne({ _id: input.id });
+      const user = await userCollection.findOne({ _id: new ObjectId(input.id) });
 
       return user;
     }

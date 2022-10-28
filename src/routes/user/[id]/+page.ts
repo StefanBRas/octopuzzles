@@ -7,8 +7,8 @@ export const load: PageLoad = async ({ fetch, params }) => {
   const trpcClient = trpc(fetch);
   const userId = new ObjectId(params.id);
   const [sudokus, user, me] = await Promise.all([
-    trpcClient.query('sudokus:search', { limit: 24, labels: [], userId }),
-    trpcClient.query('users:get', { id: userId }),
+    trpcClient.query('sudokus:search', { limit: 24, labels: [], userId: userId.toString() }),
+    trpcClient.query('users:get', { id: userId.toString() }),
     trpcClient.query('users:me')
   ]);
   if (user == null) {
