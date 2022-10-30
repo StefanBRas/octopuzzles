@@ -26,12 +26,6 @@
   } from '$stores/sudokuStore';
   import Label from '$ui/Label.svelte';
   import classNames from 'classnames';
-  import {
-    getAllBorderClues,
-    getAllCages,
-    getAllCellClues,
-    isDefaultBorders
-  } from '$utils/migration';
   import ImportFromFPuzzles from '$components/Modals/ImportFromFPuzzles.svelte';
   import { walkthroughStore } from '$stores/walkthroughStore';
   import type { PageData } from './$types';
@@ -99,13 +93,13 @@
         colors: defaultGameColors(sud.dimensions)
       });
       editorHistory.reset({
-        borderclues: getAllBorderClues(sud.borderclues, sud.borders, sud.dimensions) ?? undefined,
-        cellclues: getAllCellClues(sud.cellclues, sud.cornerclues, sud.symbols) ?? undefined,
-        regions: sud.regions ?? (!isDefaultBorders(sud.borders, sud.dimensions) ? [] : undefined),
+        borderclues: sud.borderclues ?? undefined,
+        cellclues: sud.cellclues ?? undefined,
+        regions: sud.regions ?? undefined,
         givens: sud.givens ?? undefined,
         cells: sud.cells ?? undefined,
         editorcolors: sud.colors ?? undefined,
-        cages: getAllCages(sud.extendedcages, sud.killercages) ?? undefined,
+        cages: sud.extendedcages ?? undefined,
         paths: sud.paths ?? undefined,
         dimensions: sud.dimensions,
         logic: sud.logic ?? undefined

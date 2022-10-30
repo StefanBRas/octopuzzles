@@ -25,15 +25,6 @@ export const DimensionsValidator = z.object({
 
 export type Dimensions = z.infer<typeof DimensionsValidator>;
 
-export const CornerclueValidator = z.object({
-  nw: z.string(),
-  ne: z.string(),
-  se: z.string(),
-  sw: z.string()
-});
-
-export type Cornerclue = z.infer<typeof CornerclueValidator>;
-
 export const ColorValidator = z.enum([
   'Black',
   'White',
@@ -237,33 +228,17 @@ export const LogicValidator = z.object({
 });
 export type Logic = z.infer<typeof LogicValidator>;
 
-export const SudokuSymbolValidator = z.object({
-  type: SymbolTypeValidator,
-  rotation: RotationValidator,
-  color: ColorValidator
-});
-export type SudokuSymbol = z.infer<typeof SudokuSymbolValidator>;
-
 export const CellsValidator = z.array(z.array(z.boolean()));
 export type Cells = z.infer<typeof CellsValidator>;
 
 export const GivensValidator = z.array(z.array(z.string()));
 export type Givens = z.infer<typeof GivensValidator>;
 
-export const CornercluesValidator = z.array(z.array(CornerclueValidator.optional()));
-export type Cornerclues = z.infer<typeof CornercluesValidator>;
-
 export const EditorColorsValidator = z.array(z.array(ColorValidator.optional()));
 export type EditorColors = z.infer<typeof EditorColorsValidator>;
 
 export const RegionsValidator = z.array(RegionValidator);
 export type Regions = z.infer<typeof RegionsValidator>;
-
-export const BordersValidator = z.array(LineValidator);
-export type Borders = z.infer<typeof BordersValidator>;
-
-export const KillerCagesValidator = z.array(z.array(PositionValidator));
-export type KillerCages = z.infer<typeof KillerCagesValidator>;
 
 export const ExtendedcagesValidator = z.array(ExtendedcageValidator);
 export type Extendedcages = z.infer<typeof ExtendedcagesValidator>;
@@ -276,9 +251,6 @@ export type Borderclues = z.infer<typeof BordercluesValidator>;
 
 export const CellcluesValidator = z.array(CellclueValidator);
 export type Cellclues = z.infer<typeof CellcluesValidator>;
-
-export const SudokuSymbolsValidator = z.array(z.array(z.array(SudokuSymbolValidator).optional()));
-export type SudokuSymbols = z.infer<typeof SudokuSymbolsValidator>;
 
 export const SolutionValidator = z.object({ numbers: z.array(z.array(z.string().max(3))) });
 export type Solution = z.infer<typeof SolutionValidator>;
@@ -302,16 +274,10 @@ export const SudokuValidator = z.object({
   cells: CellsValidator,
   /** The givens in the sudoku.  */
   givens: GivensValidator,
-  /** OBSOLETE: The cornerclues in the sudoku. Migrated to Cellclues when the puzzle is loaded in the client */
-  cornerclues: CornercluesValidator.optional(),
   /** The colors in the cells of the sudoku. */
   colors: EditorColorsValidator,
   /** The regions of the sudoku. */
   regions: RegionsValidator.optional(),
-  /** OBSOLETE: The borders of the sudoku. */
-  borders: BordersValidator.optional(),
-  /** OBSOLETE: The dotted boxes (killer cages) in the grid. Migrated to Extendedcages when the puzzle is loaded in the client */
-  killercages: KillerCagesValidator.optional(),
   /** The dotted boxes (killer cages) in the grid, with optional rendering settings */
   extendedcages: ExtendedcagesValidator.optional(),
   /** The paths in the sudoku, i.e. thermometers, etc. */
@@ -320,8 +286,6 @@ export const SudokuValidator = z.object({
   borderclues: BordercluesValidator,
   /** The cellclues of the sudoku. That is, a clue contained within a cell. If null, there are no cell clues */
   cellclues: CellcluesValidator.optional(),
-  /** OBSOLETE: The symbols in the grid. If null, there are no symbols */
-  symbols: SudokuSymbolsValidator.optional(),
   /** The global sudoku logic in the grid. */
   logic: LogicValidator.optional(),
   /** The solution to the puzzle if any is given */
@@ -342,10 +306,6 @@ export const NewSudokuValidator = SudokuValidator.omit({
   rank: true,
   points: true,
   public_since: true,
-  symbols: true,
-  killercages: true,
-  borders: true,
-  cornerclues: true,
   solution: true
 });
 export const UpdateSudokuValidator = NewSudokuValidator.partial();

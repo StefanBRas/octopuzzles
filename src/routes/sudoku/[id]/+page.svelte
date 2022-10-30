@@ -15,12 +15,6 @@
   import FinishedSudokuModal from '$components/Modals/FinishedSudokuModal.svelte';
   import { getUserSolution } from '$utils/getSolution';
   import { get } from 'svelte/store';
-  import {
-    getAllBorderClues,
-    getAllCages,
-    getAllCellClues,
-    isDefaultBorders
-  } from '$utils/migration';
   import type { PageData } from './$types';
   import { walkthroughStore } from '$stores/walkthroughStore';
   import { fillWalkthroughStore } from '$utils/fillWalkthroughStore';
@@ -74,13 +68,13 @@
     $description = sud.description;
 
     editorHistory.reset({
-      borderclues: getAllBorderClues(sud.borderclues, sud.borders, sud.dimensions) ?? undefined,
-      cellclues: getAllCellClues(sud.cellclues, sud.cornerclues, sud.symbols) ?? undefined,
-      regions: sud.regions ?? (!isDefaultBorders(sud.borders, sud.dimensions) ? [] : undefined),
+      borderclues: sud.borderclues ?? undefined,
+      cellclues: sud.cellclues ?? undefined,
+      regions: sud.regions ?? undefined,
       givens: sud.givens ?? undefined,
       cells: sud.cells ?? undefined,
       editorcolors: sud.colors ?? undefined,
-      cages: getAllCages(sud.extendedcages, sud.killercages) ?? undefined,
+      cages: sud.extendedcages ?? undefined,
       paths: sud.paths ?? undefined,
       dimensions: sud.dimensions,
       logic: sud.logic ?? undefined

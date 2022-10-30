@@ -294,87 +294,6 @@ async function main() {
         ['', '', '', '', '', '', '', '', ''],
         ['', '', '', '', '', '', '', '', '']
       ],
-      cornerclues: [
-        [
-          { nw: '27', ne: '', se: '', sw: '' },
-          null,
-          null,
-          { nw: '4', ne: '', se: '', sw: '' },
-          null,
-          { nw: '16', ne: '', se: '', sw: '' },
-          null,
-          { nw: '18', ne: '', se: '', sw: '' },
-          { nw: '18', ne: '', se: '', sw: '' }
-        ],
-        [null, null, { nw: '16', ne: '', se: '', sw: '' }, null, null, null, null, null, null],
-        [
-          { nw: '8', ne: '', se: '', sw: '' },
-          null,
-          { nw: '8', ne: '', se: '', sw: '' },
-          { nw: '11', ne: '', se: '', sw: '' },
-          { nw: '9', ne: '', se: '', sw: '' },
-          null,
-          { nw: '3', ne: '', se: '', sw: '' },
-          null,
-          null
-        ],
-        [
-          { nw: '15', ne: '', se: '', sw: '' },
-          { nw: '4', ne: '', se: '', sw: '' },
-          null,
-          null,
-          null,
-          { nw: '12', ne: '', se: '', sw: '' },
-          { nw: '8', ne: '', se: '', sw: '' },
-          { nw: '10', ne: '', se: '', sw: '' },
-          { nw: '10', ne: '', se: '', sw: '' }
-        ],
-        [
-          null,
-          { nw: '19', ne: '', se: '', sw: '' },
-          null,
-          { nw: '15', ne: '', se: '', sw: '' },
-          null,
-          null,
-          null,
-          null,
-          null
-        ],
-        [
-          { nw: '7', ne: '', se: '', sw: '' },
-          null,
-          null,
-          null,
-          { nw: '19', ne: '', se: '', sw: '' },
-          null,
-          null,
-          { nw: '11', ne: '', se: '', sw: '' },
-          { nw: '13', ne: '', se: '', sw: '' }
-        ],
-        [
-          { nw: '18', ne: '', se: '', sw: '' },
-          { nw: '21', ne: '', se: '', sw: '' },
-          { nw: '19', ne: '', se: '', sw: '' },
-          null,
-          null,
-          null,
-          { nw: '17', ne: '', se: '', sw: '' },
-          null,
-          null
-        ],
-        [null, null, null, null, null, null, null, { nw: '13', ne: '', se: '', sw: '' }, null],
-        [
-          null,
-          null,
-          null,
-          null,
-          { nw: '15', ne: '', se: '', sw: '' },
-          null,
-          null,
-          null,
-          { nw: '3', ne: '', se: '', sw: '' }
-        ]
-      ],
       colors: [
         [null, null, null, null, null, null, null, null, null],
         [null, null, null, null, null, null, null, null, null],
@@ -386,234 +305,8 @@ async function main() {
         [null, null, null, null, null, null, null, null, null],
         [null, null, null, null, null, null, null, null, null]
       ],
-      borders: [
-        { x1: 0, y1: 0, x2: 1, y2: 0 },
-        { x1: 1, y1: 0, x2: 2, y2: 0 },
-        { x1: 2, y1: 0, x2: 3, y2: 0 },
-        { x1: 3, y1: 0, x2: 4, y2: 0 },
-        { x1: 4, y1: 0, x2: 5, y2: 0 },
-        { x1: 5, y1: 0, x2: 6, y2: 0 },
-        { x1: 6, y1: 0, x2: 7, y2: 0 },
-        { x1: 7, y1: 0, x2: 8, y2: 0 },
-        { x1: 8, y1: 0, x2: 9, y2: 0 },
-        { x1: 0, y1: 3, x2: 1, y2: 3 },
-        { x1: 1, y1: 3, x2: 2, y2: 3 },
-        { x1: 2, y1: 3, x2: 3, y2: 3 },
-        { x1: 3, y1: 3, x2: 4, y2: 3 },
-        { x1: 4, y1: 3, x2: 5, y2: 3 },
-        { x1: 5, y1: 3, x2: 6, y2: 3 },
-        { x1: 6, y1: 3, x2: 7, y2: 3 },
-        { x1: 7, y1: 3, x2: 8, y2: 3 },
-        { x1: 8, y1: 3, x2: 9, y2: 3 },
-        { x1: 0, y1: 6, x2: 1, y2: 6 },
-        { x1: 1, y1: 6, x2: 2, y2: 6 },
-        { x1: 2, y1: 6, x2: 3, y2: 6 },
-        { x1: 3, y1: 6, x2: 4, y2: 6 },
-        { x1: 4, y1: 6, x2: 5, y2: 6 },
-        { x1: 5, y1: 6, x2: 6, y2: 6 },
-        { x1: 6, y1: 6, x2: 7, y2: 6 },
-        { x1: 7, y1: 6, x2: 8, y2: 6 },
-        { x1: 8, y1: 6, x2: 9, y2: 6 },
-        { x1: 0, y1: 9, x2: 1, y2: 9 },
-        { x1: 1, y1: 9, x2: 2, y2: 9 },
-        { x1: 2, y1: 9, x2: 3, y2: 9 },
-        { x1: 3, y1: 9, x2: 4, y2: 9 },
-        { x1: 4, y1: 9, x2: 5, y2: 9 },
-        { x1: 5, y1: 9, x2: 6, y2: 9 },
-        { x1: 6, y1: 9, x2: 7, y2: 9 },
-        { x1: 7, y1: 9, x2: 8, y2: 9 },
-        { x1: 8, y1: 9, x2: 9, y2: 9 },
-        { x1: 0, y1: 0, x2: 0, y2: 1 },
-        { x1: 0, y1: 1, x2: 0, y2: 2 },
-        { x1: 0, y1: 2, x2: 0, y2: 3 },
-        { x1: 0, y1: 3, x2: 0, y2: 4 },
-        { x1: 0, y1: 4, x2: 0, y2: 5 },
-        { x1: 0, y1: 5, x2: 0, y2: 6 },
-        { x1: 0, y1: 6, x2: 0, y2: 7 },
-        { x1: 0, y1: 7, x2: 0, y2: 8 },
-        { x1: 0, y1: 8, x2: 0, y2: 9 },
-        { x1: 3, y1: 0, x2: 3, y2: 1 },
-        { x1: 3, y1: 1, x2: 3, y2: 2 },
-        { x1: 3, y1: 2, x2: 3, y2: 3 },
-        { x1: 3, y1: 3, x2: 3, y2: 4 },
-        { x1: 3, y1: 4, x2: 3, y2: 5 },
-        { x1: 3, y1: 5, x2: 3, y2: 6 },
-        { x1: 3, y1: 6, x2: 3, y2: 7 },
-        { x1: 3, y1: 7, x2: 3, y2: 8 },
-        { x1: 3, y1: 8, x2: 3, y2: 9 },
-        { x1: 6, y1: 0, x2: 6, y2: 1 },
-        { x1: 6, y1: 1, x2: 6, y2: 2 },
-        { x1: 6, y1: 2, x2: 6, y2: 3 },
-        { x1: 6, y1: 3, x2: 6, y2: 4 },
-        { x1: 6, y1: 4, x2: 6, y2: 5 },
-        { x1: 6, y1: 5, x2: 6, y2: 6 },
-        { x1: 6, y1: 6, x2: 6, y2: 7 },
-        { x1: 6, y1: 7, x2: 6, y2: 8 },
-        { x1: 6, y1: 8, x2: 6, y2: 9 },
-        { x1: 9, y1: 0, x2: 9, y2: 1 },
-        { x1: 9, y1: 1, x2: 9, y2: 2 },
-        { x1: 9, y1: 2, x2: 9, y2: 3 },
-        { x1: 9, y1: 3, x2: 9, y2: 4 },
-        { x1: 9, y1: 4, x2: 9, y2: 5 },
-        { x1: 9, y1: 5, x2: 9, y2: 6 },
-        { x1: 9, y1: 6, x2: 9, y2: 7 },
-        { x1: 9, y1: 7, x2: 9, y2: 8 },
-        { x1: 9, y1: 8, x2: 9, y2: 9 }
-      ],
-      killercages: [
-        [
-          { column: 0, row: 0 },
-          { column: 0, row: 1 },
-          { column: 1, row: 1 },
-          { column: 1, row: 0 },
-          { column: 2, row: 0 }
-        ],
-        [
-          { column: 3, row: 0 },
-          { column: 4, row: 0 }
-        ],
-        [
-          { column: 6, row: 0 },
-          { column: 5, row: 0 },
-          { column: 5, row: 1 }
-        ],
-        [
-          { column: 6, row: 1 },
-          { column: 7, row: 1 },
-          { column: 7, row: 0 }
-        ],
-        [
-          { column: 8, row: 0 },
-          { column: 8, row: 1 },
-          { column: 8, row: 2 }
-        ],
-        [
-          { column: 8, row: 3 },
-          { column: 8, row: 4 }
-        ],
-        [
-          { column: 8, row: 5 },
-          { column: 8, row: 6 }
-        ],
-        [
-          { column: 8, row: 7 },
-          { column: 7, row: 7 },
-          { column: 7, row: 8 }
-        ],
-        [{ column: 8, row: 8 }],
-        [
-          { column: 7, row: 6 },
-          { column: 7, row: 5 }
-        ],
-        [
-          { column: 7, row: 4 },
-          { column: 7, row: 3 }
-        ],
-        [
-          { column: 7, row: 2 },
-          { column: 6, row: 2 }
-        ],
-        [{ column: 5, row: 2 }],
-        [
-          { column: 4, row: 1 },
-          { column: 3, row: 1 },
-          { column: 2, row: 1 }
-        ],
-        [
-          { column: 0, row: 2 },
-          { column: 1, row: 2 }
-        ],
-        [{ column: 2, row: 2 }],
-        [
-          { column: 3, row: 2 },
-          { column: 3, row: 3 }
-        ],
-        [
-          { column: 4, row: 2 },
-          { column: 4, row: 3 },
-          { column: 4, row: 4 }
-        ],
-        [
-          { column: 5, row: 3 },
-          { column: 5, row: 4 }
-        ],
-        [
-          { column: 6, row: 3 },
-          { column: 6, row: 4 }
-        ],
-        [
-          { column: 6, row: 5 },
-          { column: 5, row: 5 },
-          { column: 4, row: 5 },
-          { column: 4, row: 6 }
-        ],
-        [
-          { column: 5, row: 6 },
-          { column: 5, row: 7 },
-          { column: 4, row: 7 }
-        ],
-        [
-          { column: 6, row: 6 },
-          { column: 6, row: 7 }
-        ],
-        [
-          { column: 6, row: 8 },
-          { column: 5, row: 8 },
-          { column: 4, row: 8 }
-        ],
-        [
-          { column: 2, row: 8 },
-          { column: 3, row: 8 },
-          { column: 3, row: 7 },
-          { column: 3, row: 6 },
-          { column: 2, row: 6 }
-        ],
-        [
-          { column: 2, row: 7 },
-          { column: 1, row: 7 },
-          { column: 1, row: 8 },
-          { column: 1, row: 6 }
-        ],
-        [
-          { column: 0, row: 6 },
-          { column: 0, row: 7 },
-          { column: 0, row: 8 }
-        ],
-        [
-          { column: 0, row: 5 },
-          { column: 1, row: 5 }
-        ],
-        [
-          { column: 2, row: 5 },
-          { column: 2, row: 4 },
-          { column: 1, row: 4 }
-        ],
-        [
-          { column: 3, row: 4 },
-          { column: 3, row: 5 }
-        ],
-        [
-          { column: 2, row: 3 },
-          { column: 1, row: 3 }
-        ],
-        [
-          { column: 0, row: 3 },
-          { column: 0, row: 4 }
-        ]
-      ],
       paths: [],
       borderclues: [],
-      symbols: [
-        [null, null, null, null, null, null, null, null, null],
-        [null, null, null, null, null, null, null, null, null],
-        [null, null, null, null, null, null, null, null, null],
-        [null, null, null, null, null, null, null, null, null],
-        [null, null, null, null, null, null, null, null, null],
-        [null, null, null, null, null, null, null, null, null],
-        [null, null, null, null, null, null, null, null, null],
-        [null, null, null, null, null, null, null, null, null],
-        [null, null, null, null, null, null, null, null, null]
-      ],
       created_at: date1,
       updated_at: date1,
       labels: [new ObjectId('629a24cd969ba0fc6992b8b7')],
@@ -645,14 +338,6 @@ async function main() {
         ['', '', '', '3', '', ''],
         ['5', '', '', '', '', '2']
       ],
-      cornerclues: [
-        [null, null, null, null, null, null],
-        [null, null, null, null, null, null],
-        [null, null, null, null, null, null],
-        [null, null, null, null, null, null],
-        [null, null, null, null, null, null],
-        [null, null, null, null, null, null]
-      ],
       colors: [
         [null, null, null, null, null, null],
         [null, null, null, null, null, null],
@@ -661,61 +346,8 @@ async function main() {
         [null, null, null, null, null, null],
         [null, null, null, null, null, null]
       ],
-      borders: [
-        { x1: 0, y1: 0, x2: 0, y2: 1 },
-        { x1: 6, y1: 0, x2: 6, y2: 1 },
-        { x1: 0, y1: 1, x2: 0, y2: 2 },
-        { x1: 6, y1: 1, x2: 6, y2: 2 },
-        { x1: 0, y1: 2, x2: 0, y2: 3 },
-        { x1: 6, y1: 2, x2: 6, y2: 3 },
-        { x1: 0, y1: 3, x2: 0, y2: 4 },
-        { x1: 6, y1: 3, x2: 6, y2: 4 },
-        { x1: 0, y1: 4, x2: 0, y2: 5 },
-        { x1: 6, y1: 4, x2: 6, y2: 5 },
-        { x1: 0, y1: 5, x2: 0, y2: 6 },
-        { x1: 6, y1: 5, x2: 6, y2: 6 },
-        { x1: 0, y1: 0, x2: 1, y2: 0 },
-        { x1: 0, y1: 6, x2: 1, y2: 6 },
-        { x1: 1, y1: 0, x2: 2, y2: 0 },
-        { x1: 1, y1: 6, x2: 2, y2: 6 },
-        { x1: 2, y1: 0, x2: 3, y2: 0 },
-        { x1: 2, y1: 6, x2: 3, y2: 6 },
-        { x1: 3, y1: 0, x2: 4, y2: 0 },
-        { x1: 3, y1: 6, x2: 4, y2: 6 },
-        { x1: 4, y1: 0, x2: 5, y2: 0 },
-        { x1: 4, y1: 6, x2: 5, y2: 6 },
-        { x1: 5, y1: 0, x2: 6, y2: 0 },
-        { x1: 5, y1: 6, x2: 6, y2: 6 },
-        { x1: 0, y1: 4, x2: 1, y2: 4 },
-        { x1: 1, y1: 4, x2: 2, y2: 4 },
-        { x1: 2, y1: 4, x2: 3, y2: 4 },
-        { x1: 3, y1: 4, x2: 4, y2: 4 },
-        { x1: 4, y1: 4, x2: 5, y2: 4 },
-        { x1: 5, y1: 4, x2: 6, y2: 4 },
-        { x1: 0, y1: 2, x2: 1, y2: 2 },
-        { x1: 1, y1: 2, x2: 2, y2: 2 },
-        { x1: 2, y1: 2, x2: 3, y2: 2 },
-        { x1: 3, y1: 2, x2: 4, y2: 2 },
-        { x1: 4, y1: 2, x2: 5, y2: 2 },
-        { x1: 5, y1: 2, x2: 6, y2: 2 },
-        { x1: 3, y1: 5, x2: 3, y2: 6 },
-        { x1: 3, y1: 4, x2: 3, y2: 5 },
-        { x1: 3, y1: 3, x2: 3, y2: 4 },
-        { x1: 3, y1: 2, x2: 3, y2: 3 },
-        { x1: 3, y1: 1, x2: 3, y2: 2 },
-        { x1: 3, y1: 0, x2: 3, y2: 1 }
-      ],
-      killercages: [],
       paths: [],
       borderclues: [],
-      symbols: [
-        [null, null, null, null, null, null],
-        [null, null, null, null, null, null],
-        [null, null, null, null, null, null],
-        [null, null, null, null, null, null],
-        [null, null, null, null, null, null],
-        [null, null, null, null, null, null]
-      ],
       created_at: date2,
       updated_at: date2,
       solution: {
@@ -762,17 +394,6 @@ async function main() {
         ['', '', '', '', '', '', '', '', ''],
         ['', '', '', '', '', '', '', '', '']
       ],
-      cornerclues: [
-        [null, null, null, null, null, null, null, null, null],
-        [null, null, null, null, null, null, null, null, null],
-        [null, null, null, null, null, null, null, null, null],
-        [null, null, null, null, null, null, null, null, null],
-        [null, null, null, null, null, null, null, null, null],
-        [null, null, null, null, null, null, null, null, null],
-        [null, null, null, null, null, null, null, null, null],
-        [null, null, null, null, null, null, null, null, null],
-        [null, null, null, null, null, null, null, null, null]
-      ],
       colors: [
         [null, null, null, null, null, null, null, null, null],
         [null, null, null, null, null, null, null, null, null],
@@ -784,81 +405,6 @@ async function main() {
         [null, null, null, null, null, null, null, null, null],
         [null, null, null, null, null, null, null, null, null]
       ],
-      borders: [
-        { x1: 0, y1: 0, x2: 1, y2: 0 },
-        { x1: 1, y1: 0, x2: 2, y2: 0 },
-        { x1: 2, y1: 0, x2: 3, y2: 0 },
-        { x1: 3, y1: 0, x2: 4, y2: 0 },
-        { x1: 4, y1: 0, x2: 5, y2: 0 },
-        { x1: 5, y1: 0, x2: 6, y2: 0 },
-        { x1: 6, y1: 0, x2: 7, y2: 0 },
-        { x1: 7, y1: 0, x2: 8, y2: 0 },
-        { x1: 8, y1: 0, x2: 9, y2: 0 },
-        { x1: 0, y1: 3, x2: 1, y2: 3 },
-        { x1: 1, y1: 3, x2: 2, y2: 3 },
-        { x1: 2, y1: 3, x2: 3, y2: 3 },
-        { x1: 3, y1: 3, x2: 4, y2: 3 },
-        { x1: 4, y1: 3, x2: 5, y2: 3 },
-        { x1: 5, y1: 3, x2: 6, y2: 3 },
-        { x1: 6, y1: 3, x2: 7, y2: 3 },
-        { x1: 7, y1: 3, x2: 8, y2: 3 },
-        { x1: 8, y1: 3, x2: 9, y2: 3 },
-        { x1: 0, y1: 6, x2: 1, y2: 6 },
-        { x1: 1, y1: 6, x2: 2, y2: 6 },
-        { x1: 2, y1: 6, x2: 3, y2: 6 },
-        { x1: 3, y1: 6, x2: 4, y2: 6 },
-        { x1: 4, y1: 6, x2: 5, y2: 6 },
-        { x1: 5, y1: 6, x2: 6, y2: 6 },
-        { x1: 6, y1: 6, x2: 7, y2: 6 },
-        { x1: 7, y1: 6, x2: 8, y2: 6 },
-        { x1: 8, y1: 6, x2: 9, y2: 6 },
-        { x1: 0, y1: 9, x2: 1, y2: 9 },
-        { x1: 1, y1: 9, x2: 2, y2: 9 },
-        { x1: 2, y1: 9, x2: 3, y2: 9 },
-        { x1: 3, y1: 9, x2: 4, y2: 9 },
-        { x1: 4, y1: 9, x2: 5, y2: 9 },
-        { x1: 5, y1: 9, x2: 6, y2: 9 },
-        { x1: 6, y1: 9, x2: 7, y2: 9 },
-        { x1: 7, y1: 9, x2: 8, y2: 9 },
-        { x1: 8, y1: 9, x2: 9, y2: 9 },
-        { x1: 0, y1: 0, x2: 0, y2: 1 },
-        { x1: 0, y1: 1, x2: 0, y2: 2 },
-        { x1: 0, y1: 2, x2: 0, y2: 3 },
-        { x1: 0, y1: 3, x2: 0, y2: 4 },
-        { x1: 0, y1: 4, x2: 0, y2: 5 },
-        { x1: 0, y1: 5, x2: 0, y2: 6 },
-        { x1: 0, y1: 6, x2: 0, y2: 7 },
-        { x1: 0, y1: 7, x2: 0, y2: 8 },
-        { x1: 0, y1: 8, x2: 0, y2: 9 },
-        { x1: 3, y1: 0, x2: 3, y2: 1 },
-        { x1: 3, y1: 1, x2: 3, y2: 2 },
-        { x1: 3, y1: 2, x2: 3, y2: 3 },
-        { x1: 3, y1: 3, x2: 3, y2: 4 },
-        { x1: 3, y1: 4, x2: 3, y2: 5 },
-        { x1: 3, y1: 5, x2: 3, y2: 6 },
-        { x1: 3, y1: 6, x2: 3, y2: 7 },
-        { x1: 3, y1: 7, x2: 3, y2: 8 },
-        { x1: 3, y1: 8, x2: 3, y2: 9 },
-        { x1: 6, y1: 0, x2: 6, y2: 1 },
-        { x1: 6, y1: 1, x2: 6, y2: 2 },
-        { x1: 6, y1: 2, x2: 6, y2: 3 },
-        { x1: 6, y1: 3, x2: 6, y2: 4 },
-        { x1: 6, y1: 4, x2: 6, y2: 5 },
-        { x1: 6, y1: 5, x2: 6, y2: 6 },
-        { x1: 6, y1: 6, x2: 6, y2: 7 },
-        { x1: 6, y1: 7, x2: 6, y2: 8 },
-        { x1: 6, y1: 8, x2: 6, y2: 9 },
-        { x1: 9, y1: 0, x2: 9, y2: 1 },
-        { x1: 9, y1: 1, x2: 9, y2: 2 },
-        { x1: 9, y1: 2, x2: 9, y2: 3 },
-        { x1: 9, y1: 3, x2: 9, y2: 4 },
-        { x1: 9, y1: 4, x2: 9, y2: 5 },
-        { x1: 9, y1: 5, x2: 9, y2: 6 },
-        { x1: 9, y1: 6, x2: 9, y2: 7 },
-        { x1: 9, y1: 7, x2: 9, y2: 8 },
-        { x1: 9, y1: 8, x2: 9, y2: 9 }
-      ],
-      killercages: [],
       paths: [
         {
           positions: [
@@ -1045,17 +591,6 @@ async function main() {
           radius: 20,
           text: 'X'
         }
-      ],
-      symbols: [
-        [null, null, null, null, null, null, null, null, null],
-        [null, null, null, null, null, null, null, null, null],
-        [null, null, null, null, null, null, null, null, null],
-        [null, null, null, null, null, null, null, null, null],
-        [null, null, null, null, null, null, null, null, null],
-        [null, null, null, null, null, null, null, null, null],
-        [null, null, null, null, null, null, null, null, null],
-        [null, null, null, null, null, null, null, null, null],
-        [null, null, null, null, null, null, null, null, null]
       ],
       created_at: date3,
       updated_at: date3,

@@ -6,12 +6,6 @@
   import NotePencil from 'phosphor-svelte/lib/NotePencil/NotePencil.svelte';
   import LoadingIndicator from '$ui/LoadingIndicator.svelte';
   import {
-    getAllBorderClues,
-    getAllCages,
-    getAllCellClues,
-    isDefaultBorders
-  } from '$utils/migration';
-  import {
     defaultBorderclues,
     defaultCages,
     defaultCellclues,
@@ -50,23 +44,15 @@
           <div class="h-96 w-full p-4 justify-center">
             <SudokuDisplay
               cells={sudoku.cells ?? defaultCells(sudoku.dimensions)}
-              regions={sudoku.regions ??
-                (!isDefaultBorders(sudoku.borders, sudoku.dimensions)
-                  ? []
-                  : defaultRegions(sudoku.dimensions))}
+              regions={sudoku.regions ?? defaultRegions(sudoku.dimensions)}
               dimensions={sudoku.dimensions}
               logic={sudoku.logic ?? defaultLogic()}
               givens={sudoku.givens ?? defaultGivens(sudoku.dimensions)}
               paths={sudoku.paths ?? defaultPaths()}
-              cages={getAllCages(sudoku.extendedcages, sudoku.killercages) ?? defaultCages()}
+              cages={sudoku.extendedcages ?? defaultCages()}
               editorColors={sudoku.colors ?? defaultEditorColors(sudoku.dimensions)}
-              borderClues={getAllBorderClues(
-                sudoku.borderclues,
-                sudoku.borders,
-                sudoku.dimensions
-              ) ?? defaultBorderclues()}
-              cellClues={getAllCellClues(sudoku.cellclues, sudoku.cornerclues, sudoku.symbols) ??
-                defaultCellclues()}
+              borderClues={sudoku.borderclues ?? defaultBorderclues()}
+              cellClues={sudoku.cellclues ?? defaultCellclues()}
             />
           </div>
           <div class="h-32 bg-gray-100 w-full border-t p-2">
