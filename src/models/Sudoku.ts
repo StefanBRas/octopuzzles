@@ -271,19 +271,19 @@ export const SudokuValidator = z.object({
   /** The dimensions of the sudoku, i.e. the number of rows and columns */
   dimensions: DimensionsValidator,
   /** The cells that are interactable in the sudoku. */
-  cells: CellsValidator,
+  cells: CellsValidator.optional(),
   /** The givens in the sudoku.  */
-  givens: GivensValidator,
+  givens: GivensValidator.optional(),
   /** The colors in the cells of the sudoku. */
-  colors: EditorColorsValidator,
+  colors: EditorColorsValidator.optional(),
   /** The regions of the sudoku. */
   regions: RegionsValidator.optional(),
   /** The dotted boxes (killer cages) in the grid, with optional rendering settings */
   extendedcages: ExtendedcagesValidator.optional(),
   /** The paths in the sudoku, i.e. thermometers, etc. */
-  paths: PathsValidator,
+  paths: PathsValidator.optional(),
   /** The borderclues of the sudoku. That is, a clue lying on a border. If null, there are no border clues */
-  borderclues: BordercluesValidator,
+  borderclues: BordercluesValidator.optional(),
   /** The cellclues of the sudoku. That is, a clue contained within a cell. If null, there are no cell clues */
   cellclues: CellcluesValidator.optional(),
   /** The global sudoku logic in the grid. */
@@ -291,7 +291,7 @@ export const SudokuValidator = z.object({
   /** The solution to the puzzle if any is given */
   solution: SolutionValidator.optional(),
   /** A list of labels on this sudoku */
-  labels: z.array(z.instanceof(ObjectId)),
+  labels: z.array(z.instanceof(ObjectId)).optional(),
   /** The time when the user was created */
   created_at: z.date(),
   /** The last time the user was updated */

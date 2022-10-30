@@ -118,7 +118,7 @@ function defaultItem<T>(
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 export const defaultEditorColors = (
   dimensions: Dimensions = { rows: 9, columns: 9, margins: undefined }
-) => defaultItem(null, dimensions);
+) => defaultItem(undefined, dimensions);
 export const defaultGameColors = (
   dimensions: Dimensions = { rows: 9, columns: 9, margins: undefined }
 ) => defaultItem([], dimensions);
