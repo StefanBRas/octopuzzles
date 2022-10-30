@@ -1,5 +1,6 @@
 const mongodb = require('mongodb');
 require('dotenv').config();
+const ObjectId = mongodb.ObjectId;
 
 const mongoClient = new mongodb.MongoClient(process.env.MONGODB_URI);
 const database = mongoClient.db('octopuzzles');
@@ -21,7 +22,7 @@ async function main() {
   await userCollection.insertMany(
     [
       {
-        _id: '62fc78f187990d5e158fb161',
+        _id: new ObjectId('62fc78f187990d5e158fb161'),
         email: 'admin@octopuzzles.com',
         created_at: date1,
         password:
@@ -32,7 +33,7 @@ async function main() {
         verified: true
       },
       {
-        _id: '62fc78f187990d5e158fb166',
+        _id: new ObjectId('62fc78f187990d5e158fb166'),
         email: 'dev@octopuzzles.com',
         created_at: date2,
         password:
@@ -48,211 +49,211 @@ async function main() {
 
   await labelCollection.insertMany([
     {
-      _id: '629a24cd969ba0fc6992b8b7',
+      _id: new ObjectId('629a24cd969ba0fc6992b8b7'),
       name: 'Killer',
       description:
         'Within each cage marked with dotted lines, no digit may repeat and the digits must sum to the number in the top left corner'
     },
     {
-      _id: '629a67186f15be1062aededa',
+      _id: new ObjectId('629a67186f15be1062aededa'),
       name: 'Sandwich',
       description:
         'Clues outside the grid inidicate the sum of the digits between 1 and 9 in that row or column'
     },
     {
-      _id: '629a691a6f15be1062aededb',
+      _id: new ObjectId('629a691a6f15be1062aededb'),
       name: 'Thermo',
       description: 'Digits along a thermometer must strictly increase from bulb to tip'
     },
     {
-      _id: '629a69506f15be1062aededc',
+      _id: new ObjectId('629a69506f15be1062aededc'),
       name: 'Irregular',
       description:
         'Fill each row, column and indicated region with the digits 1 to 9 so that no digit appears twice'
     },
     {
-      _id: '629a6a0d6f15be1062aededd',
+      _id: new ObjectId('629a6a0d6f15be1062aededd'),
       name: 'Little Killer',
       description:
         'Digits along marked diagonals must sum to the indicated total. Digits can repeat if allowed by other rules'
     },
     {
-      _id: '629a6a596f15be1062aedede',
+      _id: new ObjectId('629a6a596f15be1062aedede'),
       name: 'Magic Square',
       description:
         'Digits in the indicated region must form a magic square, with each row, column and diagonal summing to the same total'
     },
     {
-      _id: '629a6bb06f15be1062aededf',
+      _id: new ObjectId('629a6bb06f15be1062aededf'),
       name: 'Arrow',
       description: 'Digits along an arrow must sum to the number in the attached circle'
     },
     {
-      _id: '629a6bf96f15be1062aedee0',
+      _id: new ObjectId('629a6bf96f15be1062aedee0'),
       name: 'Classic',
       description:
         'Fill each row, column and 3x3 box with the digits 1 to 9 so that no digit appears twice'
     },
     {
-      _id: '629a73306f15be1062aedee1',
+      _id: new ObjectId('629a73306f15be1062aedee1'),
       name: '6x6',
       description:
         'Fill each row, column and 3x2 box with the digits 1 to 6 so that no digit appears twice'
     },
     {
-      _id: '629a738b6f15be1062aedee2',
+      _id: new ObjectId('629a738b6f15be1062aedee2'),
       name: 'Diagonal',
       description: 'Digits may not repeat along the indicated diagonal'
     },
     {
-      _id: '629a73b96f15be1062aedee3',
+      _id: new ObjectId('629a73b96f15be1062aedee3'),
       name: 'Multi',
       description:
         'Fill each grid like a regular sudoku. The overlaps should fulfill all rules as well.'
     },
     {
-      _id: '629a74f86f15be1062aedee4',
+      _id: new ObjectId('629a74f86f15be1062aedee4'),
       name: 'Anti-King',
       description: 'Diagonally adjacent cells cannot contain the same digit'
     },
     {
-      _id: '629a75196f15be1062aedee5',
+      _id: new ObjectId('629a75196f15be1062aedee5'),
       name: 'Kropki',
       description:
         'Digits in cells separated by a white dot must be consecutive. Digits separated by a black dot must have a ratio of 2:1'
     },
     {
-      _id: '629a757f6f15be1062aedee6',
+      _id: new ObjectId('629a757f6f15be1062aedee6'),
       name: 'German Whispers',
       description: 'Adjacent digits along a line must differ by at least 5'
     },
     {
-      _id: '629a75af6f15be1062aedee7',
+      _id: new ObjectId('629a75af6f15be1062aedee7'),
       name: 'Renban',
       description:
         'Digits along a line must form a set of consecutive digits in any order, with no repeats'
     },
     {
-      _id: '629a760f6f15be1062aedee8',
+      _id: new ObjectId('629a760f6f15be1062aedee8'),
       name: 'Palindromes',
       description: 'Digits along a line read the same from either direction'
     },
     {
-      _id: '629a76626f15be1062aedee9',
+      _id: new ObjectId('629a76626f15be1062aedee9'),
       name: 'XV',
       description:
         'Digits in cells separated by an X must sum to 10. Digits in cells separated by a V must sum to 5'
     },
     {
-      _id: '629a768a6f15be1062aedeea',
+      _id: new ObjectId('629a768a6f15be1062aedeea'),
       name: 'Non-consecutive',
       description: 'Orthogonally adjacent cells cannot contain consecutive digits'
     },
     {
-      _id: '629a770a6f15be1062aedeeb',
+      _id: new ObjectId('629a770a6f15be1062aedeeb'),
       name: 'Quadruple',
       description:
         'Each digit inside a white circle must appear in at least one of the four surrounding cells'
     },
     {
-      _id: '629a77326f15be1062aedeec',
+      _id: new ObjectId('629a77326f15be1062aedeec'),
       name: 'Anti-Knights',
       description: "Cells separated by a knight's move (in chess) cannot contain the same digit"
     },
     {
-      _id: '629a77b26f15be1062aedeed',
+      _id: new ObjectId('629a77b26f15be1062aedeed'),
       name: 'Odd/Even',
       description: 'Digits on gray squares must be even, digits on gray circles must be odd'
     },
     {
-      _id: '629a78316f15be1062aedeee',
+      _id: new ObjectId('629a78316f15be1062aedeee'),
       name: 'Skyscraper',
       description:
         'Assuming each cell is filled with a tower block of the height of its digit, clues outside the grid show how many blocks can be seen from that direction'
     },
     {
-      _id: '62a1edadec9dcb7d01cd4b2c',
+      _id: new ObjectId('62a1edadec9dcb7d01cd4b2c'),
       name: 'Between Lines',
       description:
         'Digits along a line must be strictly between the numbers in the two connected circles'
     },
     {
-      _id: '62a1ede1ec9dcb7d01cd4b2d',
+      _id: new ObjectId('62a1ede1ec9dcb7d01cd4b2d'),
       name: 'X-Sums',
       description:
         'Clues outside of the grid indicate the sum of the first n digits in the indicated row/column, where n is the digit in the first cell seen in that direction'
     },
     {
-      _id: '62a1ee0dec9dcb7d01cd4b2e',
+      _id: new ObjectId('62a1ee0dec9dcb7d01cd4b2e'),
       name: 'Min/Max',
       description:
         'Digits in marked cells must be greater than/less than all orthogonally connected cells as indicated'
     },
     {
-      _id: '62a1ee1cec9dcb7d01cd4b2f',
+      _id: new ObjectId('62a1ee1cec9dcb7d01cd4b2f'),
       name: 'Disjoint Sets',
       description: 'Digits must appear in different positions in each 3x3 box'
     },
     {
-      _id: '62a1ee30ec9dcb7d01cd4b30',
+      _id: new ObjectId('62a1ee30ec9dcb7d01cd4b30'),
       name: 'Anti-Factor Lines',
       description:
         'Digits along a line of length n may not be any multiple or factor of n other than 1, and must sum to a multiple of n. Digits may repeat on a line if permitted by other rules.'
     },
     {
-      _id: '62a1ee47ec9dcb7d01cd4b31',
+      _id: new ObjectId('62a1ee47ec9dcb7d01cd4b31'),
       name: 'S-Cells',
       description:
         'Fill each row, column and 3x3 box with the digits 0 to 9 so that no digit appears twice. To enable this, there is a single Schrödinger cell in each box, containing two different digits.'
     },
     {
-      _id: '62a1ee54ec9dcb7d01cd4b32',
+      _id: new ObjectId('62a1ee54ec9dcb7d01cd4b32'),
       name: 'Equal Sum Lines',
       description:
         'Digits along a line must sum to the same total in each region the line passes through. Each time a line passes through a region should be considered as a separate total'
     },
     {
-      _id: '62a1ee67ec9dcb7d01cd4b33',
+      _id: new ObjectId('62a1ee67ec9dcb7d01cd4b33'),
       name: ' Lockout Lines',
       description:
         'Digits along a line must not lie between the numbers in the two connected diamonds'
     },
     {
-      _id: '62b069206b2453b16ba1ce8b',
+      _id: new ObjectId('62b069206b2453b16ba1ce8b'),
       name: 'Inequalities',
       description:
         'Digits in cells separated by an inequality sign should have the indicated relationship'
     },
     {
-      _id: '62b06a796b2453b16ba1ce8c',
+      _id: new ObjectId('62b06a796b2453b16ba1ce8c'),
       name: 'Numbered Rooms',
       description:
         'Digits outside of the grid appear in the nth position in the indicated row/column, where n is the digit in the first cell seen in that direction'
     },
     {
-      _id: '62b06bac6b2453b16ba1ce8d',
+      _id: new ObjectId('62b06bac6b2453b16ba1ce8d'),
       name: 'Extra Region',
       description: 'Digits may not repeat in the indicated region'
     },
     {
-      _id: '62b06bc16b2453b16ba1ce8e',
+      _id: new ObjectId('62b06bc16b2453b16ba1ce8e'),
       name: 'Clone',
       description: 'The highlighted cells contain identical digits in identical positions'
     },
     {
-      _id: '62b06bd16b2453b16ba1ce8f',
+      _id: new ObjectId('62b06bd16b2453b16ba1ce8f'),
       name: '159',
       description:
         'In each row, the digit in column 1 indicates the position of the 1 in that row. Similarly, the positions of 5s and 9s are given by the digits in column 5 and 9 respectively'
     },
     {
-      _id: '62b06be76b2453b16ba1ce90',
+      _id: new ObjectId('62b06be76b2453b16ba1ce90'),
       name: 'Cycles',
       description:
         "Cells form a horizontal cycle of length n within a row if, by repeatedly jumping to the column indicated by each cell's digit, it takes n jumps to return to the starting position, e.g. C2=4 -> C4=1 -> C1=9 -> C9=2 -> C2=4. A vertical cycle within a column is defined in a similar way"
     },
     {
-      _id: '62b06bfa6b2453b16ba1ce91',
+      _id: new ObjectId('62b06bfa6b2453b16ba1ce91'),
       name: 'Chaos Construction',
       description: 'Digits may not repeat in any region; regions are to be determined by the solver'
     }
@@ -262,8 +263,8 @@ async function main() {
 
   await sudokuCollection.insertMany([
     {
-      _id: '6287e0af33cf710c1cc89a9c',
-      user_id: '62fc78f187990d5e158fb161',
+      _id: new ObjectId('6287e0af33cf710c1cc89a9c'),
+      user_id: new ObjectId('62fc78f187990d5e158fb161'),
       public_since: date1,
       title: 'Killercage sudoku',
       description:
@@ -615,12 +616,12 @@ async function main() {
       ],
       created_at: date1,
       updated_at: date1,
-      labels: ['629a24cd969ba0fc6992b8b7'],
+      labels: [new ObjectId('629a24cd969ba0fc6992b8b7')],
       solution: null
     },
     {
-      _id: '628bcb11bdf8e35d7801d9db',
-      user_id: '62fc78f187990d5e158fb166',
+      _id: new ObjectId('628bcb11bdf8e35d7801d9db'),
+      user_id: new ObjectId('62fc78f187990d5e158fb166'),
       public_since: date2,
       title: '6x6 sudoku',
       description:
@@ -727,11 +728,11 @@ async function main() {
           ['5', '3', '1', '6', '4', '2']
         ]
       },
-      labels: ['629a73306f15be1062aedee1']
+      labels: [new ObjectId('629a73306f15be1062aedee1')]
     },
     {
-      _id: '62912c3097364fc894f7552e',
-      user_id: '62911f6097364fc894f7552c',
+      _id: new ObjectId('62912c3097364fc894f7552e'),
+      user_id: new ObjectId('62911f6097364fc894f7552c'),
       public_since: date3,
       title: 'Harrowing Journey',
       description:

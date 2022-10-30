@@ -165,7 +165,9 @@ export default trpc
       id: z.string()
     }),
     resolve: async ({ input }) => {
+      console.log('Get user');
       const user = await userCollection.findOne({ _id: new ObjectId(input.id) });
+      console.log('Got user', user);
 
       return user;
     }
