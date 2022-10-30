@@ -109,7 +109,7 @@ export const PathValidator = z.object({
   positions: z.array(PositionValidator),
   type: PathTypeValidator.optional(),
   color: ColorValidator.optional(),
-  width: z.number().int(), // up to 100%
+  width: z.number().int().optional(), // up to 100%
   form: FormValidator.optional(),
   fill: FillValidator.optional(),
   arrow: z.boolean().optional()
