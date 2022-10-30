@@ -10,6 +10,7 @@
     "check:watch": "svelte-check --tsconfig ./tsconfig.json --watch",
     "lint": "prettier --ignore-path .eslintignore --check --plugin-search-dir=. . && eslint --ignore-path .eslintignore .",
     "format": "prettier --ignore-path .eslintignore --write --plugin-search-dir=. .",
+    "format:check": "prettier --ignore-path .eslintignore --check --plugin-search-dir=. .",
     "migrate:create": "migrate-mongo create -f migrations/migrate-mongo-config.js",
     "migrate:up": "migrate-mongo up -f migrations/migrate-mongo-config.js",
     "migrate:down": "migrate-mongo down -f migrations/migrate-mongo-config.js",

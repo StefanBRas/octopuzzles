@@ -320,15 +320,13 @@ module.exports = {
           sudoku.regions ?? (!isDefaultBorders(sudoku.borders, sudoku.dimensions) ? [] : undefined),
         extendedcages: getAllCages(sudoku.extendedcages, sudoku.killercages) ?? undefined
       };
-      await db
-        .collection('sudokus')
-        .updateOne(
-          { _id: sudoku._id },
-          {
-            $unset: { borders: '', killercages: '', cornerclues: '', symbols: '' },
-            $set: updatedSudoku
-          }
-        );
+      await db.collection('sudokus').updateOne(
+        { _id: sudoku._id },
+        {
+          $unset: { borders: '', killercages: '', cornerclues: '', symbols: '' },
+          $set: updatedSudoku
+        }
+      );
     }
   },
 
