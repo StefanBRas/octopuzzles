@@ -82,7 +82,9 @@ export default trpc
         throw new TRPCError({ code: 'NOT_FOUND' });
       }
       const user = await userCollection.findOne({ _id: sudoku?.user_id });
-      const labels = await labelCollection.find({ _id: { $in: sudoku?.labels ?? [] } }).toArray();
+      const labels = await labelCollection
+        .find({ _id: { $in: sudoku?.labels?.map((id) => new ObjectId(id)) ?? [] } })
+        .toArray();
       const userVote = userId != null ? await voteCollection.findOne({ user_id: userId }) : null;
 
       return {
@@ -133,7 +135,7 @@ export default trpc
   })
   .mutation('changePublicStatus', {
     input: z.object({
-      id: z.instanceof(ObjectId),
+      id: z.string(),
       public: z.boolean()
     }),
     resolve: async ({ input, ctx }) => {
@@ -142,13 +144,13 @@ export default trpc
         throw new TRPCError({ message: 'You are not logged in', code: 'UNAUTHORIZED' });
       }
       // First check if the user has permission to update the sudoku.
-      const sudoku = await sudokuCollection.findOne({ _id: input.id });
+      const sudoku = await sudokuCollection.findOne({ _id: new ObjectId(input.id) });
       if (sudoku == null) {
         throw new TRPCError({
           message: 'We could not find the sudoku you are trying to update',
           code: 'BAD_REQUEST'
         });
-      } else if (sudoku.user_id !== jwtToken._id) {
+      } else if (sudoku.user_id?.toString() !== jwtToken._id.toString()) {
         throw new TRPCError({
           message: 'You are not allowed to edit this sudoku',
           code: 'UNAUTHORIZED'
@@ -177,7 +179,11 @@ export default trpc
       try {
         session.startTransaction();
 
-        await sudokuCollection.updateOne({ _id: input.id }, { $set: newSudoku }, { session });
+        await sudokuCollection.updateOne(
+          { _id: new ObjectId(input.id) },
+          { $set: newSudoku },
+          { session }
+        );
 
         if (shouldDeleteVotes) {
           await voteCollection.deleteMany({ sudoku_id: sudoku._id }, { session });
@@ -258,12 +264,16 @@ export default trpc
         points: 0
       };
 
-      const labels = await labelCollection.countDocuments({ _id: { $in: input.sudoku.labels } });
-      if (labels !== input.sudoku.labels.length) {
-        throw new TRPCError({
-          message: 'One of the specified labels does not exist',
-          code: 'BAD_REQUEST'
+      if (input.sudoku.labels != null) {
+        const labels = await labelCollection.countDocuments({
+          _id: { $in: input.sudoku.labels.map((id) => new ObjectId(id)) }
         });
+        if (labels !== input.sudoku.labels.length) {
+          throw new TRPCError({
+            message: 'One of the specified labels does not exist',
+            code: 'BAD_REQUEST'
+          });
+        }
       }
 
       const s = await sudokuCollection.insertOne(sudoku);
@@ -302,7 +312,7 @@ export default trpc
 
       if (input.sudokuUpdates.labels != null) {
         const labels = await labelCollection.countDocuments({
-          _id: { $in: input.sudokuUpdates.labels }
+          _id: { $in: input.sudokuUpdates.labels.map((id) => new ObjectId(id)) }
         });
         if (labels !== input.sudokuUpdates.labels.length) {
           throw new TRPCError({

@@ -234,7 +234,7 @@ export type Cells = z.infer<typeof CellsValidator>;
 export const GivensValidator = z.array(z.array(z.string()));
 export type Givens = z.infer<typeof GivensValidator>;
 
-export const EditorColorsValidator = z.array(z.array(ColorValidator.optional()));
+export const EditorColorsValidator = z.array(z.array(ColorValidator.nullable()));
 export type EditorColors = z.infer<typeof EditorColorsValidator>;
 
 export const RegionsValidator = z.array(RegionValidator);
@@ -291,7 +291,7 @@ export const SudokuValidator = z.object({
   /** The solution to the puzzle if any is given */
   solution: SolutionValidator.optional(),
   /** A list of labels on this sudoku */
-  labels: z.array(z.instanceof(ObjectId)).optional(),
+  labels: z.array(z.instanceof(ObjectId)).optional().or(z.array(z.string()).optional()),
   /** The time when the user was created */
   created_at: z.date(),
   /** The last time the user was updated */
@@ -306,6 +306,9 @@ export const NewSudokuValidator = SudokuValidator.omit({
   rank: true,
   points: true,
   public_since: true,
-  solution: true
+  solution: true,
+  labels: true
+}).extend({
+  labels: z.array(z.string()).optional()
 });
 export const UpdateSudokuValidator = NewSudokuValidator.partial();

@@ -47,7 +47,7 @@
     if (id) {
       try {
         const res = await trpc().mutation('sudokus:changePublicStatus', {
-          id,
+          id: id.toString(),
           public: make_public
         });
         isPublic = res;
@@ -78,7 +78,7 @@
     $labels =
       data.labels.map((l) => ({
         label: l,
-        selected: sud?.labels?.includes(l._id) ?? false
+        selected: sud?.labels?.includes(l._id as any) ?? false
       })) ?? [];
     if (sud != null) {
       $sudokuTitle = sud.title;
@@ -170,7 +170,7 @@
           extendedcages: $cages,
           paths: $paths,
           logic: $logic,
-          labels: $labels.filter((l) => l.selected).map((l) => l.label._id)
+          labels: $labels.filter((l) => l.selected).map((l) => l.label._id.toString())
         }
       });
 
@@ -218,13 +218,13 @@
           extendedcages: $cages,
           paths: $paths,
           logic: $logic,
-          labels: $labels.filter((l) => l.selected).map((l) => l.label._id)
+          labels: $labels.filter((l) => l.selected).map((l) => l.label._id.toString())
         }
       });
 
       if (updatedSudoku != null) {
         id = updatedSudoku._id;
-        await saveSolution(id);
+        await saveSolution(updatedSudoku._id);
 
         if ($walkthroughStore.length > 0) {
           await createOrUpdateWalkthrough({
