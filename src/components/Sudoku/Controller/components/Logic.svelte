@@ -100,8 +100,8 @@
         <div>
           <Checkbox
             bind:checked={antiking}
-            label={logicFlagNames.Antiknight}
-            on:change={() => toggleFlag('Antiknight')}
+            label={logicFlagNames.Antiking}
+            on:change={() => toggleFlag('Antiking')}
           />
         </div>
         <div>
