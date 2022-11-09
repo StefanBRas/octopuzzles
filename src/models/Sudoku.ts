@@ -234,7 +234,7 @@ export type Cells = z.infer<typeof CellsValidator>;
 export const GivensValidator = z.array(z.array(z.string()));
 export type Givens = z.infer<typeof GivensValidator>;
 
-export const EditorColorsValidator = z.array(z.array(ColorValidator.nullable()));
+export const EditorColorsValidator = z.array(z.array(ColorValidator.optional()));
 export type EditorColors = z.infer<typeof EditorColorsValidator>;
 
 export const RegionsValidator = z.array(RegionValidator);
