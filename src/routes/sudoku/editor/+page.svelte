@@ -14,7 +14,7 @@
   import { page } from '$app/stores';
   import { openModal } from '$stores/modalStore';
   import CommonDescriptionsModal from '$components/Sudoku/CommonDescriptionsModal.svelte';
-  import { Plus } from 'phosphor-svelte';
+  import Plus from 'phosphor-svelte/lib/Plus/Plus.svelte';
   import { getUserSolution } from '$utils/getSolution';
   import {
     description,
@@ -45,15 +45,11 @@
   async function changeUpdateStatus(make_public: boolean): Promise<void> {
     loading = true;
     if (id) {
-      try {
-        const res = await trpc().mutation('sudokus:changePublicStatus', {
-          id: id.toString(),
-          public: make_public
-        });
-        isPublic = res;
-      } catch (e) {
-        console.error(e);
-      }
+      const res = await trpc().mutation('sudokus:changePublicStatus', {
+        id: id.toString(),
+        public: make_public
+      });
+      isPublic = res;
     }
     loading = false;
   }
@@ -68,7 +64,10 @@
     if (provideSolution) {
       solution = { numbers: getUserSolution({ givens: $givens, values: $values }) };
     }
-    await trpc().mutation('sudokus:provideSolutionToPuzzle', { sudokuId: id, solution });
+    await trpc().mutation('sudokus:provideSolutionToPuzzle', {
+      sudokuId: id.toString(),
+      solution
+    });
   }
 
   onMount(async () => {
@@ -189,7 +188,6 @@
         }
       }
     } catch (e) {
-      console.error(e);
       if (Array.isArray(e)) {
         e.forEach((error) => (errors.sudoku = error.message));
       }
