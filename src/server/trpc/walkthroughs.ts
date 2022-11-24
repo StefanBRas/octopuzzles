@@ -1,4 +1,4 @@
-import { WalkthroughValidator } from '$models/Walkthrough';
+import { WalkthroughStepValidator, WalkthroughValidator } from '$models/Walkthrough';
 import { getJwt } from '$utils/jwt/getJwt';
 import * as trpc from '@trpc/server';
 import { TRPCError } from '@trpc/server';
@@ -49,17 +49,17 @@ export default trpc
     }
   })
   .mutation('createOrUpdate', {
-    input: WalkthroughValidator.pick({ sudoku_id: true, steps: true }),
+    input: z.object({ sudoku_id: z.string(), steps: z.array(WalkthroughStepValidator) }),
     resolve: async ({ input, ctx }) => {
       const jwtToken = getJwt(ctx);
       if (jwtToken == null) {
         throw new TRPCError({ message: 'You are not logged in', code: 'UNAUTHORIZED' });
       }
-      const sudoku = await sudokuCollection.findOne({ _id: input.sudoku_id });
+      const sudoku = await sudokuCollection.findOne({ _id: new ObjectId(input.sudoku_id) });
 
       if (sudoku == null) {
         throw new TRPCError({ message: 'This sudoku does not exist', code: 'BAD_REQUEST' });
-      } else if (sudoku.user_id !== jwtToken._id) {
+      } else if (sudoku.user_id?.toString() !== jwtToken._id.toString()) {
         throw new TRPCError({
           message: 'At the moment, only the creators of sudokus are allowed to make walkthroughs',
           code: 'UNAUTHORIZED'
@@ -67,21 +67,21 @@ export default trpc
       }
 
       const walkthrough = await walkthroughCollection.findOne({
-        sudoku_id: input.sudoku_id,
+        sudoku_id: new ObjectId(input.sudoku_id),
         user_id: jwtToken._id
       });
 
       if (walkthrough != null) {
         await walkthroughCollection.updateOne(
           {
-            sudoku_id: input.sudoku_id,
+            sudoku_id: new ObjectId(input.sudoku_id),
             user_id: jwtToken._id
           },
           { $set: { steps: input.steps } }
         );
       } else {
         await walkthroughCollection.insertOne({
-          sudoku_id: input.sudoku_id,
+          sudoku_id: new ObjectId(input.sudoku_id),
           user_id: jwtToken._id,
           steps: input.steps
         });

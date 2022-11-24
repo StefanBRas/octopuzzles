@@ -8,6 +8,10 @@
 
   export let editable = false;
   export let isOpen: boolean;
+  export let onClose: () => void;
+  $: if (!isOpen) {
+    onClose();
+  }
   let givens = editorHistory.getClue('givens');
   let borderclues = editorHistory.getClue('borderclues');
   let cellclues = editorHistory.getClue('cellclues');
