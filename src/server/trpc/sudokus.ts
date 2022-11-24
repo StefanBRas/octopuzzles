@@ -199,7 +199,7 @@ export default trpc
   })
   .mutation('provideSolutionToPuzzle', {
     input: z.object({
-      sudokuId: z.instanceof(ObjectId),
+      sudokuId: z.string(),
       solution: SolutionValidator.optional()
     }),
     resolve: async ({ input, ctx }) => {
@@ -208,13 +208,13 @@ export default trpc
         throw new TRPCError({ message: 'You are not logged in', code: 'UNAUTHORIZED' });
       }
       // First check if the user has permission to make a solution for the sudoku.
-      const sudoku = await sudokuCollection.findOne({ _id: input.sudokuId });
+      const sudoku = await sudokuCollection.findOne({ _id: new ObjectId(input.sudokuId) });
       if (sudoku == null) {
         throw new TRPCError({
           message: 'We could not find the sudoku you are trying to update',
           code: 'BAD_REQUEST'
         });
-      } else if (sudoku.user_id == null || sudoku.user_id != jwtToken._id) {
+      } else if (sudoku.user_id == null || sudoku.user_id.toString() !== jwtToken._id.toString()) {
         throw new TRPCError({
           message: 'You are not allowed to provide a solution to this sudoku',
           code: 'BAD_REQUEST'
@@ -224,7 +224,7 @@ export default trpc
       if (input.solution == null) {
         // delete solution from sudoku
         const updatedSudoku = await sudokuCollection.findOneAndUpdate(
-          { _id: input.sudokuId },
+          { _id: new ObjectId(input.sudokuId) },
           { $unset: { solution: '' } },
           { returnDocument: 'after' }
         );
@@ -235,7 +235,7 @@ export default trpc
         validateCorrectDimension(input.solution.numbers, sudoku.dimensions, 'solution');
 
         const updatedSudoku = await sudokuCollection.findOneAndUpdate(
-          { _id: input.sudokuId },
+          { _id: new ObjectId(input.sudokuId) },
           { $set: { solution: input.solution } },
           { returnDocument: 'after' }
         );
@@ -284,7 +284,7 @@ export default trpc
   })
   .mutation('update', {
     input: z.object({
-      id: z.instanceof(ObjectId),
+      id: z.string(),
       sudokuUpdates: UpdateSudokuValidator
     }),
     resolve: async ({ input, ctx }) => {
@@ -293,13 +293,16 @@ export default trpc
         throw new TRPCError({ message: 'You are not logged in', code: 'UNAUTHORIZED' });
       }
       // First check if the user has permission to update the sudoku.
-      const oldSudoku = await sudokuCollection.findOne({ _id: input.id });
+      const oldSudoku = await sudokuCollection.findOne({ _id: new ObjectId(input.id) });
       if (oldSudoku == null) {
         throw new TRPCError({
           message: 'We could not find the sudoku you are trying to update',
           code: 'BAD_REQUEST'
         });
-      } else if (oldSudoku.user_id == null || oldSudoku.user_id !== jwtToken._id) {
+      } else if (
+        oldSudoku.user_id == null ||
+        oldSudoku.user_id.toString() !== jwtToken._id.toString()
+      ) {
         throw new TRPCError({
           message: 'You are not allowed to edit this sudoku',
           code: 'BAD_REQUEST'
@@ -324,7 +327,7 @@ export default trpc
       // User has permission to edit the sudoku
 
       const updatedSudoku = await sudokuCollection.findOneAndUpdate(
-        { _id: input.id },
+        { _id: new ObjectId(input.id) },
         { $set: input.sudokuUpdates },
         { returnDocument: 'after' }
       );

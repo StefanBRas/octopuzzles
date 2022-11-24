@@ -14,7 +14,7 @@
   import { page } from '$app/stores';
   import { openModal } from '$stores/modalStore';
   import CommonDescriptionsModal from '$components/Sudoku/CommonDescriptionsModal.svelte';
-  import { Plus } from 'phosphor-svelte';
+  import Plus from 'phosphor-svelte/lib/Plus/Plus.svelte';
   import { getUserSolution } from '$utils/getSolution';
   import {
     description,
@@ -68,7 +68,7 @@
     if (provideSolution) {
       solution = { numbers: getUserSolution({ givens: $givens, values: $values }) };
     }
-    await trpc().mutation('sudokus:provideSolutionToPuzzle', { sudokuId: id, solution });
+    await trpc().mutation('sudokus:provideSolutionToPuzzle', { sudokuId: id.toString(), solution });
   }
 
   onMount(async () => {
