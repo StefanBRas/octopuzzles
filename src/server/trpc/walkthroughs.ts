@@ -1,4 +1,4 @@
-import { WalkthroughStepValidator, WalkthroughValidator } from '$models/Walkthrough';
+import { WalkthroughStepValidator } from '$models/Walkthrough';
 import { getJwt } from '$utils/jwt/getJwt';
 import * as trpc from '@trpc/server';
 import { TRPCError } from '@trpc/server';

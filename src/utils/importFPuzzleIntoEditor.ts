@@ -355,7 +355,7 @@ export function importFPuzzleIntoEditorHistory(fpuzzle: FPuzzlesJson): void {
       newEditorHistory.borderclues = newBorderclues;
       newEditorHistory.cellclues = newCellclues;
     },
-    clock: (object) => {},
+    clock: () => {},
     clone: (fpuzzleClones) => {
       const newRegions = deepCopy(newEditorHistory.regions);
 
@@ -693,7 +693,7 @@ export function importFPuzzleIntoEditorHistory(fpuzzle: FPuzzlesJson): void {
 
       newGameHistory.values = newSolution;
     },
-    'sumdot(intersection)': (object) => {},
+    'sumdot(intersection)': () => {},
     text: (fpuzzleText) => {
       const newCellclues = deepCopy(newEditorHistory.cellclues);
       const newBorderclues = deepCopy(newEditorHistory.borderclues);

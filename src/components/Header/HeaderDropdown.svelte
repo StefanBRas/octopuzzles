@@ -9,13 +9,9 @@
   import { me } from '$stores/meStore';
   import { onMount } from 'svelte';
 
-  let loading = false;
-
   async function getMe() {
-    loading = true;
     const res = await trpc().query('users:me');
     me.set(res);
-    loading = false;
   }
 
   onMount(() => {

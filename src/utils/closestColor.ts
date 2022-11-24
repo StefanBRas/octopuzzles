@@ -64,7 +64,7 @@ const colors: [Color, Rgb][] = [
 export function closestColor(color: HexColor): Color {
   const rgb1 = convertToRGB(color);
 
-  let closest = colors[0][0];
+  let closest: Color = colors[0][0];
   let closestDistance = 100000000;
 
   for (const [color, rgb2] of colors) {
