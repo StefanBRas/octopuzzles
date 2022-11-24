@@ -22,6 +22,15 @@
   let paths = editorHistory.getClue('paths');
   let dimensions = editorHistory.getClue('dimensions');
   let logic = editorHistory.getClue('logic');
+
+  function updateStepDescription(
+    step: number,
+    e: Event & {
+      currentTarget: EventTarget & HTMLTextAreaElement;
+    }
+  ): void {
+    walkthroughStore.changeDescriptionOfStep(step, (e.target as any)?.value);
+  }
 </script>
 
 {#if isOpen}
@@ -74,7 +83,7 @@
         <div class="w-1/2 h-full">
           {#if editable}
             <textarea
-              on:change={(e) => walkthroughStore.changeDescriptionOfStep(i, e.target.value)}
+              on:change={(e) => updateStepDescription(i, e)}
               class="border border-gray-300 py-2 px-4 leading-5 rounded-md w-full focus:ring focus:ring-blue-300 focus:border-blue-500 disabled:bg-gray-200 h-full"
               placeholder="Add a description"
               value={description}

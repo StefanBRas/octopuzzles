@@ -157,7 +157,10 @@
       if (i !== $selectedItemIndex) {
         newBorderClues = [...newBorderClues, borderClue];
       } else {
-        newBorderClues = [...newBorderClues, newBorderClue(borderClue.positions)];
+        newBorderClues = [
+          ...newBorderClues,
+          newBorderClue(borderClue.positions as [Position, Position])
+        ];
 
         if (type !== borderClue.type) {
           addLabel();

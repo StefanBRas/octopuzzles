@@ -31,7 +31,7 @@ export default trpc
       labels: z.array(z.instanceof(ObjectId)),
       limit: z.number().min(1).max(100).nullish(),
       cursor: z.date().nullish(),
-      userId: z.string().optional()
+      userId: z.string().nullish()
     }),
     resolve: async ({ input }) => {
       const limit = input.limit ?? 24;
@@ -200,7 +200,7 @@ export default trpc
   .mutation('provideSolutionToPuzzle', {
     input: z.object({
       sudokuId: z.string(),
-      solution: SolutionValidator.optional()
+      solution: SolutionValidator.nullish()
     }),
     resolve: async ({ input, ctx }) => {
       const jwtToken = getJwt(ctx);

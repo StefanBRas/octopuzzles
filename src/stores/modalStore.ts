@@ -58,7 +58,7 @@ export function closeModal(): void {
 /**
  * Opens a new modal
  */
-export function openModal<T>(
+export function openModal<T extends Record<string, any>>(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   component: new (...args: any) => SvelteComponentTyped<T>,
   props?: Omit<T, 'isOpen'>,

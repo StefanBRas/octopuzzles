@@ -11,7 +11,7 @@
   function handleKeyDown(k: KeyboardEvent): void {
     if (isDeleteKey(k)) {
       k.preventDefault();
-      handleClick(null);
+      handleClick(undefined);
     } else if (['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'].includes(k.key)) {
       handleClick(numberColorMap[Number(k.key)]);
     }
@@ -41,14 +41,14 @@
           if (newColors[position.row][position.column] == null) return;
 
           // Delete the value in the cell
-          newColors[position.row][position.column] = null;
+          newColors[position.row][position.column] = undefined;
           anyChanges = true;
         } else {
           // We are putting some number in the cell
 
           // If the cell already contains the number, delete it
           if (newColors[position.row][position.column] === newColor) {
-            newColors[position.row][position.column] = null;
+            newColors[position.row][position.column] = undefined;
             anyChanges = true;
           } else {
             // Insert the number
@@ -87,7 +87,7 @@
     {/each}
 
     <div class="col-span-2">
-      <SquareButton on:click={() => handleClick(null)} title="Backspace" class="w-36 p-3">
+      <SquareButton on:click={() => handleClick(undefined)} title="Backspace" class="w-36 p-3">
         <Backspace size={32} />
       </SquareButton>
     </div>

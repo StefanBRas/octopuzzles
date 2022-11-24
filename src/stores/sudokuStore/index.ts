@@ -142,7 +142,7 @@ function createEditorHistoryStore() {
       let newColor = newColors[cell.row]?.[cell.column];
       if (newColor != null) {
         changes = true;
-        newColor = null;
+        newColor = undefined;
       }
     });
     if (changes) {
@@ -463,7 +463,7 @@ export function setMargins(margins?: Margins): void {
           };
         })
         .filter((clue) => isValidPosition(clue.position)),
-      editorcolors: offsetMatrix(editorColors, offsets, null),
+      editorcolors: offsetMatrix(editorColors, offsets, undefined),
       cages: cages
         .map((cage) => {
           return { ...cage, positions: offsetPositions(cage.positions, offsets) };
