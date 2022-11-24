@@ -183,7 +183,7 @@
 
         if ($walkthroughStore.length > 0) {
           await createOrUpdateWalkthrough({
-            sudoku_id: createdSudoku._id,
+            sudoku_id: createdSudoku._id.toString(),
             steps: $walkthroughStore
           });
         }
@@ -204,7 +204,7 @@
     errors = {};
     try {
       const updatedSudoku = await trpc().mutation('sudokus:update', {
-        id,
+        id: id.toString(),
         sudokuUpdates: {
           title: $sudokuTitle,
           description: $description,
@@ -228,7 +228,7 @@
 
         if ($walkthroughStore.length > 0) {
           await createOrUpdateWalkthrough({
-            sudoku_id: updatedSudoku._id,
+            sudoku_id: updatedSudoku._id.toString(),
             steps: $walkthroughStore
           });
         } else {
