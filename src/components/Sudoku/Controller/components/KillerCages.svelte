@@ -107,7 +107,7 @@
 
   function addLabel() {
     if (type !== 'CUSTOM') {
-      const label = $labels.find((l) => l.label.name === cageTypesToLabel[type]);
+      const label = $labels.find((l) => l.label.name === cageTypesToLabel[type as CageType]);
       if (label) {
         label.selected = true;
       }

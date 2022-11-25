@@ -36,6 +36,7 @@
   import { onDestroy } from 'svelte';
   import type {
     Cellclue,
+    CellClueLocation,
     CellClueSize,
     CellClueType,
     Position,
@@ -76,7 +77,7 @@
     'InvertedArrowhead'
   ];
 
-  const cellClueLocations = [
+  const cellClueLocations: CellClueLocation[] = [
     'TopLeft',
     'Top',
     'TopRight',
@@ -203,7 +204,9 @@
 
   function addLabel() {
     if (type !== 'CUSTOM') {
-      const label = $labels.find((l) => l.label.name === cellClueTypesToLabel[type]);
+      const label = $labels.find(
+        (l) => l.label.name === cellClueTypesToLabel[type as CellClueType]
+      );
       if (label) {
         label.selected = true;
       }

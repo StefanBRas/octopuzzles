@@ -133,7 +133,7 @@
 
   function addLabel() {
     if (type !== 'CUSTOM') {
-      const label = $labels.find((l) => l.label.name === regionTypesToLabel[type]);
+      const label = $labels.find((l) => l.label.name === regionTypesToLabel[type as RegionType]);
       if (label) {
         label.selected = true;
       }

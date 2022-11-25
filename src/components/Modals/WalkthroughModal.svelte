@@ -29,6 +29,7 @@
       currentTarget: EventTarget & HTMLTextAreaElement;
     }
   ): void {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     walkthroughStore.changeDescriptionOfStep(step, (e.target as any)?.value);
   }
 </script>
