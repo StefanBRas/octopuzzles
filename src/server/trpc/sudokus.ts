@@ -23,15 +23,16 @@ import {
   validateCorrectDimensionsOfSudokuClues
 } from '$utils/validation';
 import { getJwt } from '$utils/jwt/getJwt';
+import type { Label } from '$models/Label';
 
 export default trpc
   .router<TRPCContext>()
   .query('search', {
     input: z.object({
-      labels: z.array(z.instanceof(ObjectId)),
-      limit: z.number().min(1).max(100).nullish(),
+      labels: z.array(z.string()),
+      limit: z.number().min(1).max(100).optional(),
       cursor: z.date().nullish(),
-      userId: z.string().nullish()
+      userId: z.string().optional()
     }),
     resolve: async ({ input }) => {
       const limit = input.limit ?? 24;
@@ -40,7 +41,7 @@ export default trpc
         filter.public_since = { ...filter.public_since, $lt: input.cursor };
       }
       if (input.labels.length > 0) {
-        filter.labels = { $in: input.labels };
+        filter.labels = { $in: input.labels.map((l) => new ObjectId(l)) };
       }
       if (input.userId != null) {
         filter.user_id = { $eq: new ObjectId(input.userId) };
@@ -48,20 +49,27 @@ export default trpc
       const sudokusAgg = (await sudokuCollection
         .aggregate([
           { $match: filter },
-          { $lookup: { from: 'users', localField: 'user_id', foreignField: '_id', as: 'creator' } }
+          { $lookup: { from: 'users', localField: 'user_id', foreignField: '_id', as: 'creator' } },
+          {
+            $lookup: { from: 'labels', localField: 'labels', foreignField: '_id', as: 'fullLabels' }
+          }
         ])
         .sort({ public_since: -1 })
         .limit(limit + 1)
-        .toArray()) as (WithId<Sudoku> & { creator: WithId<User>[] })[];
+        .toArray()) as (WithId<Sudoku> & {
+        creator: WithId<User>[];
+        fullLabels: WithId<Label>[];
+      })[];
 
-      const sudokus: (WithId<Sudoku> & { creator?: WithId<User> })[] = sudokusAgg.map((sudoku) => {
-        return {
-          ...sudoku,
-          creator: sudoku.creator[0] ?? undefined
-        };
-      });
+      const sudokus: (WithId<Sudoku> & { creator?: WithId<User>; fullLabels: WithId<Label>[] })[] =
+        sudokusAgg.map((sudoku) => {
+          return {
+            ...sudoku,
+            creator: sudoku.creator[0] ?? undefined
+          };
+        });
 
-      let nextCursor: typeof input.cursor | undefined = undefined;
+      let nextCursor: typeof input.cursor | null | undefined = undefined;
       if (sudokus.length > limit) {
         const nextItem = sudokus.pop();
         nextCursor = nextItem?.public_since;
@@ -81,7 +89,9 @@ export default trpc
       if (sudoku == null) {
         throw new TRPCError({ code: 'NOT_FOUND' });
       }
-      const user = await userCollection.findOne({ _id: sudoku?.user_id });
+      const user = await userCollection.findOne({
+        _id: sudoku?.user_id ? new ObjectId(sudoku.user_id) : undefined
+      });
       const labels = await labelCollection
         .find({ _id: { $in: sudoku?.labels?.map((id) => new ObjectId(id)) ?? [] } })
         .toArray();
@@ -97,7 +107,7 @@ export default trpc
   })
   .mutation('delete', {
     input: z.object({
-      id: z.instanceof(ObjectId)
+      id: z.string()
     }),
     resolve: async ({ input, ctx }) => {
       const jwtToken = getJwt(ctx);

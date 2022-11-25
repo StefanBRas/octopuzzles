@@ -19,8 +19,12 @@
   import type { Sudoku } from '$models/Sudoku';
   import type { ObjectId, WithId } from 'mongodb';
   import type { User } from '$models/User';
+  import type { Label } from '$models/Label';
+  import PuzzleLabel from '$ui/PuzzleLabel.svelte';
 
-  export let sudokus: (WithId<Sudoku> & { creator?: WithId<User> })[] | null;
+  export let sudokus:
+    | (WithId<Sudoku> & { creator?: WithId<User>; fullLabels: WithId<Label>[] })[]
+    | null;
   export let hasNextPage: boolean;
   export let loading: boolean;
   export let loadNextPage: () => Promise<void>;
@@ -100,7 +104,7 @@
               {/if}
             </div>
 
-            <!-- <div class="h-8 w-full flex items-center overflow-y-hidden overflow-x-auto">
+            <div class="h-8 w-full flex items-center overflow-y-hidden overflow-x-auto">
               {#if sudoku.fullLabels}
                 <div class="flex gap-2">
                   {#each sudoku.fullLabels as label}
@@ -108,7 +112,7 @@
                   {/each}
                 </div>
               {/if}
-            </div> -->
+            </div>
           </div>
         </a>
       {/if}
