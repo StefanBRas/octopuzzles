@@ -142,7 +142,7 @@
 </script>
 
 <svelte:head>
-  <title>{status} | OctoPuzzles</title>
+  <title>{$page.status} | OctoPuzzles</title>
 </svelte:head>
 
 <div class="p-4">

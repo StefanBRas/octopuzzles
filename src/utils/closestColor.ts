@@ -22,12 +22,12 @@ function deltaE(rgbA: Rgb, rgbB: Rgb): number {
 }
 
 function rgb2lab(rgb: Rgb): [number, number, number] {
-  let r = rgb[0] / 255,
-    g = rgb[1] / 255,
-    b = rgb[2] / 255,
-    x,
-    y,
-    z;
+  let r = rgb[0] / 255;
+  let g = rgb[1] / 255;
+  let b = rgb[2] / 255;
+  let x: number;
+  let y: number;
+  let z: number;
   r = r > 0.04045 ? Math.pow((r + 0.055) / 1.055, 2.4) : r / 12.92;
   g = g > 0.04045 ? Math.pow((g + 0.055) / 1.055, 2.4) : g / 12.92;
   b = b > 0.04045 ? Math.pow((b + 0.055) / 1.055, 2.4) : b / 12.92;

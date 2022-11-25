@@ -50,6 +50,7 @@
   <g id="cellclues">
     {#each cellClues as editorClue}
       {#each getCellCluesToDraw(editorClue) as cellClue, index}
+        <!-- svelte-ignore a11y-click-events-have-key-events -->
         <g
           class={interactive ? 'cursor-pointer' : 'pointer-events-none'}
           on:click={() => {
@@ -73,7 +74,7 @@
               {cellClue.text}
             </text>
           {/if}
-          {#if cellClue.symbol}
+          {#if cellClue.symbol && cellClue.color}
             <svelte:component
               this={symbolsMap[cellClue.symbol]}
               x={cellClue.position.column * cellSize}
