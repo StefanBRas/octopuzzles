@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck
 export type HexColor = `#${string}`;
 export type PositionString = `R${number}C${number}`;
@@ -319,8 +320,8 @@ function _compress(
   getCharFromInt: (index: number) => string
 ): string {
   if (uncompressed == null) return '';
-  let i;
-  let value;
+  let i: number;
+  let value: number;
   const context_dictionary: Record<string, number> = {};
   const context_dictionaryToCreate: Record<string, boolean> = {};
   let context_c = '';
@@ -332,9 +333,8 @@ function _compress(
   const context_data = [];
   let context_data_val = 0;
   let context_data_position = 0;
-  let ii;
 
-  for (ii = 0; ii < uncompressed.length; ii++) {
+  for (let ii = 0; ii < uncompressed.length; ii++) {
     context_c = uncompressed.charAt(ii);
     if (!Object.prototype.hasOwnProperty.call(context_dictionary, context_c)) {
       context_dictionary[context_c] = context_dictSize++;

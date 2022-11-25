@@ -36,7 +36,7 @@ export default trpc
     }),
     resolve: async ({ input }) => {
       const limit = input.limit ?? 24;
-      const filter: Filter<Sudoku> = { public_since: { $exists: true } };
+      const filter: Filter<Sudoku & { labels?: ObjectId[] }> = { public_since: { $exists: true } };
       if (input.cursor) {
         filter.public_since = { ...filter.public_since, $lt: input.cursor };
       }
@@ -139,7 +139,7 @@ export default trpc
 
         return sudoku.value;
       } catch (e) {
-        throw new TRPCError({ message: e.message, code: 'INTERNAL_SERVER_ERROR' });
+        throw new TRPCError({ message: (e as Error).message, code: 'INTERNAL_SERVER_ERROR' });
       }
     }
   })
@@ -203,7 +203,7 @@ export default trpc
 
         return input.public;
       } catch (e) {
-        throw new TRPCError({ message: e.message, code: 'INTERNAL_SERVER_ERROR' });
+        throw new TRPCError({ message: (e as Error).message, code: 'INTERNAL_SERVER_ERROR' });
       }
     }
   })

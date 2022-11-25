@@ -20,7 +20,7 @@ export const DimensionsValidator = z.object({
   /** The number of columns in the sudoku */
   columns: z.number().int().min(1).max(36),
   /** The margins of the sudoku (for outside clues) */
-  margins: MarginsValidator.nullish()
+  margins: MarginsValidator.optional()
 });
 
 export type Dimensions = z.infer<typeof DimensionsValidator>;
@@ -52,7 +52,7 @@ export type RegionType = z.infer<typeof RegionTypeValidator>;
 
 export const RegionValidator = z.object({
   positions: z.array(PositionValidator),
-  type: RegionTypeValidator.nullish(),
+  type: RegionTypeValidator.optional(),
   color: ColorValidator.nullish(),
   borders: z.boolean().nullish()
 });
@@ -107,7 +107,7 @@ export type Fill = z.infer<typeof FillValidator>;
 
 export const PathValidator = z.object({
   positions: z.array(PositionValidator),
-  type: PathTypeValidator.nullish(),
+  type: PathTypeValidator.optional(),
   color: ColorValidator.nullish(),
   width: z.number().int().nullish(), // up to 100%
   form: FormValidator.nullish(),
@@ -132,7 +132,7 @@ export type Shape = z.infer<typeof ShapeValidator>;
 
 export const BorderclueValidator = z.object({
   positions: z.array(PositionValidator).length(2),
-  type: BorderClueTypeValidator.nullish(),
+  type: BorderClueTypeValidator.optional(),
   shape: ShapeValidator.nullish(),
   color: ColorValidator.nullish(),
   radius: z.number().int().nullish(), // up to 100%
@@ -193,13 +193,13 @@ export type Rotation = z.infer<typeof RotationValidator>;
 
 export const CellclueValidator = z.object({
   position: PositionValidator,
-  type: CellClueTypeValidator.nullish(),
-  location: CellClueLocationValidator.nullish(),
+  type: CellClueTypeValidator.optional(),
+  location: CellClueLocationValidator.optional(),
   text: z.string().nullish(),
-  size: CellClueSizeValidator.nullish(),
+  size: CellClueSizeValidator.optional(),
   symbol: SymbolTypeValidator.nullish(),
-  rotation: RotationValidator.nullish(),
-  color: ColorValidator.nullish()
+  rotation: RotationValidator.optional(),
+  color: ColorValidator.optional()
 });
 export type Cellclue = z.infer<typeof CellclueValidator>;
 
@@ -291,7 +291,7 @@ export const SudokuValidator = z.object({
   /** The solution to the puzzle if any is given */
   solution: SolutionValidator.nullish(),
   /** A list of labels on this sudoku */
-  labels: z.array(z.instanceof(ObjectId)).nullish().or(z.array(z.string()).nullish()),
+  labels: z.array(z.string()).nullish(),
   /** The time when the user was created */
   created_at: z.date(),
   /** The last time the user was updated */

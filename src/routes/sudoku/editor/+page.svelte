@@ -77,6 +77,7 @@
     $labels =
       data.labels.map((l) => ({
         label: l,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         selected: sud?.labels?.includes(l._id as any) ?? false
       })) ?? [];
     if (sud != null) {
