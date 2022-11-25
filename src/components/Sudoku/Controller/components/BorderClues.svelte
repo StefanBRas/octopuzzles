@@ -142,7 +142,9 @@
 
   function addLabel() {
     if (type !== 'CUSTOM') {
-      const label = $labels.find((l) => l.label.name === borderClueTypesToLabel[type]);
+      const label = $labels.find(
+        (l) => l.label.name === borderClueTypesToLabel[type as BorderClueType]
+      );
       if (label) {
         label.selected = true;
       }

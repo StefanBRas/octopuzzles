@@ -23,7 +23,7 @@
       usernameOrEmail = '';
       password = '';
     } catch (e) {
-      errors = e;
+      errors = e as TRPCError;
     } finally {
       loading = false;
     }

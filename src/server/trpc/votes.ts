@@ -76,7 +76,7 @@ export default trpc.router<TRPCContext>().mutation('vote', {
 
         return { sudoku_id: input.sudoku_id, user_id: userId, value: input.value };
       } catch (e) {
-        throw new TRPCError({ message: e.message, code: 'INTERNAL_SERVER_ERROR' });
+        throw new TRPCError({ message: (e as Error).message, code: 'INTERNAL_SERVER_ERROR' });
       }
     } else {
       // The user has voted before
@@ -103,7 +103,7 @@ export default trpc.router<TRPCContext>().mutation('vote', {
 
           return { sudoku_id: input.sudoku_id, user_id: userId, value: input.value };
         } catch (e) {
-          throw new TRPCError({ message: e.message, code: 'INTERNAL_SERVER_ERROR' });
+          throw new TRPCError({ message: (e as Error).message, code: 'INTERNAL_SERVER_ERROR' });
         }
       } else if (input.value === oldVote.value) {
         // The user is voting the same that they did before, don't do anything
@@ -132,7 +132,7 @@ export default trpc.router<TRPCContext>().mutation('vote', {
 
           return { sudoku_id: input.sudoku_id, user_id: userId, value: input.value };
         } catch (e) {
-          throw new TRPCError({ message: e.message, code: 'INTERNAL_SERVER_ERROR' });
+          throw new TRPCError({ message: (e as Error).message, code: 'INTERNAL_SERVER_ERROR' });
         }
       }
     }

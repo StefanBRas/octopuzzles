@@ -177,8 +177,8 @@
   }
 
   function addLabel() {
-    if (type !== 'CUSTOM') {
-      const label = $labels.find((l) => l.label.name === pathTypesToLabel[type]);
+    if (type === 'CUSTOM') {
+      const label = $labels.find((l) => l.label.name === pathTypesToLabel[type as PathType]);
       if (label) {
         label.selected = true;
       }
