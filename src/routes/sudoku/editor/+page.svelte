@@ -269,7 +269,7 @@
   async function deleteSudoku(): Promise<void> {
     loading = true;
     if (id) {
-      await trpc().mutation('sudokus:delete', { id });
+      await trpc().mutation('sudokus:delete', { id: id.toString() });
       await goto('/');
     }
     loading = false;

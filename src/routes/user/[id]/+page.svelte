@@ -15,7 +15,7 @@
 
   export let data: PageData;
 
-  let nextCursor: Date | undefined = undefined;
+  let nextCursor: Date | null | undefined = undefined;
   $: nextCursor = data.sudokus.nextCursor;
 
   let loading = false;
@@ -35,7 +35,7 @@
   function deleteSudoku(id: ObjectId): void {
     openModal(DangerActionModal, {
       onAccept: async () => {
-        await trpc().mutation('sudokus:delete', { id });
+        await trpc().mutation('sudokus:delete', { id: id.toString() });
       }
     });
   }

@@ -17,10 +17,11 @@
   import type { ObjectId } from 'mongodb';
 
   export let data: PageData;
+  let sudokus = data.sudokuData;
 
-  let currentCursor: Date | undefined = undefined;
-  let nextCursor: Date | undefined = undefined;
-  $: nextCursor = data.sudokuData.nextCursor;
+  let currentCursor: Date | null | undefined = undefined;
+  let nextCursor: Date | null | undefined = undefined;
+  $: nextCursor = sudokus.nextCursor;
 
   let loading = false;
 
@@ -32,14 +33,20 @@
       limit: 24,
       cursor: nextCursor
     });
-    data.sudokuData = sudokuData;
+    sudokus = sudokuData;
     nextCursor = sudokuData.nextCursor;
     loading = false;
   }
 
   async function refetch(labels: ObjectId[]) {
     loading = true;
-    await trpc().query('sudokus:search', { labels, limit: 24, cursor: currentCursor });
+    const sudokuData = await trpc().query('sudokus:search', {
+      labels: labels.map((l) => l.toString()),
+      limit: 24,
+      cursor: currentCursor
+    });
+    sudokus = sudokuData;
+    nextCursor = sudokuData.nextCursor;
     loading = false;
   }
 
@@ -140,11 +147,11 @@
   </div>
 {/if}
 
-{#if data.sudokuData != null}
+{#if sudokus != null}
   <SudokuList
-    hasNextPage={data.sudokuData.nextCursor != null}
+    hasNextPage={sudokus.nextCursor != null}
     {loadNextPage}
     {loading}
-    sudokus={data.sudokuData.sudokus ?? null}
+    sudokus={sudokus.sudokus ?? null}
   />
 {/if}
