@@ -7,7 +7,7 @@ services:
     plan: standard
     branch: main
     buildCommand: npm install && npm run build
-    runCommand: node build/index.js
+    startCommand: node build/index.js
     pullRequestPreviewsEnabled: true
     buildFilter:
       paths:
