@@ -4,7 +4,7 @@ import type { PageLoad } from './$types';
 
 export const load: PageLoad = async ({ fetch, params }) => {
   const trpcClient = trpc(fetch);
-  const userId = params.id;
+  const userId = parseInt(params.id);
   const [sudokus, user, me] = await Promise.all([
     trpcClient.query('sudokus:search', { limit: 24, labels: [], userId: userId }),
     trpcClient.query('users:get', { id: userId }),

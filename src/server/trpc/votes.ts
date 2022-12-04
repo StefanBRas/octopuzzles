@@ -1,4 +1,3 @@
-import { mongoClient, sudokuCollection, voteCollection } from '../dbSetup';
 import { TRPCError } from '@trpc/server';
 import * as trpc from '@trpc/server';
 import type { TRPCContext } from '.';
@@ -8,18 +7,20 @@ import { VoteValidator, type Vote } from '$models/Vote';
 import { getJwt } from '$utils/jwt/getJwt';
 
 export default trpc.router<TRPCContext>().mutation('vote', {
-  input: VoteValidator.pick({ sudoku_id: true, value: true }),
-  resolve: async ({ input, ctx }): Promise<Vote | undefined> => {
+  input: VoteValidator.pick({ sudokuId: true, value: true }),
+  resolve: async ({ input, ctx }): Promise<Vote | null> => {
     // This resolver can, and should, be massively simplified, but maybe the vote architecture should be re-throught anyways
     const jwtToken = getJwt(ctx);
     if (jwtToken == null) {
       throw new TRPCError({ message: 'You are not logged in', code: 'UNAUTHORIZED' });
     }
-    const userId = jwtToken._id;
+    const userId = jwtToken.id;
 
     const [sudoku, oldVote] = await Promise.all([
-      sudokuCollection.findOne({ _id: input.sudoku_id }),
-      voteCollection.findOne({ sudoku_id: input.sudoku_id, user_id: userId })
+      ctx.prisma.sudoku.findUnique({ where: { id: input.sudokuId } }),
+      ctx.prisma.vote.findUnique({
+        where: { userId_sudokuId: { sudokuId: input.sudokuId, userId } }
+      })
     ]);
 
     if (sudoku == null) {
@@ -29,7 +30,7 @@ export default trpc.router<TRPCContext>().mutation('vote', {
       });
     }
 
-    const publicSince = sudoku.public_since;
+    const publicSince = sudoku.publicSince;
     if (publicSince == null) {
       throw new TRPCError({
         message: "You can't vote on a sudoku that is not published yet",
@@ -52,88 +53,51 @@ export default trpc.router<TRPCContext>().mutation('vote', {
       // The user has not voted before
       if (input.value === 0) {
         // If voting 0 and there is no vote already, do nothing
-        return;
+        return null;
       }
 
-      const session = mongoClient.startSession();
-      try {
-        session.startTransaction();
+      const newPoints = sudoku.points + input.value;
+      const [vote] = await ctx.prisma.$transaction([
+        ctx.prisma.vote.create({ data: { sudokuId: input.sudokuId, userId, value: input.value } }),
+        ctx.prisma.sudoku.update({
+          where: { id: input.sudokuId },
+          data: { points: newPoints, rank: rankingAlgorithm(newPoints, publicSince) }
+        })
+      ]);
 
-        const newPoints = sudoku.points + input.value;
-        await Promise.all([
-          voteCollection.insertOne(
-            { sudoku_id: input.sudoku_id, user_id: userId, value: input.value },
-            { session }
-          ),
-          sudokuCollection.updateOne(
-            { _id: input.sudoku_id },
-            { $set: { points: newPoints, rank: rankingAlgorithm(newPoints, publicSince) } },
-            { session }
-          )
-        ]);
-
-        await session.commitTransaction();
-
-        return { sudoku_id: input.sudoku_id, user_id: userId, value: input.value };
-      } catch (e) {
-        throw new TRPCError({ message: (e as Error).message, code: 'INTERNAL_SERVER_ERROR' });
-      }
+      return vote;
     } else {
       // The user has voted before
       if (input.value === 0) {
         // delete the vote
-        const session = mongoClient.startSession();
-        try {
-          session.startTransaction();
-
-          const newPoints = sudoku.points - oldVote.value;
-          await Promise.all([
-            voteCollection.deleteOne(
-              { sudoku_id: input.sudoku_id, user_id: userId, value: input.value },
-              { session }
-            ),
-            sudokuCollection.updateOne(
-              { _id: input.sudoku_id },
-              { $set: { points: newPoints, rank: rankingAlgorithm(newPoints, publicSince) } },
-              { session }
-            )
-          ]);
-
-          await session.commitTransaction();
-
-          return { sudoku_id: input.sudoku_id, user_id: userId, value: input.value };
-        } catch (e) {
-          throw new TRPCError({ message: (e as Error).message, code: 'INTERNAL_SERVER_ERROR' });
-        }
+        const newPoints = sudoku.points - oldVote.value;
+        const [vote] = await ctx.prisma.$transaction([
+          ctx.prisma.vote.delete({
+            where: { userId_sudokuId: { sudokuId: input.sudokuId, userId } }
+          }),
+          ctx.prisma.sudoku.update({
+            where: { id: input.sudokuId },
+            data: { points: newPoints, rank: rankingAlgorithm(newPoints, publicSince) }
+          })
+        ]);
+        return vote;
       } else if (input.value === oldVote.value) {
         // The user is voting the same that they did before, don't do anything
-        return;
+        return null;
       } else {
         // The user is changing their vote
-        const session = mongoClient.startSession();
-        try {
-          session.startTransaction();
-
-          const newPoints = sudoku.points + input.value - oldVote.value;
-          await Promise.all([
-            voteCollection.updateOne(
-              { sudoku_id: input.sudoku_id, user_id: userId, value: input.value },
-              { $set: { value: input.value } },
-              { session }
-            ),
-            sudokuCollection.updateOne(
-              { _id: input.sudoku_id },
-              { $set: { points: newPoints, rank: rankingAlgorithm(newPoints, publicSince) } },
-              { session }
-            )
-          ]);
-
-          await session.commitTransaction();
-
-          return { sudoku_id: input.sudoku_id, user_id: userId, value: input.value };
-        } catch (e) {
-          throw new TRPCError({ message: (e as Error).message, code: 'INTERNAL_SERVER_ERROR' });
-        }
+        const newPoints = sudoku.points + input.value - oldVote.value;
+        const [vote] = await ctx.prisma.$transaction([
+          ctx.prisma.vote.update({
+            where: { userId_sudokuId: { userId, sudokuId: input.sudokuId } },
+            data: { value: input.value }
+          }),
+          ctx.prisma.sudoku.update({
+            where: { id: input.sudokuId },
+            data: { points: newPoints, rank: rankingAlgorithm(newPoints, publicSince) }
+          })
+        ]);
+        return vote;
       }
     }
   }

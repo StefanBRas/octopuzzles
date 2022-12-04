@@ -14,13 +14,12 @@
   import Button from '$ui/Button.svelte';
   import type { PageData } from './$types';
   import trpc from '$lib/client/trpc';
-  import type { ObjectId } from 'mongodb';
 
   export let data: PageData;
   let sudokus = data.sudokuData;
 
-  let currentCursor: Date | null | undefined = undefined;
-  let nextCursor: Date | null | undefined = undefined;
+  let currentCursor: Date | null = null;
+  let nextCursor: Date | null = null;
   $: nextCursor = sudokus.nextCursor;
 
   let loading = false;
@@ -31,19 +30,19 @@
     let sudokuData = await trpc().query('sudokus:search', {
       labels: [],
       limit: 24,
-      cursor: nextCursor
+      cursor: nextCursor ?? undefined
     });
     sudokus = sudokuData;
     nextCursor = sudokuData.nextCursor;
     loading = false;
   }
 
-  async function refetch(labels: ObjectId[]) {
+  async function refetch(labels: number[]) {
     loading = true;
     const sudokuData = await trpc().query('sudokus:search', {
-      labels: labels.map((l) => l.toString()),
+      labels,
       limit: 24,
-      cursor: currentCursor
+      cursor: currentCursor ?? undefined
     });
     sudokus = sudokuData;
     nextCursor = sudokuData.nextCursor;
@@ -59,20 +58,20 @@
 
   let showFilters = false;
 
-  let activeLabels = $page.url.searchParams.getAll('label');
+  let activeLabels = $page.url.searchParams.getAll('label').map((l) => parseInt(l));
 
   function search(): void {
     $page.url.searchParams.delete('label');
     activeLabels.forEach((l) => {
-      $page.url.searchParams.append('label', l);
+      $page.url.searchParams.append('label', l.toString());
     });
 
     window.history.pushState('page2', 'Title', '?' + $page.url.searchParams.toString());
 
-    refetch(activeLabels as unknown as ObjectId[]);
+    refetch(activeLabels);
   }
 
-  function toggleLabel(labelId: string): void {
+  function toggleLabel(labelId: number): void {
     let found = false;
     activeLabels = activeLabels.filter((l) => {
       if (labelId === l) {
@@ -116,8 +115,8 @@
     <h2 class="font-semibold mb-2">Labels</h2>
     <div class="flex gap-2 flex-wrap">
       {#each data.labels as label}
-        {@const selected = activeLabels.includes(label._id.toString())}
-        <button on:click={() => toggleLabel(label._id.toString())}>
+        {@const selected = activeLabels.includes(label.id)}
+        <button on:click={() => toggleLabel(label.id)}>
           <PuzzleLabel
             {label}
             class={classNames(

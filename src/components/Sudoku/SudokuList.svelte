@@ -17,18 +17,15 @@
     defaultRegions
   } from '$utils/defaults';
   import type { Sudoku } from '$models/Sudoku';
-  import type { ObjectId, WithId } from 'mongodb';
   import type { User } from '$models/User';
   import type { Label } from '$models/Label';
   import PuzzleLabel from '$ui/PuzzleLabel.svelte';
 
-  export let sudokus:
-    | (WithId<Sudoku> & { creator?: WithId<User>; fullLabels: WithId<Label>[] })[]
-    | null;
+  export let sudokus: (Sudoku & { user?: User; labels: Label[] })[] | null;
   export let hasNextPage: boolean;
   export let loading: boolean;
   export let loadNextPage: () => Promise<void>;
-  export let deleteSudoku: ((id: ObjectId) => void) | undefined = undefined;
+  export let deleteSudoku: ((id: number) => void) | undefined = undefined;
 </script>
 
 {#if !sudokus && loading}
@@ -38,12 +35,12 @@
 {/if}
 {#if sudokus}
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 3xl:grid-cols-5 gap-4">
-    {#each sudokus as sudoku (sudoku._id)}
+    {#each sudokus as sudoku (sudoku.id)}
       {#if sudoku}
         <a
           class="shadow-md items-center col-span-1 flex flex-col border rounded-md m-4 overflow-hidden cursor-pointer"
-          href="/sudoku/{sudoku._id}"
-          data-sveltekit-prefetch
+          href="/sudoku/{sudoku.id}"
+          data-sveltekit-preload-data
         >
           <div class="h-96 w-full p-4 justify-center">
             <SudokuDisplay
@@ -66,12 +63,9 @@
                   {sudoku.title ?? '[untitled]'}
                 </h2>
                 <div class="flex text-sm text-gray-500">
-                  {#if sudoku.creator}
-                    <a
-                      class="cursor-pointer hover:text-gray-800"
-                      href={`/user/${sudoku.creator._id}`}
-                    >
-                      {sudoku.creator.username}
+                  {#if sudoku.user}
+                    <a class="cursor-pointer hover:text-gray-800" href={`/user/${sudoku.user.id}`}>
+                      {sudoku.user.username}
                     </a>
                   {:else}
                     <p class="text-sm text-gray-500">[deleted]</p>
@@ -81,8 +75,8 @@
                     {sudoku.points ?? 0} point{Math.abs(sudoku.points) !== 1 ? 's' : ''}
                   </p>
                   <span class="mx-1">•</span>
-                  {#if sudoku.public_since}
-                    <p>{formatDistanceToNowStrict(sudoku.public_since)} ago</p>
+                  {#if sudoku.publicSince}
+                    <p>{formatDistanceToNowStrict(sudoku.publicSince)} ago</p>
                   {:else}
                     <p class="text-orange-500">Not public</p>
                   {/if}
@@ -92,11 +86,11 @@
                 <div class="flex flex-col items-end justify-around">
                   <a
                     class="rounded-full w-7 h-7 p-1 hover:bg-gray-200"
-                    href="/sudoku/editor?id={sudoku._id}"><NotePencil size={20} /></a
+                    href="/sudoku/editor?id={sudoku.id}"><NotePencil size={20} /></a
                   >
                   <button
                     class="rounded-full w-7 h-7 p-1 hover:text-red-500 hover:bg-red-100"
-                    on:click|preventDefault={() => deleteSudoku?.(sudoku._id)}
+                    on:click|preventDefault={() => deleteSudoku?.(sudoku.id)}
                   >
                     <Trash size={20} />
                   </button>
@@ -105,9 +99,9 @@
             </div>
 
             <div class="h-8 w-full flex items-center overflow-y-hidden overflow-x-auto">
-              {#if sudoku.fullLabels}
+              {#if sudoku.labels}
                 <div class="flex gap-2">
-                  {#each sudoku.fullLabels as label}
+                  {#each sudoku.labels as label}
                     <PuzzleLabel {label} />
                   {/each}
                 </div>

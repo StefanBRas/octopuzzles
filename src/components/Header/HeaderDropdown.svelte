@@ -51,21 +51,21 @@
       <ul class="py-1">
         <li class="w-full">
           <a
-            data-sveltekit-prefetch
+            data-sveltekit-preload-data
             href="/sudoku/editor"
             class="block py-1 px-2 hover:bg-gray-200 w-full">Create sudoku</a
           >
         </li>
         <li class="w-full">
           <a
-            data-sveltekit-prefetch
-            href="/user/{$me._id}"
+            data-sveltekit-preload-data
+            href="/user/{$me.id}"
             class="block py-1 px-2 hover:bg-gray-200 w-full">Profile</a
           >
         </li>
         <li class="w-full">
           <a
-            data-sveltekit-prefetch
+            data-sveltekit-preload-data
             href="/settings"
             class="block py-1 px-2 hover:bg-gray-200 w-full">Settings</a
           >

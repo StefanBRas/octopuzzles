@@ -6,12 +6,11 @@
   import Button from '$ui/Button.svelte';
   import deepCopy from '$utils/deepCopy';
   import classNames from 'classnames';
-  import type { WithId } from 'mongodb';
   import type { Label } from '$models/Label';
 
   export let isOpen: boolean;
   export let currentDescription: string;
-  export let addLabel: (label: WithId<Label>) => string;
+  export let addLabel: (label: Label) => string;
 
   let previewedDescription = '';
 </script>

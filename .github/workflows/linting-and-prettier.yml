@@ -5,7 +5,7 @@ on:
 jobs:
   lint:
     env:
-      MONGODB_URI: test
+      DATABASE_URL: test
       SMTP_SERVER: test
       SMTP_PORT: 1
       SMTP_LOGIN: test

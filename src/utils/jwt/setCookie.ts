@@ -1,8 +1,9 @@
 import jwt from 'jsonwebtoken';
 import { JWT_SECRET } from '$env/static/private';
-import type { User } from '$models/User';
+
 import pick from 'lodash/pick';
 import type { RequestEvent } from '@sveltejs/kit';
+import type { User } from '@prisma/client';
 
 export function setCookie(
   user: User,
@@ -10,7 +11,7 @@ export function setCookie(
     event: RequestEvent<Partial<Record<string, string>>>;
   }
 ): void {
-  const token = jwt.sign(pick(user, ['_id', 'role']), JWT_SECRET, {
+  const token = jwt.sign(pick(user, ['id', 'role']), JWT_SECRET, {
     expiresIn: `${15 * 60 * 1000}`
   });
   ctx.event.cookies.set('token', `Bearer ${token}`, {

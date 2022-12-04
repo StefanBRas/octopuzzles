@@ -41,14 +41,14 @@
           if (newColors[position.row][position.column] == null) return;
 
           // Delete the value in the cell
-          newColors[position.row][position.column] = undefined;
+          newColors[position.row][position.column] = null;
           anyChanges = true;
         } else {
           // We are putting some number in the cell
 
           // If the cell already contains the number, delete it
           if (newColors[position.row][position.column] === newColor) {
-            newColors[position.row][position.column] = undefined;
+            newColors[position.row][position.column] = null;
             anyChanges = true;
           } else {
             // Insert the number

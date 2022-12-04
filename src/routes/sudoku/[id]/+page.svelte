@@ -132,9 +132,9 @@
   }
 
   function showDoneModal(): void {
-    if (data.sudoku?._id) {
+    if (data.sudoku?.id) {
       openModal(FinishedSudokuModal, {
-        sudokuId: data.sudoku._id,
+        sudokuId: data.sudoku.id,
         takeScreenshot,
         finishTime: `${days}${hours}${minutes}:${seconds}`
       });
@@ -163,7 +163,7 @@
 
   <meta property="og:title" content="{data.sudoku?.title ?? 'Sudoku'} | OctoPuzzles" />
   <meta property="og:description" content={data.sudoku?.description} />
-  <meta property="og:url" content="http://www.octopuzzles.com/sudoku/{data.sudoku._id}" />
+  <meta property="og:url" content="http://www.octopuzzles.com/sudoku/{data.sudoku.id}" />
   <meta property="og:type" content="website" />
 </svelte:head>
 

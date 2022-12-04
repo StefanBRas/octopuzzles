@@ -29,7 +29,6 @@
   import ImportFromFPuzzles from '$components/Modals/ImportFromFPuzzles.svelte';
   import { walkthroughStore } from '$stores/walkthroughStore';
   import type { PageData } from './$types';
-  import type { ObjectId } from 'mongodb';
   import trpc, { type InferMutationInput } from '$lib/client/trpc';
   import { fillWalkthroughStore } from '$utils/fillWalkthroughStore';
 
@@ -46,7 +45,7 @@
     loading = true;
     if (id) {
       const res = await trpc().mutation('sudokus:changePublicStatus', {
-        id: id.toString(),
+        id,
         public: make_public
       });
       isPublic = res;
@@ -58,14 +57,14 @@
     return await trpc().mutation('walkthrougs:createOrUpdate', data);
   }
 
-  async function saveSolution(id: ObjectId): Promise<void> {
+  async function saveSolution(id: number): Promise<void> {
     let solution: InferMutationInput<'sudokus:provideSolutionToPuzzle'>['solution'] = undefined;
     // create solution
     if (provideSolution) {
       solution = { numbers: getUserSolution({ givens: $givens, values: $values }) };
     }
     await trpc().mutation('sudokus:provideSolutionToPuzzle', {
-      sudokuId: id.toString(),
+      sudokuId: id,
       solution
     });
   }
@@ -78,14 +77,14 @@
       data.labels.map((l) => ({
         label: l,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        selected: sud?.labels?.includes(l._id as any) ?? false
+        selected: sud?.labels?.some((label) => label.id === l.id) ?? false
       })) ?? [];
     if (sud != null) {
       $sudokuTitle = sud.title;
       $description = sud.description;
-      id = sud._id;
+      id = sud.id;
       provideSolution = sud.solution != null;
-      isPublic = sud.public_since != null;
+      isPublic = sud.publicSince != null;
       gameHistory.set({
         values: defaultValues(sud.dimensions),
         centermarks: defaultCentermarks(sud.dimensions),
@@ -129,7 +128,7 @@
     $mode = 'game';
   }
 
-  let id: ObjectId | undefined = undefined;
+  let id: number | undefined = undefined;
   let isPublic = false;
   let errors: Record<string, string> = {};
   let loading = false;
@@ -169,13 +168,13 @@
           givens: $givens,
           extendedcages: $cages,
           paths: $paths,
-          logic: $logic,
-          labels: $labels.filter((l) => l.selected).map((l) => l.label._id.toString())
-        }
+          logic: $logic
+        },
+        labels: $labels.filter((l) => l.selected).map((l) => l.label.id)
       });
 
       if (createdSudoku != null) {
-        id = createdSudoku._id;
+        id = createdSudoku.id;
         $page.url.searchParams.set('id', id?.toString() as string);
         if (provideSolution) {
           await saveSolution(id);
@@ -183,7 +182,7 @@
 
         if ($walkthroughStore.length > 0) {
           await createOrUpdateWalkthrough({
-            sudoku_id: createdSudoku._id.toString(),
+            sudokuId: createdSudoku.id,
             steps: $walkthroughStore
           });
         }
@@ -203,7 +202,7 @@
     errors = {};
     try {
       const updatedSudoku = await trpc().mutation('sudokus:update', {
-        id: id.toString(),
+        id,
         sudokuUpdates: {
           title: $sudokuTitle,
           description: $description,
@@ -216,23 +215,23 @@
           givens: $givens,
           extendedcages: $cages,
           paths: $paths,
-          logic: $logic,
-          labels: $labels.filter((l) => l.selected).map((l) => l.label._id.toString())
-        }
+          logic: $logic
+        },
+        labels: $labels.filter((l) => l.selected).map((l) => l.label.id)
       });
 
       if (updatedSudoku != null) {
-        id = updatedSudoku._id;
-        await saveSolution(updatedSudoku._id);
+        id = updatedSudoku.id;
+        await saveSolution(updatedSudoku.id);
 
         if ($walkthroughStore.length > 0) {
           await createOrUpdateWalkthrough({
-            sudoku_id: updatedSudoku._id.toString(),
+            sudokuId: updatedSudoku.id,
             steps: $walkthroughStore
           });
         } else {
           await trpc().mutation('walkthrougs:delete', {
-            sudokuId: updatedSudoku._id.toString()
+            sudokuId: updatedSudoku.id
           });
         }
       }
@@ -253,7 +252,7 @@
         }
         let newLabels = $labels;
         newLabels.map((label) => {
-          if (l._id === label.label._id) {
+          if (l.id === label.label.id) {
             label.selected = true;
             return label;
           } else {
@@ -270,7 +269,7 @@
   async function deleteSudoku(): Promise<void> {
     loading = true;
     if (id) {
-      await trpc().mutation('sudokus:delete', { id: id.toString() });
+      await trpc().mutation('sudokus:delete', { id });
       await goto('/');
     }
     loading = false;

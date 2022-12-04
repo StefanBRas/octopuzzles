@@ -1,5 +1,4 @@
-import type { User } from '$models/User';
-import type { WithId } from 'mongodb';
+import type { User } from '@prisma/client';
 import { writable } from 'svelte/store';
 
-export const me = writable<Pick<WithId<User>, '_id' | 'email' | 'role' | 'username'> | null>(null);
+export const me = writable<Pick<User, 'id' | 'email' | 'role' | 'username'> | null>(null);

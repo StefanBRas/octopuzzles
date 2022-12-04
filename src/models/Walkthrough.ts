@@ -1,4 +1,3 @@
-import { ObjectId } from 'mongodb';
 import { z } from 'zod';
 import { ColorValidator } from './Sudoku';
 
@@ -42,10 +41,11 @@ export const WalkthroughStepValidator = z.object({
 export type WalkthroughStep = z.infer<typeof WalkthroughStepValidator>;
 
 export const WalkthroughValidator = z.object({
+  id: z.number().int(),
   /** The sudoku this walkthrough is made on */
-  sudoku_id: z.instanceof(ObjectId),
+  sudokuId: z.number().int(),
   /** The user that made this walkthrough */
-  user_id: z.instanceof(ObjectId),
+  userId: z.number().int(),
   /** The steps on the way to the solution */
   steps: z.array(WalkthroughStepValidator)
 });

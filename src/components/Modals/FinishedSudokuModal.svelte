@@ -10,10 +10,9 @@
   import Image from 'phosphor-svelte/lib/Image/Image.svelte';
   import { closeModal } from '$stores/modalStore';
   import Button from '$ui/Button.svelte';
-  import type { ObjectId } from 'mongodb';
 
   export let isOpen: boolean;
-  export let sudokuId: ObjectId;
+  export let sudokuId: number;
   export let takeScreenshot: () => void;
   export let finishTime: string;
 </script>

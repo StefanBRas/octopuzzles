@@ -1,9 +1,8 @@
-import { ObjectId } from 'mongodb';
 import { z } from 'zod';
 
 export const TokenValidator = z.object({
   kind: z.enum(['VERIFY_EMAIL']),
-  user_id: z.instanceof(ObjectId),
+  userId: z.number().int(),
   token: z.string()
 });
 

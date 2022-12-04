@@ -4,6 +4,7 @@ export const RoleValidator = z.enum(['Admin', 'User']);
 export type Role = z.infer<typeof RoleValidator>;
 
 export const UserValidator = z.object({
+  id: z.number().int(),
   /** Username of the user */
   username: z
     .string()
@@ -21,8 +22,8 @@ export const UserValidator = z.object({
   /** Whether the user has verified their account */
   verified: z.boolean(),
   /** The time when the user was created */
-  created_at: z.date(),
+  createdAt: z.date(),
   /** The last time the user was updated */
-  updated_at: z.date()
+  updatedAt: z.date()
 });
 export type User = z.infer<typeof UserValidator>;
