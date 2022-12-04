@@ -22,7 +22,7 @@
   import PuzzleLabel from '$ui/PuzzleLabel.svelte';
 
   export let sudokus:
-    | (Sudoku & { user?: Omit<User, 'password' | 'email'>; labels: Label[] })[]
+    | (Sudoku & { user?: Omit<User, 'password' | 'email' | 'verified'>; labels: Label[] })[]
     | null;
   export let hasNextPage: boolean;
   export let loading: boolean;
