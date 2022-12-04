@@ -4,7 +4,7 @@
   "description": "octopuzzles",
   "scripts": {
     "dev": "vite dev",
-    "build": "npm run migrate:up && vite build",
+    "build": "vite build",
     "preview": "vite preview",
     "check": "svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-check --tsconfig ./tsconfig.json --watch",
@@ -14,7 +14,7 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.21.0",
-    "@sveltejs/adapter-node": "1.0.0-next.77",
+    "@sveltejs/adapter-node": "1.0.0-next.102",
     "@sveltejs/kit": "1.0.0-next.511",
     "@tailwindcss/forms": "^0.5.0",
     "@types/jsonwebtoken": "^8.5.9",
