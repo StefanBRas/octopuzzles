@@ -1,0 +1,52 @@
+name: migrate database
+
+# Controls when the workflow will run
+on:
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+  push:
+    branches:
+      - main
+    paths:
+      - '**/schema.prisma'
+
+jobs:
+  migrate-db:
+    name: Migrate database
+
+    # Use the staging environment and secrets setup for that env
+    environment: Production
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+    # TODO: Use later to restrict away from main?
+    # if: github.ref == 'refs/heads/master'
+
+    runs-on: ubuntu-latest
+
+    # Set the default shell and
+    # working directory for all steps
+    defaults:
+      run:
+        shell: bash
+        working-directory: .
+
+    steps:
+      # Checks-out repository under $GITHUB_WORKSPACE, so the job can access it
+      - uses: actions/checkout@v2
+
+      # Node
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16.15
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: 'Install deps'
+        run: |
+          mkdir node_modules && npm ci
+
+      - name: run migration
+        run: |
+          npx prisma generate && npx prisma migrate deploy
