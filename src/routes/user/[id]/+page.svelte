@@ -9,13 +9,12 @@
     selectedItemIndex
   } from '$stores/sudokuStore';
   import SudokuList from '$components/Sudoku/SudokuList.svelte';
-  import type { ObjectId } from 'mongodb';
   import trpc from '$lib/client/trpc';
   import type { PageData } from './$types';
 
   export let data: PageData;
 
-  let nextCursor: Date | null | undefined = undefined;
+  let nextCursor: Date | null = null;
   $: nextCursor = data.sudokus.nextCursor;
 
   let loading = false;
@@ -25,17 +24,17 @@
     let sudokuData = await trpc().query('sudokus:search', {
       labels: [],
       limit: 24,
-      cursor: nextCursor
+      cursor: nextCursor ?? undefined
     });
     data.sudokus = sudokuData;
     nextCursor = sudokuData.nextCursor;
     loading = false;
   }
 
-  function deleteSudoku(id: ObjectId): void {
+  function deleteSudoku(id: number): void {
     openModal(DangerActionModal, {
       onAccept: async () => {
-        await trpc().mutation('sudokus:delete', { id: id.toString() });
+        await trpc().mutation('sudokus:delete', { id });
       }
     });
   }

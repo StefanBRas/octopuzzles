@@ -1,21 +1,13 @@
-import {
-  labelCollection,
-  mongoClient,
-  sudokuCollection,
-  userCollection,
-  voteCollection
-} from '../dbSetup';
 import * as trpc from '@trpc/server';
 import { z } from 'zod';
-import { ObjectId, type Filter, type WithId } from 'mongodb';
+
 import {
   NewSudokuValidator,
   SolutionValidator,
-  UpdateSudokuValidator,
-  type Sudoku
+  SudokuValidator,
+  UpdateSudokuValidator
 } from '$models/Sudoku';
 import type { TRPCContext } from '.';
-import type { User } from '$models/User';
 import { TRPCError } from '@trpc/server';
 
 import {
@@ -23,56 +15,60 @@ import {
   validateCorrectDimensionsOfSudokuClues
 } from '$utils/validation';
 import { getJwt } from '$utils/jwt/getJwt';
-import type { Label } from '$models/Label';
+import type { Sudoku } from '@prisma/client';
+import { LabelValidator } from '$models/Label';
+import { UserValidator } from '$models/User';
 
 export default trpc
   .router<TRPCContext>()
   .query('search', {
     input: z.object({
-      labels: z.array(z.string()),
+      labels: z.array(z.number().int()),
       limit: z.number().min(1).max(100).optional(),
-      cursor: z.date().nullish(),
-      userId: z.string().optional()
+      cursor: z.date().optional(),
+      userId: z.number().int().optional()
     }),
-    resolve: async ({ input }) => {
+    resolve: async ({ input, ctx }) => {
       const limit = input.limit ?? 24;
-      const filter: Filter<Sudoku & { labels?: ObjectId[] }> = { public_since: { $exists: true } };
-      if (input.cursor) {
-        filter.public_since = { ...filter.public_since, $lt: input.cursor };
-      }
-      if (input.labels.length > 0) {
-        filter.labels = { $in: input.labels.map((l) => new ObjectId(l)) };
-      }
-      if (input.userId != null) {
-        filter.user_id = { $eq: new ObjectId(input.userId) };
-      }
-      const sudokusAgg = (await sudokuCollection
-        .aggregate([
-          { $match: filter },
-          { $lookup: { from: 'users', localField: 'user_id', foreignField: '_id', as: 'creator' } },
-          {
-            $lookup: { from: 'labels', localField: 'labels', foreignField: '_id', as: 'fullLabels' }
+
+      const rawSudokus = await ctx.prisma.sudoku.findMany({
+        where: {
+          publicSince: { not: null, lt: input.cursor },
+          userId: input.userId,
+          labels: input.labels.length > 0 ? { some: { id: { in: input.labels } } } : undefined
+        },
+        include: {
+          labels: true,
+          user: {
+            select: {
+              password: false,
+              id: true,
+              username: true,
+              email: true,
+              role: true,
+              verified: true,
+              createdAt: true,
+              updatedAt: true
+            }
           }
-        ])
-        .sort({ public_since: -1 })
-        .limit(limit + 1)
-        .toArray()) as (WithId<Sudoku> & {
-        creator: WithId<User>[];
-        fullLabels: WithId<Label>[];
-      })[];
+        },
+        orderBy: { publicSince: 'desc' },
+        take: limit + 1
+      });
 
-      const sudokus: (WithId<Sudoku> & { creator?: WithId<User>; fullLabels: WithId<Label>[] })[] =
-        sudokusAgg.map((sudoku) => {
-          return {
-            ...sudoku,
-            creator: sudoku.creator[0] ?? undefined
-          };
-        });
+      const sudokus = z
+        .array(
+          SudokuValidator.extend({
+            labels: z.array(LabelValidator),
+            user: UserValidator.omit({ password: true })
+          })
+        )
+        .parse(rawSudokus);
 
-      let nextCursor: typeof input.cursor | null | undefined = undefined;
+      let nextCursor: typeof input.cursor | null = null;
       if (sudokus.length > limit) {
         const nextItem = sudokus.pop();
-        nextCursor = nextItem?.public_since;
+        nextCursor = nextItem?.publicSince ?? null;
       }
 
       return { sudokus, nextCursor };
@@ -80,72 +76,59 @@ export default trpc
   })
   .query('get', {
     input: z.object({
-      id: z.string()
+      id: z.number().int()
     }),
     resolve: async ({ input, ctx }) => {
       const jwtToken = getJwt(ctx);
-      const userId = jwtToken?._id;
-      const sudoku = await sudokuCollection.findOne({ _id: new ObjectId(input.id) });
-      if (sudoku == null) {
-        throw new TRPCError({ code: 'NOT_FOUND' });
-      }
-      const user = await userCollection.findOne({
-        _id: sudoku?.user_id ? new ObjectId(sudoku.user_id) : undefined
+      const userId = jwtToken?.id;
+      const sudokuRaw = await ctx.prisma.sudoku.findUnique({
+        where: { id: input.id },
+        include: { user: true, labels: true }
       });
-      const labels = await labelCollection
-        .find({ _id: { $in: sudoku?.labels?.map((id) => new ObjectId(id)) ?? [] } })
-        .toArray();
-      const userVote = userId != null ? await voteCollection.findOne({ user_id: userId }) : null;
+      if (sudokuRaw == null) return null;
 
-      return {
-        ...sudoku,
-        creator: user,
-        userVote,
-        fullLabels: labels
-      };
+      const sudoku = SudokuValidator.extend({
+        user: UserValidator,
+        labels: z.array(LabelValidator)
+      }).parse(sudokuRaw);
+
+      const userVote =
+        sudoku != null && userId != null
+          ? await ctx.prisma.vote.findUnique({
+              where: { userId_sudokuId: { sudokuId: sudoku?.id, userId } }
+            })
+          : null;
+
+      return sudoku != null ? { ...sudoku, userVote } : null;
     }
   })
   .mutation('delete', {
     input: z.object({
-      id: z.string()
+      id: z.number().int()
     }),
     resolve: async ({ input, ctx }) => {
       const jwtToken = getJwt(ctx);
       if (jwtToken == null) {
         throw new TRPCError({ message: 'You are not logged in', code: 'UNAUTHORIZED' });
       }
-      const session = mongoClient.startSession();
-      const sudokuId = new ObjectId(input.id);
-      try {
-        session.startTransaction();
-
-        const sudoku = await sudokuCollection.findOneAndDelete(
-          {
-            _id: sudokuId,
-            user_id: jwtToken._id
-          },
-          { session }
-        );
-        if (sudoku.value == null) {
-          throw new TRPCError({
-            message: 'Something went wrong when deleting your sudoku',
-            code: 'INTERNAL_SERVER_ERROR'
-          });
-        }
-
-        await voteCollection.deleteMany({ sudoku_id: sudoku.value._id }, { session });
-
-        await session.commitTransaction();
-
-        return sudoku.value;
-      } catch (e) {
-        throw new TRPCError({ message: (e as Error).message, code: 'INTERNAL_SERVER_ERROR' });
+      const sudoku = await ctx.prisma.sudoku.findUnique({ where: { id: input.id } });
+      if (sudoku?.userId !== jwtToken.id) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'You can only delete your own sudokus'
+        });
       }
+      await ctx.prisma.$transaction([
+        ctx.prisma.sudoku.delete({ where: { id: input.id } }),
+        ctx.prisma.vote.deleteMany({ where: { sudokuId: sudoku.id } })
+      ]);
+
+      return sudoku;
     }
   })
   .mutation('changePublicStatus', {
     input: z.object({
-      id: z.string(),
+      id: z.number().int(),
       public: z.boolean()
     }),
     resolve: async ({ input, ctx }) => {
@@ -154,13 +137,13 @@ export default trpc
         throw new TRPCError({ message: 'You are not logged in', code: 'UNAUTHORIZED' });
       }
       // First check if the user has permission to update the sudoku.
-      const sudoku = await sudokuCollection.findOne({ _id: new ObjectId(input.id) });
+      const sudoku = await ctx.prisma.sudoku.findUnique({ where: { id: input.id } });
       if (sudoku == null) {
         throw new TRPCError({
           message: 'We could not find the sudoku you are trying to update',
           code: 'BAD_REQUEST'
         });
-      } else if (sudoku.user_id?.toString() !== jwtToken._id.toString()) {
+      } else if (sudoku.userId !== jwtToken.id) {
         throw new TRPCError({
           message: 'You are not allowed to edit this sudoku',
           code: 'UNAUTHORIZED'
@@ -168,49 +151,39 @@ export default trpc
       }
 
       let shouldDeleteVotes = false;
-      const newSudoku: Partial<Sudoku> = {
+      const newSudoku: Pick<Sudoku, 'points' | 'rank' | 'publicSince'> = {
         points: 0,
-        rank: 0
+        rank: 0,
+        publicSince: null
       };
 
-      if (input.public && sudoku.public_since == null) {
+      if (input.public && sudoku.publicSince == null) {
         // The user wants to make the sudoku public
-        newSudoku.public_since = new Date();
-      } else if (!input.public && sudoku.public_since != null) {
+        newSudoku.publicSince = new Date();
+      } else if (!input.public && sudoku.publicSince != null) {
         // User wants to take the sudoku out of public status
         shouldDeleteVotes = true;
-        newSudoku.public_since = undefined;
+        newSudoku.publicSince = null;
       } else {
         // The user is not really changing the public status, just return what it already is
         return input.public;
       }
 
-      const session = mongoClient.startSession();
-      try {
-        session.startTransaction();
-
-        await sudokuCollection.updateOne(
-          { _id: new ObjectId(input.id) },
-          { $set: newSudoku },
-          { session }
-        );
+      await ctx.prisma.$transaction(async (tx) => {
+        await tx.sudoku.update({ where: { id: input.id }, data: newSudoku });
 
         if (shouldDeleteVotes) {
-          await voteCollection.deleteMany({ sudoku_id: sudoku._id }, { session });
+          await tx.vote.deleteMany({ where: { sudokuId: sudoku.id } });
         }
+      });
 
-        await session.commitTransaction();
-
-        return input.public;
-      } catch (e) {
-        throw new TRPCError({ message: (e as Error).message, code: 'INTERNAL_SERVER_ERROR' });
-      }
+      return input.public;
     }
   })
   .mutation('provideSolutionToPuzzle', {
     input: z.object({
-      sudokuId: z.string(),
-      solution: SolutionValidator.nullish()
+      sudokuId: z.number().int(),
+      solution: SolutionValidator.optional()
     }),
     resolve: async ({ input, ctx }) => {
       const jwtToken = getJwt(ctx);
@@ -218,13 +191,13 @@ export default trpc
         throw new TRPCError({ message: 'You are not logged in', code: 'UNAUTHORIZED' });
       }
       // First check if the user has permission to make a solution for the sudoku.
-      const sudoku = await sudokuCollection.findOne({ _id: new ObjectId(input.sudokuId) });
+      const sudoku = await ctx.prisma.sudoku.findUnique({ where: { id: input.sudokuId } });
       if (sudoku == null) {
         throw new TRPCError({
           message: 'We could not find the sudoku you are trying to update',
           code: 'BAD_REQUEST'
         });
-      } else if (sudoku.user_id == null || sudoku.user_id.toString() !== jwtToken._id.toString()) {
+      } else if (sudoku.userId == null || sudoku.userId !== jwtToken.id) {
         throw new TRPCError({
           message: 'You are not allowed to provide a solution to this sudoku',
           code: 'BAD_REQUEST'
@@ -233,30 +206,29 @@ export default trpc
 
       if (input.solution == null) {
         // delete solution from sudoku
-        const updatedSudoku = await sudokuCollection.findOneAndUpdate(
-          { _id: new ObjectId(input.sudokuId) },
-          { $unset: { solution: '' } },
-          { returnDocument: 'after' }
-        );
+        const updatedSudoku = await ctx.prisma.sudoku.update({
+          where: { id: input.sudokuId },
+          data: { solution: undefined }
+        });
 
-        return updatedSudoku.value;
+        return updatedSudoku;
       } else {
         // Add solution to puzzle
         validateCorrectDimension(input.solution.numbers, sudoku.dimensions, 'solution');
 
-        const updatedSudoku = await sudokuCollection.findOneAndUpdate(
-          { _id: new ObjectId(input.sudokuId) },
-          { $set: { solution: input.solution } },
-          { returnDocument: 'after' }
-        );
+        const updatedSudoku = await ctx.prisma.sudoku.update({
+          where: { id: input.sudokuId },
+          data: { solution: input.solution }
+        });
 
-        return updatedSudoku.value;
+        return updatedSudoku;
       }
     }
   })
   .mutation('create', {
     input: z.object({
-      sudoku: NewSudokuValidator
+      sudoku: NewSudokuValidator,
+      labels: z.array(z.number().int()).optional()
     }),
     resolve: async ({ input, ctx }) => {
       const jwtToken = getJwt(ctx);
@@ -265,20 +237,11 @@ export default trpc
       }
       validateCorrectDimensionsOfSudokuClues(input.sudoku);
 
-      const sudoku: Sudoku = {
-        ...input.sudoku,
-        created_at: new Date(),
-        updated_at: new Date(),
-        user_id: jwtToken._id,
-        rank: 0,
-        points: 0
-      };
-
-      if (input.sudoku.labels != null) {
-        const labels = await labelCollection.countDocuments({
-          _id: { $in: input.sudoku.labels.map((id) => new ObjectId(id)) }
+      if (input.labels != null) {
+        const labelsCount = await ctx.prisma.label.count({
+          where: { id: { in: input.labels } }
         });
-        if (labels !== input.sudoku.labels.length) {
+        if (labelsCount !== input.labels.length) {
           throw new TRPCError({
             message: 'One of the specified labels does not exist',
             code: 'BAD_REQUEST'
@@ -286,16 +249,31 @@ export default trpc
         }
       }
 
-      const s = await sudokuCollection.insertOne(sudoku);
-      const newSudoku = await sudokuCollection.findOne({ _id: s.insertedId });
+      const { dimensions, ...sudokuInput } = input.sudoku;
+      const newSudoku = await ctx.prisma.sudoku.create({
+        data: {
+          ...sudokuInput,
+          rows: dimensions.rows,
+          columns: dimensions.columns,
+          marginTop: dimensions.margins?.top,
+          marginRight: dimensions.margins?.right,
+          marginBottom: dimensions.margins?.bottom,
+          marginLeft: dimensions.margins?.left,
+          userId: jwtToken.id,
+          rank: 0,
+          points: 0,
+          labels: { connect: input.labels?.map((l) => ({ id: l })) ?? [] }
+        }
+      });
 
       return newSudoku;
     }
   })
   .mutation('update', {
     input: z.object({
-      id: z.string(),
-      sudokuUpdates: UpdateSudokuValidator
+      id: z.number().int(),
+      sudokuUpdates: UpdateSudokuValidator,
+      labels: z.array(z.number().int()).optional()
     }),
     resolve: async ({ input, ctx }) => {
       const jwtToken = getJwt(ctx);
@@ -303,16 +281,13 @@ export default trpc
         throw new TRPCError({ message: 'You are not logged in', code: 'UNAUTHORIZED' });
       }
       // First check if the user has permission to update the sudoku.
-      const oldSudoku = await sudokuCollection.findOne({ _id: new ObjectId(input.id) });
+      const oldSudoku = await ctx.prisma.sudoku.findUnique({ where: { id: input.id } });
       if (oldSudoku == null) {
         throw new TRPCError({
           message: 'We could not find the sudoku you are trying to update',
           code: 'BAD_REQUEST'
         });
-      } else if (
-        oldSudoku.user_id == null ||
-        oldSudoku.user_id.toString() !== jwtToken._id.toString()
-      ) {
+      } else if (oldSudoku.userId == null || oldSudoku.userId !== jwtToken.id) {
         throw new TRPCError({
           message: 'You are not allowed to edit this sudoku',
           code: 'BAD_REQUEST'
@@ -323,11 +298,11 @@ export default trpc
         dimensions: input.sudokuUpdates.dimensions ?? oldSudoku.dimensions
       });
 
-      if (input.sudokuUpdates.labels != null) {
-        const labels = await labelCollection.countDocuments({
-          _id: { $in: input.sudokuUpdates.labels.map((id) => new ObjectId(id)) }
+      if (input.labels != null) {
+        const labelsCount = await ctx.prisma.label.count({
+          where: { id: { in: input.labels } }
         });
-        if (labels !== input.sudokuUpdates.labels.length) {
+        if (labelsCount !== input.labels.length) {
           throw new TRPCError({
             message: 'One of the specified labels does not exist',
             code: 'BAD_REQUEST'
@@ -336,12 +311,24 @@ export default trpc
       }
       // User has permission to edit the sudoku
 
-      const updatedSudoku = await sudokuCollection.findOneAndUpdate(
-        { _id: new ObjectId(input.id) },
-        { $set: input.sudokuUpdates },
-        { returnDocument: 'after' }
-      );
+      const { dimensions, ...sudokuInput } = input.sudokuUpdates;
+      const updatedSudoku = await ctx.prisma.sudoku.update({
+        where: { id: input.id },
+        data: {
+          ...sudokuInput,
+          rows: dimensions?.rows,
+          columns: dimensions?.columns,
+          marginTop: dimensions?.margins?.top,
+          marginRight: dimensions?.margins?.right,
+          marginBottom: dimensions?.margins?.bottom,
+          marginLeft: dimensions?.margins?.left,
+          userId: jwtToken.id,
+          rank: 0,
+          points: 0,
+          labels: { connect: input.labels?.map((l) => ({ id: l })) ?? [] }
+        }
+      });
 
-      return updatedSudoku.value;
+      return updatedSudoku;
     }
   });

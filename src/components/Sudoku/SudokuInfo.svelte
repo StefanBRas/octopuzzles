@@ -14,21 +14,20 @@
   import WhatsAppLink from '$components/shareButtons/WhatsAppLink.svelte';
   import RedditLink from '$components/shareButtons/RedditLink.svelte';
   import type { Sudoku } from '$models/Sudoku';
-  import type { WithId } from 'mongodb';
   import type { User } from '$models/User';
   import type { Vote } from '$models/Vote';
   import type { Label } from '$models/Label';
   import trpc from '$lib/client/trpc';
 
-  export let sudoku: WithId<Sudoku> & {
-    creator?: WithId<User> | null;
-    userVote?: WithId<Vote> | null;
-    fullLabels: WithId<Label>[];
+  export let sudoku: Sudoku & {
+    user?: User | null;
+    userVote?: Vote | null;
+    labels: Label[];
   };
   export let takeScreenshot: () => void;
 
   async function vote(value: number) {
-    return await trpc().mutation('votes:vote', { sudoku_id: sudoku._id, value });
+    return await trpc().mutation('votes:vote', { sudokuId: sudoku.id, value });
   }
 
   $: pointsWithoutUserVote = (sudoku.points ?? 0) - (sudoku.userVote?.value ?? 0);
@@ -36,7 +35,7 @@
   let userVote = sudoku.userVote == null || sudoku.userVote.value === 0 ? 0 : sudoku.userVote.value;
 
   async function handleVote(value: 1 | -1): Promise<void> {
-    if (sudoku.public_since) {
+    if (sudoku.publicSince) {
       let newValue = userVote === value ? 0 : value;
       userVote = newValue; // optimistic
       const res = await vote(newValue);
@@ -55,11 +54,11 @@
         <button
           class={classNames(
             'w-8 h-8 transition-colors',
-            { 'hover:text-orange-500 cursor-pointer': sudoku.public_since != null },
+            { 'hover:text-orange-500 cursor-pointer': sudoku.publicSince != null },
             userVote > 0 && 'text-orange-500'
           )}
           on:click={() => handleVote(1)}
-          disabled={sudoku.public_since == null}
+          disabled={sudoku.publicSince == null}
         >
           <CaretUp size={32} />
         </button>
@@ -73,11 +72,11 @@
         <button
           class={classNames(
             'w-8 h-8 transition-colors',
-            { 'hover:text-orange-500 cursor-pointer': sudoku.public_since != null },
+            { 'hover:text-orange-500 cursor-pointer': sudoku.publicSince != null },
             userVote < 0 && 'text-orange-500'
           )}
           on:click={() => handleVote(-1)}
-          disabled={sudoku.public_since == null}
+          disabled={sudoku.publicSince == null}
         >
           <CaretDown size={32} />
         </button>
@@ -87,19 +86,19 @@
         <h1 class="text-3xl">{sudoku.title}</h1>
         <div class="text-gray-600 text-sm flex">
           <p>
-            {#if sudoku.public_since}
-              Created {formatDistanceToNowStrict(sudoku.public_since)} ago
+            {#if sudoku.publicSince}
+              Created {formatDistanceToNowStrict(sudoku.publicSince)} ago
             {/if}
             by
-            {#if sudoku.creator}
+            {#if sudoku.user}
               <a
                 class="font-semibold hover:underline hover:text-blue-500"
-                href="/user/{sudoku.creator._id}">{sudoku.creator.username}</a
+                href="/user/{sudoku.user.id}">{sudoku.user.username}</a
               >
             {:else}
               [DELETED]
             {/if}
-            {#if sudoku.public_since == null}
+            {#if sudoku.publicSince == null}
               -
               <span class="text-orange-500">NOT PUBLIC</span>
             {/if}
@@ -112,24 +111,24 @@
       <p>Share:</p>
       <TwitterLink
         class="w-6 h-6 block"
-        url="https://www.octopuzzles.com/sudoku/{sudoku._id}"
+        url="https://www.octopuzzles.com/sudoku/{sudoku.id}"
         text="Can you solve this?"><TwitterLogo size={24} /></TwitterLink
       >
 
-      <FacebookLink class="w-6 h-6 block" url="https://www.octopuzzles.com/sudoku/{sudoku._id}"
+      <FacebookLink class="w-6 h-6 block" url="https://www.octopuzzles.com/sudoku/{sudoku.id}"
         ><FacebookLogo size={24} /></FacebookLink
       >
 
       <WhatsAppLink
         class="w-6 h-6 block"
-        text="Can you solve this? https://www.octopuzzles.com/sudoku/{sudoku._id}"
+        text="Can you solve this? https://www.octopuzzles.com/sudoku/{sudoku.id}"
         ><WhatsappLogo size={24} /></WhatsAppLink
       >
 
       <RedditLink
         class="w-6 h-6 block"
         text="Can you solve this?"
-        url="https://www.octopuzzles.com/sudoku/{sudoku._id}"><RedditLogo size={24} /></RedditLink
+        url="https://www.octopuzzles.com/sudoku/{sudoku.id}"><RedditLogo size={24} /></RedditLink
       >
 
       <button class="w-6 h-6 block" title="Take image of sudoku" on:click={takeScreenshot}
@@ -140,10 +139,10 @@
 
   <hr />
 
-  {#if sudoku.fullLabels}
+  {#if sudoku.labels}
     <div class="flex gap-2 mb-4">
-      {#each sudoku.fullLabels as label}
-        <a href="/?label={label._id}">
+      {#each sudoku.labels as label}
+        <a href="/?label={label.id}">
           <PuzzleLabel {label} class="hover:bg-gray-200 transition-colors" />
         </a>
       {/each}

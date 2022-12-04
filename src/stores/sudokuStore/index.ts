@@ -32,7 +32,6 @@ import type {
   InputMode,
   Mode
 } from '$types';
-import type { WithId } from 'mongodb';
 
 // WRITABLES
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
@@ -142,7 +141,7 @@ function createEditorHistoryStore() {
       let newColor = newColors[cell.row]?.[cell.column];
       if (newColor != null) {
         changes = true;
-        newColor = undefined;
+        newColor = null;
       }
     });
     if (changes) {
@@ -299,7 +298,7 @@ function createGameHistoryStore() {
 
 export const sudokuTitle = writable('');
 export const description = writable('');
-export const labels = writable<{ label: WithId<Label>; selected: boolean }[]>([]);
+export const labels = writable<{ label: Label; selected: boolean }[]>([]);
 
 export const gameHistory = createGameHistoryStore();
 
@@ -463,7 +462,7 @@ export function setMargins(margins?: Margins): void {
           };
         })
         .filter((clue) => isValidPosition(clue.position)),
-      editorcolors: offsetMatrix(editorColors, offsets, undefined),
+      editorcolors: offsetMatrix(editorColors, offsets, null),
       cages: cages
         .map((cage) => {
           return { ...cage, positions: offsetPositions(cage.positions, offsets) };

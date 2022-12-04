@@ -1,40 +1,38 @@
-import { tokenCollection, userCollection } from '../dbSetup';
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
 import * as argon2 from 'argon2';
 import * as trpc from '@trpc/server';
 import type { TRPCContext } from '.';
-import type { Filter } from 'mongodb';
 import { sendVerifyUserMail } from '$server/email';
 import pick from 'lodash/pick';
-import { UserValidator, type User } from '$models/User';
-import { ObjectId } from 'mongodb';
+import { UserValidator } from '$models/User';
 import { setCookie } from '$utils/jwt/setCookie';
 import { getJwt } from '$utils/jwt/getJwt';
+import type { Prisma } from '@prisma/client';
 
 export default trpc
   .router<TRPCContext>()
   .mutation('register', {
     input: UserValidator.pick({ username: true, email: true, password: true }),
-    resolve: async ({ input }) => {
+    resolve: async ({ input, ctx }) => {
       const hashedPassword = await argon2.hash(input.password);
 
       try {
-        const user = await userCollection.insertOne({
-          created_at: new Date(),
-          updated_at: new Date(),
-          email: input.email,
-          password: hashedPassword,
-          role: 'User',
-          username: input.username,
-          verified: false
+        const user = await ctx.prisma.user.create({
+          data: {
+            email: input.email,
+            password: hashedPassword,
+            role: 'User',
+            username: input.username,
+            verified: false
+          }
         });
 
         const token = crypto.randomUUID();
 
         sendVerifyUserMail(input.username, input.email, token);
 
-        tokenCollection.insertOne({ kind: 'VERIFY_EMAIL', token: token, user_id: user.insertedId });
+        await ctx.prisma.token.create({ data: { kind: 'VERIFY_EMAIL', token, userId: user.id } });
 
         return true;
       } catch (e) {
@@ -49,13 +47,13 @@ export default trpc
     }),
     resolve: async ({ input, ctx }) => {
       const usernameOrEmail = input.usernameOrEmail;
-      const filter: Filter<User> = {};
+      const filter: Prisma.UserWhereInput = {};
       if (usernameOrEmail.includes('@')) {
         filter.email = usernameOrEmail;
       } else {
         filter.username = usernameOrEmail;
       }
-      const user = await userCollection.findOne(filter);
+      const user = await ctx.prisma.user.findFirst({ where: filter });
 
       if (user == null) {
         throw new TRPCError({
@@ -86,7 +84,7 @@ export default trpc
       }
       setCookie(user, ctx);
 
-      return pick(user, ['_id', 'email', 'role', 'username']);
+      return pick(user, ['id', 'email', 'role', 'username']);
     }
   })
   .mutation('logout', {
@@ -104,9 +102,9 @@ export default trpc
         return null;
       }
 
-      const user = await userCollection.findOne({ _id: new ObjectId(jwtToken._id) });
+      const user = await ctx.prisma.user.findUnique({ where: { id: jwtToken.id } });
       if (user) {
-        return pick(user, ['_id', 'email', 'role', 'username']);
+        return pick(user, ['id', 'email', 'role', 'username']);
       }
 
       return null;
@@ -115,29 +113,29 @@ export default trpc
   .mutation('verify', {
     input: z.string(), // the token
     resolve: async ({ ctx, input }) => {
-      const token = await tokenCollection.findOneAndDelete({ token: input });
-      if (token.value == null) {
+      const token = await ctx.prisma.token.delete({ where: { token: input } });
+      if (token == null) {
         throw new TRPCError({ message: 'That token has expired', code: 'PRECONDITION_FAILED' });
       }
-      const user = await userCollection.findOneAndUpdate(
-        { _id: token.value?.user_id },
-        { $set: { verified: true } }
-      );
+      const user = await ctx.prisma.user.update({
+        where: { id: token.userId },
+        data: { verified: true }
+      });
 
-      if (user.value == null) {
+      if (user == null) {
         throw new TRPCError({ message: 'Could not find that user', code: 'PRECONDITION_FAILED' });
       }
-      setCookie(user.value, ctx);
+      setCookie(user, ctx);
 
-      return pick(user.value, ['_id', 'email', 'role', 'username']);
+      return pick(user, ['id', 'email', 'role', 'username']);
     }
   })
   .mutation('resend-verification', {
     input: z.object({
       email: z.string().email()
     }),
-    resolve: async ({ input }) => {
-      const user = await userCollection.findOne({ email: input.email });
+    resolve: async ({ input, ctx }) => {
+      const user = await ctx.prisma.user.findFirst({ where: { email: input.email } });
       if (user == null) {
         throw new TRPCError({
           message: 'We could not find the user you want to verify',
@@ -151,10 +149,8 @@ export default trpc
 
       sendVerifyUserMail(user.username, input.email, verificationToken);
 
-      tokenCollection.insertOne({
-        kind: 'VERIFY_EMAIL',
-        token: verificationToken,
-        user_id: user._id
+      await ctx.prisma.token.create({
+        data: { kind: 'VERIFY_EMAIL', token: verificationToken, userId: user.id }
       });
 
       return null;
@@ -162,11 +158,9 @@ export default trpc
   })
   .query('get', {
     input: z.object({
-      id: z.string()
+      id: z.number().int()
     }),
-    resolve: async ({ input }) => {
-      const user = await userCollection.findOne({ _id: new ObjectId(input.id) });
-
-      return user;
+    resolve: async ({ input, ctx }) => {
+      return ctx.prisma.user.findUnique({ where: { id: input.id } });
     }
   });

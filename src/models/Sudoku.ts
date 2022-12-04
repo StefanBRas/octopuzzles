@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import { ObjectId } from 'mongodb';
 
 export const MarginsValidator = z.object({
   /** The width of the left edge of the frame */
@@ -53,8 +52,8 @@ export type RegionType = z.infer<typeof RegionTypeValidator>;
 export const RegionValidator = z.object({
   positions: z.array(PositionValidator),
   type: RegionTypeValidator.optional(),
-  color: ColorValidator.nullish(),
-  borders: z.boolean().nullish()
+  color: ColorValidator.optional(),
+  borders: z.boolean().optional()
 });
 
 export type Region = z.infer<typeof RegionValidator>;
@@ -77,9 +76,9 @@ export type CageType = z.infer<typeof CageTypeValidator>;
 
 export const ExtendedcageValidator = z.object({
   positions: z.array(PositionValidator),
-  type: CageTypeValidator.nullish(),
-  text: z.string().nullish(),
-  color: ColorValidator.nullish()
+  type: CageTypeValidator.optional(),
+  text: z.string().optional(),
+  color: ColorValidator.optional()
 });
 export type Extendedcage = z.infer<typeof ExtendedcageValidator>;
 
@@ -108,11 +107,11 @@ export type Fill = z.infer<typeof FillValidator>;
 export const PathValidator = z.object({
   positions: z.array(PositionValidator),
   type: PathTypeValidator.optional(),
-  color: ColorValidator.nullish(),
-  width: z.number().int().nullish(), // up to 100%
-  form: FormValidator.nullish(),
-  fill: FillValidator.nullish(),
-  arrow: z.boolean().nullish()
+  color: ColorValidator.optional(),
+  width: z.number().int().optional(), // up to 100%
+  form: FormValidator.optional(),
+  fill: FillValidator.optional(),
+  arrow: z.boolean().optional()
 });
 export type Path = z.infer<typeof PathValidator>;
 
@@ -133,10 +132,10 @@ export type Shape = z.infer<typeof ShapeValidator>;
 export const BorderclueValidator = z.object({
   positions: z.array(PositionValidator).length(2),
   type: BorderClueTypeValidator.optional(),
-  shape: ShapeValidator.nullish(),
-  color: ColorValidator.nullish(),
-  radius: z.number().int().nullish(), // up to 100%
-  text: z.string().nullish()
+  shape: ShapeValidator.optional(),
+  color: ColorValidator.optional(),
+  radius: z.number().int().optional(), // up to 100%
+  text: z.string().optional()
 });
 export type Borderclue = z.infer<typeof BorderclueValidator>;
 
@@ -195,9 +194,9 @@ export const CellclueValidator = z.object({
   position: PositionValidator,
   type: CellClueTypeValidator.optional(),
   location: CellClueLocationValidator.optional(),
-  text: z.string().nullish(),
+  text: z.string().optional(),
   size: CellClueSizeValidator.optional(),
-  symbol: SymbolTypeValidator.nullish(),
+  symbol: SymbolTypeValidator.optional(),
   rotation: RotationValidator.optional(),
   color: ColorValidator.optional()
 });
@@ -223,8 +222,8 @@ export type LogicFlag = z.infer<typeof LogicFlagValidator>;
 
 export const LogicValidator = z.object({
   /** the valid digits expected in the puzzle, as a comma separated list of ranges (num or alpha). If None, defaults to 1-9 */
-  digits: z.string().nullish(),
-  flags: z.array(LogicFlagValidator).nullish()
+  digits: z.string().optional(),
+  flags: z.array(LogicFlagValidator).optional()
 });
 export type Logic = z.infer<typeof LogicValidator>;
 
@@ -234,7 +233,7 @@ export type Cells = z.infer<typeof CellsValidator>;
 export const GivensValidator = z.array(z.array(z.string()));
 export type Givens = z.infer<typeof GivensValidator>;
 
-export const EditorColorsValidator = z.array(z.array(ColorValidator.nullish()));
+export const EditorColorsValidator = z.array(z.array(ColorValidator.nullable()));
 export type EditorColors = z.infer<typeof EditorColorsValidator>;
 
 export const RegionsValidator = z.array(RegionValidator);
@@ -256,10 +255,11 @@ export const SolutionValidator = z.object({ numbers: z.array(z.array(z.string().
 export type Solution = z.infer<typeof SolutionValidator>;
 
 export const SudokuValidator = z.object({
+  id: z.number().int(),
   /** The id of the user who created the sudoku */
-  user_id: z.instanceof(ObjectId).nullish(),
+  userId: z.number().int().nullable(),
   /** When this sudoku became public */
-  public_since: z.date().nullish(),
+  publicSince: z.date().nullable(),
   /** The title of the sudoku */
   title: z.string().max(64).min(1),
   /** The description of the sudoku, e.g. rules, etc. */
@@ -271,44 +271,56 @@ export const SudokuValidator = z.object({
   /** The dimensions of the sudoku, i.e. the number of rows and columns */
   dimensions: DimensionsValidator,
   /** The cells that are interactable in the sudoku. */
-  cells: CellsValidator.nullish(),
+  cells: CellsValidator.nullable(),
   /** The givens in the sudoku.  */
-  givens: GivensValidator.nullish(),
+  givens: GivensValidator.nullable(),
   /** The colors in the cells of the sudoku. */
-  colors: EditorColorsValidator.nullish(),
+  colors: EditorColorsValidator.nullable(),
   /** The regions of the sudoku. */
-  regions: RegionsValidator.nullish(),
+  regions: RegionsValidator.nullable(),
   /** The dotted boxes (killer cages) in the grid, with optional rendering settings */
-  extendedcages: ExtendedcagesValidator.nullish(),
+  extendedcages: ExtendedcagesValidator.nullable(),
   /** The paths in the sudoku, i.e. thermometers, etc. */
-  paths: PathsValidator.nullish(),
+  paths: PathsValidator.nullable(),
   /** The borderclues of the sudoku. That is, a clue lying on a border. If null, there are no border clues */
-  borderclues: BordercluesValidator.nullish(),
+  borderclues: BordercluesValidator.nullable(),
   /** The cellclues of the sudoku. That is, a clue contained within a cell. If null, there are no cell clues */
-  cellclues: CellcluesValidator.nullish(),
+  cellclues: CellcluesValidator.nullable(),
   /** The global sudoku logic in the grid. */
-  logic: LogicValidator.nullish(),
+  logic: LogicValidator.nullable(),
   /** The solution to the puzzle if any is given */
-  solution: SolutionValidator.nullish(),
-  /** A list of labels on this sudoku */
-  labels: z.array(z.string()).nullish(),
+  solution: SolutionValidator.nullable(),
   /** The time when the user was created */
-  created_at: z.date(),
+  createdAt: z.date(),
   /** The last time the user was updated */
-  updated_at: z.date()
+  updatedAt: z.date()
 });
 export type Sudoku = z.infer<typeof SudokuValidator>;
 
-export const NewSudokuValidator = SudokuValidator.omit({
-  created_at: true,
-  updated_at: true,
-  user_id: true,
-  rank: true,
-  points: true,
-  public_since: true,
-  solution: true,
-  labels: true
-}).extend({
-  labels: z.array(z.string()).nullish()
+export const NewSudokuValidator = z.object({
+  /** The title of the sudoku */
+  title: z.string().max(64).min(1),
+  /** The description of the sudoku, e.g. rules, etc. */
+  description: z.string().max(4096).min(1),
+  /** The dimensions of the sudoku, i.e. the number of rows and columns */
+  dimensions: DimensionsValidator,
+  /** The cells that are interactable in the sudoku. */
+  cells: CellsValidator.optional(),
+  /** The givens in the sudoku.  */
+  givens: GivensValidator.optional(),
+  /** The colors in the cells of the sudoku. */
+  colors: EditorColorsValidator.optional(),
+  /** The regions of the sudoku. */
+  regions: RegionsValidator.optional(),
+  /** The dotted boxes (killer cages) in the grid, with optional rendering settings */
+  extendedcages: ExtendedcagesValidator.optional(),
+  /** The paths in the sudoku, i.e. thermometers, etc. */
+  paths: PathsValidator.optional(),
+  /** The borderclues of the sudoku. That is, a clue lying on a border. If null, there are no border clues */
+  borderclues: BordercluesValidator.optional(),
+  /** The cellclues of the sudoku. That is, a clue contained within a cell. If null, there are no cell clues */
+  cellclues: CellcluesValidator.optional(),
+  /** The global sudoku logic in the grid. */
+  logic: LogicValidator.optional()
 });
 export const UpdateSudokuValidator = NewSudokuValidator.partial();

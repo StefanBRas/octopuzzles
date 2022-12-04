@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
-const LabelValidator = z.object({
+export const LabelValidator = z.object({
+  id: z.number().int(),
   name: z.string(),
   description: z.string()
 });

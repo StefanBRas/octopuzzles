@@ -7,9 +7,10 @@ import sudokus from './sudokus';
 import users from './users';
 import walkthroughs from './walkthroughs';
 import votes from './votes';
+import prisma from '$utils/prisma';
 
 export const createContext = async (event: RequestEvent) => {
-  return { event };
+  return { event, prisma };
 };
 
 export type TRPCContext = inferAsyncReturnType<typeof createContext>;

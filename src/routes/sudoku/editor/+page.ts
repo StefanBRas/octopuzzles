@@ -2,7 +2,8 @@ import trpc from '$lib/client/trpc';
 import type { PageLoad } from './$types';
 
 export const load: PageLoad = async ({ fetch, url }) => {
-  const sudokuId = url.searchParams.get('id');
+  const sudokuIdParam = url.searchParams.get('id');
+  const sudokuId = sudokuIdParam ? parseInt(sudokuIdParam) : undefined;
   const trpcClient = trpc(fetch);
   const [sudoku, walkthrough] =
     sudokuId != null
