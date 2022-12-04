@@ -60,7 +60,7 @@ export default trpc
         .array(
           SudokuValidator.extend({
             labels: z.array(LabelValidator),
-            user: UserValidator.omit({ password: true })
+            user: UserValidator.omit({ password: true, email: true, verified: true })
           })
         )
         .parse(rawSudokus);
