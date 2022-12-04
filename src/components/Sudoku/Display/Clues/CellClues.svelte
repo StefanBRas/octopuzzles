@@ -9,7 +9,7 @@
   export let cellClues: Cellclues;
   export let interactive = false;
 
-  const horizontalOffset = (l?: CellClueLocation) => {
+  const horizontalOffset = (l?: CellClueLocation | null) => {
     switch (l) {
       case 'Top':
       case 'Center':
@@ -27,7 +27,7 @@
     }
   };
 
-  const verticalOffset = (l?: CellClueLocation) => {
+  const verticalOffset = (l?: CellClueLocation | null) => {
     switch (l) {
       case 'Left':
       case 'Center':

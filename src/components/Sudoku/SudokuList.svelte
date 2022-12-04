@@ -21,7 +21,9 @@
   import type { Label } from '$models/Label';
   import PuzzleLabel from '$ui/PuzzleLabel.svelte';
 
-  export let sudokus: (Sudoku & { user?: User; labels: Label[] })[] | null;
+  export let sudokus:
+    | (Sudoku & { user?: Omit<User, 'password' | 'email'>; labels: Label[] })[]
+    | null;
   export let hasNextPage: boolean;
   export let loading: boolean;
   export let loadNextPage: () => Promise<void>;

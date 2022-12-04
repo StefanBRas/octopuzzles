@@ -44,9 +44,9 @@ export default trpc
               password: false,
               id: true,
               username: true,
-              email: true,
+              email: false,
               role: true,
-              verified: true,
+              verified: false,
               createdAt: true,
               updatedAt: true
             }
