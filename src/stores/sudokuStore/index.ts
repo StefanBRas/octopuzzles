@@ -404,7 +404,7 @@ export function resetAll(): void {
   editorHistory.reset();
 }
 
-export function setMargins(margins?: Margins): void {
+export function setMargins(margins?: Margins | null): void {
   const dimensions = get(editorHistory.getClue('dimensions'));
   const borderclues = get(editorHistory.getClue('borderclues'));
   const cellclues = get(editorHistory.getClue('cellclues'));
