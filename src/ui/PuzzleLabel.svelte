@@ -8,10 +8,6 @@
 </script>
 
 <span
-  class={classNames(
-    'rounded-full text-sm px-2 py-1 whitespace-nowrap',
-    { 'bg-gray-300': !className.includes('bg-') },
-    className
-  )}
+  class={classNames('rounded-full text-sm px-2 py-1 whitespace-nowrap bg-gray-300', className)}
   title={label.description}>{label.name}</span
 >
