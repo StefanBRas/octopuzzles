@@ -11,6 +11,13 @@ import { gameHistory } from './sudokuStore';
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function createWalkthroughStore() {
   const steps = writable<{ description: string; step: SolutionStep }[]>([]);
+  const currentStepIndex = writable<number>(0);
+
+  function set(newSteps:{ description: string; step: SolutionStep }[]) {
+    steps.set(newSteps);
+
+    currentStepIndex.set(0);
+  }
 
   function changeDescriptionOfStep(stepIndex: number, newDescription: string): void {
     const currentSteps = deepCopy(get(steps));
@@ -42,7 +49,7 @@ function createWalkthroughStore() {
     const colors = deepCopy(get(gameHistory.getValue('colors')));
 
     const newStep = {
-      description: '',
+      description: stepIndex >= 0 && replace ? currentSteps[stepIndex].description : '',
       step: {
         values,
         cornermarks,
@@ -57,14 +64,21 @@ function createWalkthroughStore() {
     } else {
       steps.set([...currentSteps, newStep]);
     }
+
+    currentStepIndex.set(stepIndex > -1 ? stepIndex : currentSteps.length - 1)
+  }
+
+  function getCurrentStepNo() {
+    return get(currentStepIndex);
   }
 
   return {
     subscribe: steps.subscribe,
-    set: steps.set,
+    set,
     changeDescriptionOfStep,
     removeStep,
-    addStep
+    addStep,
+    getCurrentStepNo,
   };
 }
 
