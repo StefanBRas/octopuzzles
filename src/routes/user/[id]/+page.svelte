@@ -24,6 +24,7 @@
     let sudokuData = await trpc().query('sudokus:search', {
       labels: [],
       limit: 24,
+      userId: data.user.id,
       cursor: nextCursor ?? undefined
     });
     data.sudokus = sudokuData;
@@ -65,5 +66,5 @@
   {loadNextPage}
   {loading}
   sudokus={data.sudokus.sudokus ?? null}
-  deleteSudoku={data.me != null ? deleteSudoku : undefined}
+  deleteSudoku={data.me != null && data.me.id === data.user.id ? deleteSudoku : undefined}
 />

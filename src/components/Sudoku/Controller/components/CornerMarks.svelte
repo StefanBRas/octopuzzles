@@ -6,6 +6,7 @@
   import SquareButton from '$ui/SquareButton.svelte';
   import classNames from 'classnames';
   import { isDeleteKey } from '$utils/isDeleteKey';
+  import { hasOpenModals } from '$stores/modalStore';
 
   function handleClick(newCornermark: string): void {
     let currentCornermarks = get(gameHistory.getValue('cornermarks'));
@@ -53,6 +54,9 @@
   }
 
   function handleKeyDown(k: KeyboardEvent): void {
+    //do not accept keyboard input when any modal controls are open
+    if (hasOpenModals()) return;
+
     if (isDeleteKey(k)) {
       k.preventDefault();
       handleClick('');

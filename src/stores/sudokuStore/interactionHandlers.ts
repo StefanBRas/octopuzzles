@@ -1,4 +1,5 @@
 import type { Position } from '$models/Sudoku';
+import { hasOpenModals } from '$stores/modalStore';
 import { isCommandKey } from '$utils/isCommandKey';
 import { get } from 'svelte/store';
 import { editorHistory, selectedCells } from '.';
@@ -60,6 +61,9 @@ export const defaultHandleMouseEnter: MouseEnterHandler = ({ cell, mouseDown }) 
 
 /** Default action to run when user moves around with the arrow buttons */
 export const defaultHandleArrows: ArrowHandler = ({ k }) => {
+  //do not accept keyboard input when any modal controls are open
+  if (hasOpenModals()) return;
+
   const cells = get(selectedCells);
   const dim = get(editorHistory.getClue('dimensions'));
   const lastCell = cells[cells.length - 1];

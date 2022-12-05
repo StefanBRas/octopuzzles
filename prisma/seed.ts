@@ -202,7 +202,7 @@ const main = async (): Promise<void> => {
       },
       {
         id: 29,
-        name: 'Equal Sum Lines',
+        name: 'Region-Sum Lines',
         description:
           'Digits along a line must sum to the same total in each region the line passes through. Each time a line passes through a region should be considered as a separate total'
       },
@@ -251,6 +251,18 @@ const main = async (): Promise<void> => {
         name: 'Chaos Construction',
         description:
           'Digits may not repeat in any region; regions are to be determined by the solver'
+      },
+      {
+        id: 38,
+        name: 'Product-Sum Lines',
+        description:
+          'Digits along a line must sum to the product of the digits in the two connected squares'
+      },
+      {
+        id: 39,
+        name: 'Entropic Lines',
+        description:
+          'Every set of 3 consecutive digits along a line must contain one low digit (123), one medium digit (456) and one high digit (789)'
       }
     ].map(async (label) => {
       await prisma.label.upsert({ where: { id: label.id }, update: {}, create: label });

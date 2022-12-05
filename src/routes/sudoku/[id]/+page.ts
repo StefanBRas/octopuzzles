@@ -7,7 +7,7 @@ export const load: PageLoad = async ({ fetch, params }) => {
   const sudokuId = parseInt(params.id);
   const [sudoku, walkthrough] = await Promise.all([
     trpcClient.query('sudokus:get', { id: sudokuId }),
-    trpcClient.query('walkthrougs:get', { sudokuId })
+    trpcClient.query('walkthroughs:get', { sudokuId })
   ]);
   if (sudoku == null) {
     throw error(404, 'Not found');

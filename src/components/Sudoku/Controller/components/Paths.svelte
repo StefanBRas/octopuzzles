@@ -39,6 +39,7 @@
   import Square from '$icons/shapes/Square.svelte';
   import Diamond from '$icons/shapes/Diamond.svelte';
   import type { Path, PathType, Position } from '$models/Sudoku';
+  import { hasOpenModals } from '$stores/modalStore';
 
   const paths = editorHistory.getClue('paths');
 
@@ -59,6 +60,8 @@
     'Palindrome',
     'AntiFactor',
     'EqualSum',
+    'ProductSum',
+    'Entropic',
     'Odd',
     'Even',
     'Pill'
@@ -246,6 +249,9 @@
   };
 
   const customHandleArrows: ArrowHandler = ({ k, metaButtonClicked }) => {
+    //do not accept keyboard input when any modal controls are open
+    if (hasOpenModals()) return;
+
     if (!metaButtonClicked) {
       defaultHandleArrows({ k, metaButtonClicked });
       return;
@@ -312,6 +318,9 @@
   });
 
   function handleKeyDown(k: KeyboardEvent): void {
+    //do not accept keyboard input when any modal controls are open
+    if (hasOpenModals()) return;
+
     if (isDeleteKey(k)) {
       if ($selectedItemIndex !== undefined) {
         deletePathAtIndex($selectedItemIndex);
@@ -422,9 +431,9 @@
       <Label id="pen">Pen</Label>
       <RadioGroup
         options={{
-          ROUND: { icon: Circle, color, size: 16 },
-          SQUARE: { icon: Square, color, size: 16 },
-          DIAMOND: { icon: Diamond, color, size: 16 }
+          Round: { icon: Circle, color, size: 16 },
+          Square: { icon: Square, color, size: 16 },
+          Diamond: { icon: Diamond, color, size: 16 }
         }}
         bind:value={form}
         onChange={() => updateSelectedPath()}
