@@ -104,6 +104,15 @@
             {/if}
           </p>
         </div>
+        {#if sudoku.labels}
+          <div class="flex gap-2 pt-2">
+            {#each sudoku.labels as label}
+              <a href="/?label={label.id}">
+                <PuzzleLabel {label} class="hover:bg-gray-200 transition-colors" />
+              </a>
+            {/each}
+          </div>
+        {/if}
       </div>
     </div>
 
@@ -137,17 +146,7 @@
     </div>
   </div>
 
-  <hr />
-
-  {#if sudoku.labels}
-    <div class="flex gap-2 mb-4">
-      {#each sudoku.labels as label}
-        <a href="/?label={label.id}">
-          <PuzzleLabel {label} class="hover:bg-gray-200 transition-colors" />
-        </a>
-      {/each}
-    </div>
-  {/if}
+  <hr class="mb-4" />
 
   <p class="whitespace-pre-line max-w-7xl">{sudoku.description}</p>
 
