@@ -17,7 +17,7 @@ import {
 import { getJwt } from '$utils/jwt/getJwt';
 import type { Sudoku } from '@prisma/client';
 import { LabelValidator } from '$models/Label';
-import { FrontendUserValidator, UserValidator } from '$models/User';
+import { FrontendUserValidator } from '$models/User';
 
 export default trpc
   .router<TRPCContext>()

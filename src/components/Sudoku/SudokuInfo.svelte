@@ -20,7 +20,7 @@
   import trpc from '$lib/client/trpc';
 
   export let sudoku: Sudoku & {
-    user?: User | null;
+    user?: Pick<User, 'id' | 'username' | 'role'> | null;
     userVote?: Vote | null;
     labels: Label[];
   };
