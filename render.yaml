@@ -11,7 +11,9 @@ services:
     pullRequestPreviewsEnabled: true
     buildFilter:
       paths:
-        - src/**/*.js
+        - src/**/*.svelte
+        - src/**/*.ts
+        - src/**/*.html
       ignoredPaths:
         - src/**/*.test.js
     envVars:
