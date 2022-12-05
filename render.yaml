@@ -1,3 +1,4 @@
+previewsEnabled: true
 services:
   # A Docker web service
   - type: web
@@ -11,7 +12,9 @@ services:
     pullRequestPreviewsEnabled: true
     buildFilter:
       paths:
-        - src/**/*.js
+        - src/**/*.svelte
+        - src/**/*.ts
+        - src/**/*.html
       ignoredPaths:
         - src/**/*.test.js
     envVars:
@@ -29,6 +32,7 @@ services:
         sync: false
       - key: BASE_URL
         value: https://www.octopuzzles.com
+        previewValue: REPLACE_ME
       - key: JWT_SECRET
         generateValue: true
 
