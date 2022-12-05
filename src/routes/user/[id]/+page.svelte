@@ -66,5 +66,5 @@
   {loadNextPage}
   {loading}
   sudokus={data.sudokus.sudokus ?? null}
-  deleteSudoku={data.me != null ? deleteSudoku : undefined}
+  deleteSudoku={data.me != null && data.me.id === data.user.id ? deleteSudoku : undefined}
 />
