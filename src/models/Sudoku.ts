@@ -19,7 +19,7 @@ export const DimensionsValidator = z.object({
   /** The number of columns in the sudoku */
   columns: z.number().int().min(1).max(36),
   /** The margins of the sudoku (for outside clues) */
-  margins: MarginsValidator.optional()
+  margins: MarginsValidator.nullish()
 });
 
 export type Dimensions = z.infer<typeof DimensionsValidator>;
@@ -51,9 +51,9 @@ export type RegionType = z.infer<typeof RegionTypeValidator>;
 
 export const RegionValidator = z.object({
   positions: z.array(PositionValidator),
-  type: RegionTypeValidator.optional(),
-  color: ColorValidator.optional(),
-  borders: z.boolean().optional()
+  type: RegionTypeValidator.nullish(),
+  color: ColorValidator.nullish(),
+  borders: z.boolean().nullish()
 });
 
 export type Region = z.infer<typeof RegionValidator>;
@@ -76,9 +76,9 @@ export type CageType = z.infer<typeof CageTypeValidator>;
 
 export const ExtendedcageValidator = z.object({
   positions: z.array(PositionValidator),
-  type: CageTypeValidator.optional(),
-  text: z.string().optional(),
-  color: ColorValidator.optional()
+  type: CageTypeValidator.nullish(),
+  text: z.string().nullish(),
+  color: ColorValidator.nullish()
 });
 export type Extendedcage = z.infer<typeof ExtendedcageValidator>;
 
@@ -108,12 +108,12 @@ export type Fill = z.infer<typeof FillValidator>;
 
 export const PathValidator = z.object({
   positions: z.array(PositionValidator),
-  type: PathTypeValidator.optional(),
-  color: ColorValidator.optional(),
-  width: z.number().int().optional(), // up to 100%
-  form: FormValidator.optional(),
-  fill: FillValidator.optional(),
-  arrow: z.boolean().optional()
+  type: PathTypeValidator.nullish(),
+  color: ColorValidator.nullish(),
+  width: z.number().int().nullish(), // up to 100%
+  form: FormValidator.nullish(),
+  fill: FillValidator.nullish(),
+  arrow: z.boolean().nullish()
 });
 export type Path = z.infer<typeof PathValidator>;
 
@@ -133,11 +133,11 @@ export type Shape = z.infer<typeof ShapeValidator>;
 
 export const BorderclueValidator = z.object({
   positions: z.array(PositionValidator).length(2),
-  type: BorderClueTypeValidator.optional(),
-  shape: ShapeValidator.optional(),
-  color: ColorValidator.optional(),
-  radius: z.number().int().optional(), // up to 100%
-  text: z.string().optional()
+  type: BorderClueTypeValidator.nullish(),
+  shape: ShapeValidator.nullish(),
+  color: ColorValidator.nullish(),
+  radius: z.number().int().nullish(), // up to 100%
+  text: z.string().nullish()
 });
 export type Borderclue = z.infer<typeof BorderclueValidator>;
 
@@ -194,13 +194,13 @@ export type Rotation = z.infer<typeof RotationValidator>;
 
 export const CellclueValidator = z.object({
   position: PositionValidator,
-  type: CellClueTypeValidator.optional(),
-  location: CellClueLocationValidator.optional(),
-  text: z.string().optional(),
-  size: CellClueSizeValidator.optional(),
-  symbol: SymbolTypeValidator.optional(),
-  rotation: RotationValidator.optional(),
-  color: ColorValidator.optional()
+  type: CellClueTypeValidator.nullish(),
+  location: CellClueLocationValidator.nullish(),
+  text: z.string().nullish(),
+  size: CellClueSizeValidator.nullish(),
+  symbol: SymbolTypeValidator.nullish(),
+  rotation: RotationValidator.nullish(),
+  color: ColorValidator.nullish()
 });
 export type Cellclue = z.infer<typeof CellclueValidator>;
 
@@ -224,8 +224,8 @@ export type LogicFlag = z.infer<typeof LogicFlagValidator>;
 
 export const LogicValidator = z.object({
   /** the valid digits expected in the puzzle, as a comma separated list of ranges (num or alpha). If None, defaults to 1-9 */
-  digits: z.string().optional(),
-  flags: z.array(LogicFlagValidator).optional()
+  digits: z.string().nullish(),
+  flags: z.array(LogicFlagValidator).nullish()
 });
 export type Logic = z.infer<typeof LogicValidator>;
 

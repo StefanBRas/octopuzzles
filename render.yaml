@@ -36,4 +36,6 @@ databases:
   - name: database
     databaseName: octopuzzles
     user: octopuzzles
-    ipAllowList: [] # only allow internal connections
+    ipAllowList: # required
+      - source: 0.0.0.0/0
+        description: everywhere

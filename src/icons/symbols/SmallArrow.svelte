@@ -4,7 +4,7 @@
 
   export let size = 64;
   export let color: Color;
-  export let rotation: Rotation | undefined;
+  export let rotation: Rotation | undefined | null;
   export let x = 0;
   export let y = 0;
 

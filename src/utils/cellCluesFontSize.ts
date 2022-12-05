@@ -1,6 +1,6 @@
 import type { CellClueSize } from '$models/Sudoku';
 
-export function cellCluesFontSize(s: string, size?: CellClueSize): string {
+export function cellCluesFontSize(s: string, size?: CellClueSize | null): string {
   let scale = 0;
   switch (s.length) {
     case 1:

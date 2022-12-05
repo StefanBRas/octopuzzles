@@ -40,7 +40,7 @@ export function emptyPath(positions: Position[], type?: PathType): Path {
   };
 }
 
-export function pathDefaults(type?: PathType | 'CUSTOM'): {
+export function pathDefaults(type?: PathType | 'CUSTOM' | null): {
   color: Color;
   width: number;
   form: Form;
@@ -232,7 +232,7 @@ export function emptyBorderClue(
   return { type, positions, color: undefined, radius: undefined, text: undefined };
 }
 
-export function borderClueDefaults(type?: BorderClueType | 'CUSTOM'): {
+export function borderClueDefaults(type?: BorderClueType | 'CUSTOM' | null): {
   shape: Shape;
   color: Color | 'NONE';
   radius: number;
@@ -308,7 +308,7 @@ export function emptyCellClue(position: Position, type?: CellClueType): Cellclue
   };
 }
 
-export function cellClueDefaults(type?: CellClueType | 'CUSTOM'): {
+export function cellClueDefaults(type?: CellClueType | 'CUSTOM' | null): {
   text: string;
   location: CellClueLocation;
   size: CellClueSize;
@@ -450,7 +450,7 @@ export function emptyRegion(positions: Position[], type?: RegionType): Region {
   return { type, positions, borders: undefined, color: undefined };
 }
 
-export function regionDefaults(type?: RegionType | 'CUSTOM'): {
+export function regionDefaults(type?: RegionType | 'CUSTOM' | null): {
   borders: boolean;
   color: Color | 'NONE';
 } {

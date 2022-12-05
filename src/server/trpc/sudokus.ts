@@ -44,9 +44,9 @@ export default trpc
               password: false,
               id: true,
               username: true,
-              email: true,
+              email: false,
               role: true,
-              verified: true,
+              verified: false,
               createdAt: true,
               updatedAt: true
             }
@@ -60,7 +60,7 @@ export default trpc
         .array(
           SudokuValidator.extend({
             labels: z.array(LabelValidator),
-            user: UserValidator.omit({ password: true })
+            user: UserValidator.omit({ password: true, email: true, verified: true })
           })
         )
         .parse(rawSudokus);
