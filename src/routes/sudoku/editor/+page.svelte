@@ -53,8 +53,8 @@
     loading = false;
   }
 
-  async function createOrUpdateWalkthrough(data: InferMutationInput<'walkthrougs:createOrUpdate'>) {
-    return await trpc().mutation('walkthrougs:createOrUpdate', data);
+  async function createOrUpdateWalkthrough(data: InferMutationInput<'walkthroughs:createOrUpdate'>) {
+    return await trpc().mutation('walkthroughs:createOrUpdate', data);
   }
 
   async function saveSolution(id: number): Promise<void> {
@@ -230,7 +230,7 @@
             steps: $walkthroughStore
           });
         } else {
-          await trpc().mutation('walkthrougs:delete', {
+          await trpc().mutation('walkthroughs:delete', {
             sudokuId: updatedSudoku.id
           });
         }
