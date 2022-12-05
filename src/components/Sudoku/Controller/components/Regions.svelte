@@ -246,6 +246,9 @@
   };
 
   const customHandleArrows: ArrowHandler = ({ k, metaButtonClicked }) => {
+    //do not accept keyboard input when any modal controls are open
+    if (hasOpenModals()) return;
+
     if (!metaButtonClicked) {
       defaultHandleArrows({ k, metaButtonClicked });
       return;
