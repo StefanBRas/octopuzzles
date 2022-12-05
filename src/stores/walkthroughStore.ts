@@ -25,7 +25,7 @@ function createWalkthroughStore() {
     steps.set(newSteps);
   }
 
-  function removeStepFromWalkthrough(stepIndex: number): void {
+  function removeStep(stepIndex: number): void {
     const currentSteps = deepCopy(get(steps));
 
     const newSteps = currentSteps.filter((_, i) => i !== stepIndex);
@@ -33,7 +33,7 @@ function createWalkthroughStore() {
     steps.set(newSteps);
   }
 
-  function addLatestStepToWalkthrough(): void {
+  function addStep(stepIndex = -1, replace = false): void {
     const currentSteps = deepCopy(get(steps));
     const values = deepCopy(get(gameHistory.getValue('values')));
     const cornermarks = deepCopy(get(gameHistory.getValue('cornermarks')));
@@ -41,27 +41,30 @@ function createWalkthroughStore() {
     const notes = deepCopy(get(gameHistory.getValue('notes')));
     const colors = deepCopy(get(gameHistory.getValue('colors')));
 
-    steps.set([
-      ...currentSteps,
-      {
-        description: '',
-        step: {
-          values,
-          cornermarks,
-          centermarks,
-          notes,
-          colors
-        }
-      }
-    ]);
+    const newStep = {
+      description: '',
+      step: {
+        values,
+        cornermarks,
+        centermarks,
+        notes,
+        colors
+      }};
+
+    if (stepIndex > -1) {
+      currentSteps.splice(stepIndex, replace ? 1 : 0, newStep);
+      steps.set(currentSteps);
+    } else {
+      steps.set([...currentSteps, newStep]);
+    }
   }
 
   return {
     subscribe: steps.subscribe,
     set: steps.set,
     changeDescriptionOfStep,
-    removeStepFromWalkthrough,
-    addLatestStepToWalkthrough
+    removeStep,
+    addStep
   };
 }
 

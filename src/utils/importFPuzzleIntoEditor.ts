@@ -305,7 +305,7 @@ export function importFPuzzleIntoEditorHistory(fpuzzle: FPuzzlesJson): void {
             shape: 'Circle',
             color: circle.baseC === '#FFFFFF' ? 'White' : closestColor(circle.baseC),
             positions: positions as [Position, Position],
-            radius: circle.width * 50,
+            radius: Math.floor(circle.width * 50),
             text: circle.value ?? undefined
           });
         } else if (circle.cells.length === 1) {
@@ -316,7 +316,7 @@ export function importFPuzzleIntoEditorHistory(fpuzzle: FPuzzlesJson): void {
             fill: circle.baseC === '#FFFFFF' ? 'Hollow' : 'Solid',
             form: 'Round',
             positions: positions,
-            width: circle.width * 100
+            width: Math.floor(circle.width * 100)
           });
 
           if (circle.baseC !== '#FFFFFF' && circle.baseC !== circle.outlineC) {
@@ -328,7 +328,7 @@ export function importFPuzzleIntoEditorHistory(fpuzzle: FPuzzlesJson): void {
               fill: 'Solid',
               form: 'Round',
               positions: positions,
-              width: Math.min(circle.width * 100 - 3)
+              width: Math.min(Math.floor(circle.width * 100) - 3)
             });
           }
 
@@ -434,7 +434,7 @@ export function importFPuzzleIntoEditorHistory(fpuzzle: FPuzzlesJson): void {
             fill: 'Solid',
             form: 'Round',
             positions,
-            width: lines.width * 50
+            width: Math.floor(lines.width * 50)
           });
         }
       }
@@ -592,7 +592,7 @@ export function importFPuzzleIntoEditorHistory(fpuzzle: FPuzzlesJson): void {
             shape: diamond ? 'Diamond' : 'Square',
             color: rectangle.baseC === '#FFFFFF' ? 'White' : closestColor(rectangle.baseC),
             positions: positions as [Position, Position],
-            radius: rectangle.width * (diamond ? 70.7 : 50),
+            radius: Math.floor(rectangle.width * (diamond ? 70.7 : 50)),
             text: rectangle.value ?? undefined
           });
         } else if (rectangle.cells.length === 1) {
@@ -603,7 +603,7 @@ export function importFPuzzleIntoEditorHistory(fpuzzle: FPuzzlesJson): void {
             fill: rectangle.baseC === '#FFFFFF' ? 'Hollow' : 'Solid',
             form: diamond ? 'Diamond' : 'Square',
             positions: positions,
-            width: rectangle.width * (diamond ? 141.4 : 100)
+            width: Math.floor(rectangle.width * (diamond ? 141.4 : 100))
           });
 
           if (rectangle.baseC !== '#FFFFFF' && rectangle.baseC !== rectangle.outlineC) {
@@ -615,7 +615,7 @@ export function importFPuzzleIntoEditorHistory(fpuzzle: FPuzzlesJson): void {
               fill: 'Solid',
               form: diamond ? 'Diamond' : 'Square',
               positions: positions,
-              width: Math.min(rectangle.width * 100 - 3, 0)
+              width: Math.min(Math.floor(rectangle.width * 100) - 3, 0)
             });
           }
 

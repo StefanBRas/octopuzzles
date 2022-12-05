@@ -5,6 +5,8 @@
   import Button from '$ui/Button.svelte';
   import ArrowsCounterClockwise from 'phosphor-svelte/lib/ArrowsCounterClockwise/ArrowsCounterClockwise.svelte';
   import Trash from 'phosphor-svelte/lib/Trash/Trash.svelte';
+  import Swap from 'phosphor-svelte/lib/Swap/Swap.svelte';
+  import ArrowsOutLineVertical from 'phosphor-svelte/lib/ArrowsOutLineVertical/ArrowsOutLineVertical.svelte';
 
   export let editable = false;
   export let isOpen: boolean;
@@ -50,11 +52,24 @@
             on:click={() => {
               gameHistory.set(step);
             }}
-            title="Reset from this step"><ArrowsCounterClockwise size={16} /></button
+            title="Reset to this step"><ArrowsCounterClockwise size={16} /></button
           >
           {#if editable}
             <button
-              on:click={() => walkthroughStore.removeStepFromWalkthrough(i)}
+              on:click={() => walkthroughStore.addStep(i)}
+              title="Insert a new step"
+              class="w-6 h-6 rounded-full p-1 hover:bg-red-100 hover:text-red-600"
+              ><ArrowsOutLineVertical size={16} /></button
+            >
+            <button
+              on:click={() => walkthroughStore.addStep(i, true)}
+              title="Replace this step"
+              class="w-6 h-6 rounded-full p-1 hover:bg-red-100 hover:text-red-600"
+              ><Swap size={16} /></button
+            >
+            <button
+              on:click={() => walkthroughStore.removeStep(i)}
+              title="Delete this step"
               class="w-6 h-6 rounded-full p-1 hover:bg-red-100 hover:text-red-600"
               ><Trash size={16} /></button
             >
@@ -100,8 +115,8 @@
 
     {#if editable}
       <div class="w-full flex justify-center mt-2">
-        <Button variant="primary" on:click={() => walkthroughStore.addLatestStepToWalkthrough()}>
-          Add last step to walkthrough
+        <Button variant="primary" on:click={() => walkthroughStore.addStep()}>
+          Add step to walkthrough
         </Button>
       </div>
     {/if}

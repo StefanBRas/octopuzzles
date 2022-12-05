@@ -19,3 +19,5 @@ declare module 'phosphor-svelte/lib/FileArrowUp/FileArrowUp.svelte';
 declare module 'phosphor-svelte/lib/ArrowCounterClockwise/ArrowCounterClockwise.svelte';
 declare module 'phosphor-svelte/lib/ArrowUUpRight/ArrowUUpRight.svelte';
 declare module 'phosphor-svelte/lib/ArrowUUpLeft/ArrowUUpLeft.svelte';
+declare module 'phosphor-svelte/lib/Swap/Swap.svelte';
+declare module 'phosphor-svelte/lib/ArrowsOutLineVertical/ArrowsOutLineVertical.svelte';

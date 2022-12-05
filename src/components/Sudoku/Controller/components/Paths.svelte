@@ -59,6 +59,8 @@
     'Palindrome',
     'AntiFactor',
     'EqualSum',
+    'ProductSum',
+    'Entropic',
     'Odd',
     'Even',
     'Pill'
@@ -422,9 +424,9 @@
       <Label id="pen">Pen</Label>
       <RadioGroup
         options={{
-          ROUND: { icon: Circle, color, size: 16 },
-          SQUARE: { icon: Square, color, size: 16 },
-          DIAMOND: { icon: Diamond, color, size: 16 }
+          Round: { icon: Circle, color, size: 16 },
+          Square: { icon: Square, color, size: 16 },
+          Diamond: { icon: Diamond, color, size: 16 }
         }}
         bind:value={form}
         onChange={() => updateSelectedPath()}

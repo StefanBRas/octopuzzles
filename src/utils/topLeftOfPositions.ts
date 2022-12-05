@@ -5,25 +5,14 @@ import type { Position } from '$models/Sudoku';
  * Prioritises tops.
  * If leftmost has lower index than topmost, uses left most, otherwise topmost
  */
-export function topLeftOfPositions(positions: Position[]): Position {
-  let leftMostPosition = positions[0];
-  let topMostPosition = positions[0];
-
-  for (const position of positions) {
-    if (
-      position.column < leftMostPosition.column ||
-      (position.column == leftMostPosition.column && position.row < leftMostPosition.row)
-    ) {
-      leftMostPosition = position;
-    }
-
-    if (
-      position.row < topMostPosition.row ||
-      (position.row == topMostPosition.row && position.column < topMostPosition.column)
-    ) {
-      topMostPosition = position;
-    }
-  }
-
-  return leftMostPosition.column < topMostPosition.row ? leftMostPosition : topMostPosition;
+ export function topLeftOfPositions(positions: Position[]): Position {
+	let topLeft = positions[0];
+	for (const position of positions) {
+		if (position.row < topLeft.row) {
+			topLeft = position;
+		} else if (position.row == topLeft.row && position.column < topLeft.column) {
+			topLeft = position;
+		}
+	}
+	return topLeft;
 }
