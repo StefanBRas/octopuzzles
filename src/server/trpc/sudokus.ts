@@ -17,7 +17,7 @@ import {
 import { getJwt } from '$utils/jwt/getJwt';
 import type { Sudoku } from '@prisma/client';
 import { LabelValidator } from '$models/Label';
-import { UserValidator } from '$models/User';
+import { FrontendUserValidator, UserValidator } from '$models/User';
 
 export default trpc
   .router<TRPCContext>()
@@ -41,14 +41,9 @@ export default trpc
           labels: true,
           user: {
             select: {
-              password: false,
               id: true,
               username: true,
-              email: false,
-              role: true,
-              verified: false,
-              createdAt: true,
-              updatedAt: true
+              role: true
             }
           }
         },
@@ -60,7 +55,7 @@ export default trpc
         .array(
           SudokuValidator.extend({
             labels: z.array(LabelValidator),
-            user: UserValidator.omit({ password: true, email: true, verified: true })
+            user: FrontendUserValidator
           })
         )
         .parse(rawSudokus);
@@ -83,12 +78,15 @@ export default trpc
       const userId = jwtToken?.id;
       const sudokuRaw = await ctx.prisma.sudoku.findUnique({
         where: { id: input.id },
-        include: { user: true, labels: true }
+        include: {
+          user: { select: { id: true, username: true, role: true } },
+          labels: true
+        }
       });
       if (sudokuRaw == null) return null;
 
       const sudoku = SudokuValidator.extend({
-        user: UserValidator,
+        user: FrontendUserValidator,
         labels: z.array(LabelValidator)
       }).parse(sudokuRaw);
 
