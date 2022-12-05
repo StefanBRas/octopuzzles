@@ -7,8 +7,12 @@
   import { numberColorMap } from '$constants';
   import { isDeleteKey } from '$utils/isDeleteKey';
   import type { Color } from '$models/Sudoku';
+    import { hasOpenModals } from '$stores/modalStore';
 
   function handleKeyDown(k: KeyboardEvent): void {
+    //do not accept keyboard input when any modal controls are open
+    if (hasOpenModals()) return;
+    
     if (isDeleteKey(k)) {
       k.preventDefault();
       handleClick(undefined);

@@ -31,6 +31,7 @@
   import Star from '$icons/shapes/Star.svelte';
   import Line from '$icons/shapes/Line.svelte';
   import type { Borderclue, BorderClueType, Position } from '$models/Sudoku';
+    import { hasOpenModals } from '$stores/modalStore';
 
   let borderClues = editorHistory.getClue('borderclues');
 
@@ -181,6 +182,9 @@
   };
 
   function handleKeyDown(k: KeyboardEvent): void {
+    //do not accept keyboard input when any modal controls are open
+    if (hasOpenModals()) return;
+
     if (!isArrowKey(k.key)) {
       input.focus();
     }

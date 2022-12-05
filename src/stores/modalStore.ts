@@ -91,3 +91,5 @@ export function openModal<T extends Record<string, any>>(
 function pop(amount = 1): void {
   modals.update((prev) => prev.slice(0, Math.max(0, prev.length - amount)));
 }
+
+export function hasOpenModals() : boolean { return get(modals).length > 0; }

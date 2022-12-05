@@ -33,6 +33,7 @@
   import { regionTypeNames, regionTypesToLabel } from '$constants';
   import moveArrayElement from '$utils/moveArrayElement';
   import type { Position, Region, RegionType } from '$models/Sudoku';
+    import { hasOpenModals } from '$stores/modalStore';
 
   const regions = editorHistory.getClue('regions');
 
@@ -149,6 +150,9 @@
   };
 
   function handleKeyDown(k: KeyboardEvent): void {
+    //do not accept keyboard input when any modal controls are open
+    if (hasOpenModals()) return;
+    
     if (isDeleteKey(k)) {
       if ($selectedItemIndex !== undefined) {
         deleteRegionAtIndex($selectedItemIndex);
