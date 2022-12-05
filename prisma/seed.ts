@@ -263,7 +263,7 @@ const main = async (): Promise<void> => {
         name: 'Entropic Lines',
         description:
           'Every set of 3 consecutive digits along a line must contain one low digit (123), one medium digit (456) and one high digit (789)'
-      },
+      }
     ].map(async (label) => {
       await prisma.label.upsert({ where: { id: label.id }, update: {}, create: label });
     })

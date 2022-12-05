@@ -13,7 +13,7 @@ function createWalkthroughStore() {
   const steps = writable<{ description: string; step: SolutionStep }[]>([]);
   const currentStepIndex = writable<number>(0);
 
-  function set(newSteps:{ description: string; step: SolutionStep }[]) {
+  function set(newSteps: { description: string; step: SolutionStep }[]) {
     steps.set(newSteps);
 
     currentStepIndex.set(0);
@@ -56,7 +56,8 @@ function createWalkthroughStore() {
         centermarks,
         notes,
         colors
-      }};
+      }
+    };
 
     if (stepIndex > -1) {
       currentSteps.splice(stepIndex, replace ? 1 : 0, newStep);
@@ -65,7 +66,7 @@ function createWalkthroughStore() {
       steps.set([...currentSteps, newStep]);
     }
 
-    currentStepIndex.set(stepIndex > -1 ? stepIndex : currentSteps.length - 1)
+    currentStepIndex.set(stepIndex > -1 ? stepIndex : currentSteps.length - 1);
   }
 
   function getCurrentStepNo() {
@@ -78,7 +79,7 @@ function createWalkthroughStore() {
     changeDescriptionOfStep,
     removeStep,
     addStep,
-    getCurrentStepNo,
+    getCurrentStepNo
   };
 }
 

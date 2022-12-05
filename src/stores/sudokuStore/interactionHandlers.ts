@@ -63,7 +63,7 @@ export const defaultHandleMouseEnter: MouseEnterHandler = ({ cell, mouseDown }) 
 export const defaultHandleArrows: ArrowHandler = ({ k }) => {
   //do not accept keyboard input when any modal controls are open
   if (hasOpenModals()) return;
-  
+
   const cells = get(selectedCells);
   const dim = get(editorHistory.getClue('dimensions'));
   const lastCell = cells[cells.length - 1];

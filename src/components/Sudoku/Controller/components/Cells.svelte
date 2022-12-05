@@ -3,7 +3,7 @@
   import { editorHistory, selectedCells } from '$stores/sudokuStore';
   import deepCopy from '$utils/deepCopy';
   import { isDeleteKey } from '$utils/isDeleteKey';
-    import { hasOpenModals } from '$stores/modalStore';
+  import { hasOpenModals } from '$stores/modalStore';
 
   let cells = editorHistory.getClue('cells');
 
@@ -22,7 +22,7 @@
   function handleKeyDown(k: KeyboardEvent): void {
     //do not accept keyboard input when any modal controls are open
     if (hasOpenModals()) return;
-    
+
     if (isDeleteKey(k)) {
       handleClick(false);
     } else if (k.key === 'Enter') {

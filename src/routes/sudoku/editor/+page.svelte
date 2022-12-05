@@ -53,7 +53,9 @@
     loading = false;
   }
 
-  async function createOrUpdateWalkthrough(data: InferMutationInput<'walkthroughs:createOrUpdate'>) {
+  async function createOrUpdateWalkthrough(
+    data: InferMutationInput<'walkthroughs:createOrUpdate'>
+  ) {
     return await trpc().mutation('walkthroughs:createOrUpdate', data);
   }
 

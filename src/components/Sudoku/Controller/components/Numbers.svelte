@@ -5,7 +5,7 @@
   import deepCopy from '$utils/deepCopy';
   import { get } from 'svelte/store';
   import { isDeleteKey } from '$utils/isDeleteKey';
-    import { hasOpenModals } from '$stores/modalStore';
+  import { hasOpenModals } from '$stores/modalStore';
 
   function handleClick(newValue: string): void {
     const positions = get(selectedCells);
@@ -62,7 +62,7 @@
   function handleKeyDown(k: KeyboardEvent): void {
     //do not accept keyboard input when any modal controls are open
     if (hasOpenModals()) return;
-    
+
     if (isDeleteKey(k)) {
       handleClick('');
     } else if (['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'].includes(k.key)) {

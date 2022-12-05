@@ -39,7 +39,7 @@
   import Square from '$icons/shapes/Square.svelte';
   import Diamond from '$icons/shapes/Diamond.svelte';
   import type { Path, PathType, Position } from '$models/Sudoku';
-    import { hasOpenModals } from '$stores/modalStore';
+  import { hasOpenModals } from '$stores/modalStore';
 
   const paths = editorHistory.getClue('paths');
 
@@ -317,7 +317,7 @@
   function handleKeyDown(k: KeyboardEvent): void {
     //do not accept keyboard input when any modal controls are open
     if (hasOpenModals()) return;
-    
+
     if (isDeleteKey(k)) {
       if ($selectedItemIndex !== undefined) {
         deletePathAtIndex($selectedItemIndex);

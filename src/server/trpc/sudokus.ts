@@ -33,8 +33,11 @@ export default trpc
       const limit = input.limit ?? 24;
 
       const rawSudokus = await ctx.prisma.sudoku.findMany({
-        where: {          
-          publicSince: (jwtToken !== null && input.userId === jwtToken.id) ? { lt: input.cursor } : { not: null, lt: input.cursor },
+        where: {
+          publicSince:
+            jwtToken !== null && input.userId === jwtToken.id
+              ? { lt: input.cursor }
+              : { not: null, lt: input.cursor },
           userId: input.userId,
           labels: input.labels.length > 0 ? { some: { id: { in: input.labels } } } : undefined
         },

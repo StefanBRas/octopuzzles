@@ -202,7 +202,7 @@ export function getPathsToDraw(path: Path): Path[] {
       break;
     }
     case 'Between':
-    case 'Lockout': 
+    case 'Lockout':
     case 'ProductSum': {
       const firstPosition = path.positions[0];
       const lastPosition = path.positions[path.positions.length - 1];
@@ -213,7 +213,9 @@ export function getPathsToDraw(path: Path): Path[] {
           arrow: false,
           color: path.color ?? defaultSettings.color,
           fill: 'Hollow',
-          form: path.form ?? (path.type === 'Between' ? 'Round' : path.type === 'Lockout' ? 'Diamond' : 'Square'),
+          form:
+            path.form ??
+            (path.type === 'Between' ? 'Round' : path.type === 'Lockout' ? 'Diamond' : 'Square'),
           positions: [bulbPosition],
           width: path.type === 'ProductSum' ? 70 : 81
         });

@@ -5,7 +5,7 @@
   import deepCopy from '$utils/deepCopy';
   import SquareButton from '$ui/SquareButton.svelte';
   import { isDeleteKey } from '$utils/isDeleteKey';
-    import { hasOpenModals } from '$stores/modalStore';
+  import { hasOpenModals } from '$stores/modalStore';
 
   const handleClick = (newCentermark: string): void => {
     let currentCentermarks = get(gameHistory.getValue('centermarks'));
@@ -55,8 +55,8 @@
   function handleKeyDown(k: KeyboardEvent): void {
     //do not accept keyboard input when any modal controls are open
     if (hasOpenModals()) return;
-    
-        if (isDeleteKey(k)) {
+
+    if (isDeleteKey(k)) {
       k.preventDefault();
       handleClick('');
     } else if (['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'].includes(k.key)) {

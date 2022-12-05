@@ -34,7 +34,7 @@
   import { cageDefaults } from '$utils/prefabs';
   import moveArrayElement from '$utils/moveArrayElement';
   import type { CageType, Extendedcage, Position } from '$models/Sudoku';
-    import { hasOpenModals } from '$stores/modalStore';
+  import { hasOpenModals } from '$stores/modalStore';
 
   const cages = editorHistory.getClue('cages');
 
@@ -126,7 +126,7 @@
   function handleKeyDown(k: KeyboardEvent): void {
     //do not accept keyboard input when any modal controls are open
     if (hasOpenModals()) return;
-    
+
     if (!isArrowKey(k.key)) {
       input.focus();
     }

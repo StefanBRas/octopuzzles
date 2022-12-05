@@ -31,7 +31,7 @@
   import Star from '$icons/shapes/Star.svelte';
   import Line from '$icons/shapes/Line.svelte';
   import type { Borderclue, BorderClueType, Position } from '$models/Sudoku';
-    import { hasOpenModals } from '$stores/modalStore';
+  import { hasOpenModals } from '$stores/modalStore';
 
   let borderClues = editorHistory.getClue('borderclues');
 
