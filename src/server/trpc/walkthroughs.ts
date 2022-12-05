@@ -1,4 +1,4 @@
-import { WalkthroughStepValidator, WalkthroughValidator } from '$models/Walkthrough';
+import { WalkthroughStepValidator, WalkthroughValidator, type Walkthrough } from '$models/Walkthrough';
 import { getJwt } from '$utils/jwt/getJwt';
 import * as trpc from '@trpc/server';
 import { TRPCError } from '@trpc/server';
@@ -15,7 +15,7 @@ export default trpc
       const walkthroughRaw = await ctx.prisma.walkthrough.findFirst({
         where: { sudokuId: input.sudokuId }
       });
-      const walkthrough = WalkthroughValidator.parse(walkthroughRaw);
+      const walkthrough:Walkthrough | null = walkthroughRaw !== null ? WalkthroughValidator.parse(walkthroughRaw) : null;
       return walkthrough;
     }
   })

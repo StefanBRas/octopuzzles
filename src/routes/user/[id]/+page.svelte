@@ -24,6 +24,7 @@
     let sudokuData = await trpc().query('sudokus:search', {
       labels: [],
       limit: 24,
+      userId: data.user.id,
       cursor: nextCursor ?? undefined
     });
     data.sudokus = sudokuData;

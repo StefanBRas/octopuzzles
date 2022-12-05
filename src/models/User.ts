@@ -16,7 +16,7 @@ export const UserValidator = z.object({
     ),
   /** The email of the user */
   email: z.string().email(),
-  password: z.string().min(10).max(64),
+  password: z.string().min(10).max(256),
   /** The users permission role */
   role: RoleValidator,
   /** Whether the user has verified their account */

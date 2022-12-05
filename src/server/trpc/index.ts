@@ -21,7 +21,7 @@ export const router = trpc
   .merge('labels:', labels)
   .merge('users:', users)
   .merge('votes:', votes)
-  .merge('walkthrougs:', walkthroughs)
+  .merge('walkthroughs:', walkthroughs)
   .merge('sudokus:', sudokus);
 
 export type Router = typeof router;
