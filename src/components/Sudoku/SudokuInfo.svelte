@@ -17,7 +17,11 @@
   import type { User } from '$models/User';
   import type { Vote } from '$models/Vote';
   import type { Label } from '$models/Label';
-  import trpc from '$lib/client/trpc';
+  import trpc, { type InferQueryOutput } from '$lib/client/trpc';
+  import { onMount } from 'svelte';
+  import RichTextEditor from '$components/RichTextEditor.svelte';
+  import HtmlContent from './HTMLContent.svelte';
+  import Button from '$ui/Button.svelte';
 
   export let sudoku: Sudoku & {
     user?: Pick<User, 'id' | 'username' | 'role'> | null;
@@ -25,6 +29,36 @@
     labels: Label[];
   };
   export let takeScreenshot: () => void;
+
+  onMount(() => {
+    getComments();
+  });
+
+  let savingComment = false;
+  let commentContent = '';
+
+  async function postComment() {
+    savingComment = true;
+    await trpc().mutation('comments:create', {
+      body: commentContent,
+      sudokuId: sudoku.id
+    });
+    commentContent = '';
+    savingComment = false;
+    await getComments();
+  }
+
+  let commentCursor: Date | null | undefined = undefined;
+  let comments: InferQueryOutput<'comments:onSudoku'>['comments'] = [];
+  async function getComments() {
+    const c = await trpc().query('comments:onSudoku', {
+      sudokuId: sudoku.id,
+      limit: 20,
+      cursor: commentCursor ?? undefined
+    });
+    commentCursor = c.nextCursor;
+    comments = c.comments;
+  }
 
   async function vote(value: number) {
     return await trpc().mutation('votes:vote', { sudokuId: sudoku.id, value });
@@ -148,9 +182,41 @@
 
   <hr class="mb-4" />
 
-  <p class="whitespace-pre-line max-w-7xl">{sudoku.description}</p>
+  <HtmlContent content={sudoku.description} />
 
   {#if sudoku.solution == null}
     <p class="text-gray-800 text-sm mt-4">Info: No solution provided for this puzzle</p>
   {/if}
+
+  <h2 class="mt-8 font-semibold mb-2">Comments</h2>
+  <ul class="space-y-2">
+    <li class="rounded-lg shadow border p-2">
+      <h6>Write a new comment</h6>
+      <RichTextEditor bind:content={commentContent} placeholder="New comment" />
+      <div class="flex w-full justify-end">
+        <Button
+          loading={savingComment}
+          variant="primary"
+          on:click={() => {
+            void postComment();
+          }}>Save</Button
+        >
+      </div>
+    </li>
+    {#if comments.length > 0}
+      {#each comments as comment}
+        <li class="rounded-lg shadow border p-2">
+          <div class="flex gap-2 items-center mb-2">
+            <h6 class="font-semibold">{comment.user.username}</h6>
+            <span class="text-sm text-gray-500"
+              >created {formatDistanceToNowStrict(comment.createdAt)} ago</span
+            >
+          </div>
+          <HtmlContent content={comment.body} />
+        </li>
+      {/each}
+    {:else}
+      <li class="text-gray-700 mt-2">No comments</li>
+    {/if}
+  </ul>
 </aside>

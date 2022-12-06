@@ -31,6 +31,7 @@
   import type { PageData } from './$types';
   import trpc, { type InferMutationInput } from '$lib/client/trpc';
   import { fillWalkthroughStore } from '$utils/fillWalkthroughStore';
+  import RichTextEditor from '$components/RichTextEditor.svelte';
 
   export let data: PageData;
 
@@ -367,21 +368,19 @@
       </Input>
       <div class="relative">
         <button
-          class="absolute top-8 p-1 right-2 w-6 h-6 rounded-full border border-orange-500 text-orange-500 bg-orange-100 hover:bg-orange-200 hover:text-orange-600 transition-colors shadow flex items-center justify-center"
+          class="absolute top-2 p-1 right-2 w-6 h-6 rounded-full border border-orange-500 text-orange-500 bg-orange-100 hover:bg-orange-200 hover:text-orange-600 transition-colors shadow flex items-center justify-center"
           title="Add common descriptions"
           type="button"
           on:click={openAddDescriptionModal}><Plus size={24} /></button
         >
-        <Input
-          label="Description"
-          bind:value={$description}
-          asTextarea
-          placeholder="Normal sudoku rules apply..."
-        >
-          <p slot="error">
-            {errors.description ? errors.description : ''}
-          </p>
-        </Input>
+        <div class="rounded-lg border mt-2 p-1">
+          <RichTextEditor bind:content={$description} placeholder="Normal sudoku rules apply..." />
+          {#if errors.description}
+            <p class="text-red-500">
+              {errors.description}
+            </p>
+          {/if}
+        </div>
       </div>
 
       <label

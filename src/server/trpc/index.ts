@@ -7,6 +7,7 @@ import sudokus from './sudokus';
 import users from './users';
 import walkthroughs from './walkthroughs';
 import votes from './votes';
+import comments from './comments';
 import prisma from '$utils/prisma';
 
 export const createContext = async (event: RequestEvent) => {
@@ -22,6 +23,7 @@ export const router = trpc
   .merge('users:', users)
   .merge('votes:', votes)
   .merge('walkthroughs:', walkthroughs)
-  .merge('sudokus:', sudokus);
+  .merge('sudokus:', sudokus)
+  .merge('comments:', comments);
 
 export type Router = typeof router;
