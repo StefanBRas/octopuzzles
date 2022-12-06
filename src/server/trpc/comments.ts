@@ -1,7 +1,6 @@
 import { TRPCError } from '@trpc/server';
 import * as trpc from '@trpc/server';
 import type { TRPCContext } from '.';
-import { getJwt } from '$utils/jwt/getJwt';
 import { CommentValidator } from '$models/Comment';
 import { z } from 'zod';
 
@@ -10,11 +9,10 @@ export default trpc
   .mutation('create', {
     input: CommentValidator.pick({ body: true, sudokuId: true }),
     resolve: async ({ input, ctx }) => {
-      const jwtToken = getJwt(ctx);
-      if (jwtToken == null) {
+      if (ctx.token == null) {
         throw new TRPCError({ message: 'You are not logged in', code: 'UNAUTHORIZED' });
       }
-      const userId = jwtToken.id;
+      const userId = ctx.token.id;
       return ctx.prisma.comment.create({
         data: { body: input.body, userId, sudokuId: input.sudokuId }
       });
@@ -50,8 +48,7 @@ export default trpc
   .mutation('delete', {
     input: z.object({ id: z.number().int() }),
     resolve: async ({ input, ctx }) => {
-      const jwtToken = getJwt(ctx);
-      if (jwtToken == null) {
+      if (ctx.token == null) {
         throw new TRPCError({ message: 'You are not logged in', code: 'UNAUTHORIZED' });
       }
       const comment = await ctx.prisma.comment.findUnique({ where: { id: input.id } });
@@ -62,7 +59,7 @@ export default trpc
         });
       }
 
-      if (comment.userId !== jwtToken.id) {
+      if (comment.userId !== ctx.token.id) {
         throw new TRPCError({
           code: 'UNAUTHORIZED',
           message: 'You can only delete your own comments'
