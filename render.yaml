@@ -7,7 +7,7 @@ services:
     region: oregon
     plan: standard
     branch: main
-    buildCommand: npm install && npm run build
+    buildCommand: ./build.sh
     startCommand: node build/index.js
     pullRequestPreviewsEnabled: true
     buildFilter:
@@ -40,6 +40,4 @@ databases:
   - name: database
     databaseName: octopuzzles
     user: octopuzzles
-    ipAllowList: # required
-      - source: 0.0.0.0/0
-        description: everywhere
+    ipAllowList: []

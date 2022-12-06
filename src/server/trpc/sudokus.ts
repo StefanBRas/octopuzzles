@@ -14,7 +14,6 @@ import {
   validateCorrectDimension,
   validateCorrectDimensionsOfSudokuClues
 } from '$utils/validation';
-import { getJwt } from '$utils/jwt/getJwt';
 import type { Sudoku } from '@prisma/client';
 import { LabelValidator } from '$models/Label';
 import { FrontendUserValidator } from '$models/User';
@@ -29,13 +28,12 @@ export default trpc
       userId: z.number().int().optional()
     }),
     resolve: async ({ input, ctx }) => {
-      const jwtToken = getJwt(ctx);
       const limit = input.limit ?? 24;
 
       const rawSudokus = await ctx.prisma.sudoku.findMany({
         where: {
           publicSince:
-            jwtToken !== null && input.userId === jwtToken.id
+            ctx.token !== null && input.userId === ctx.token.id
               ? { lt: input.cursor }
               : { not: null, lt: input.cursor },
           userId: input.userId,
@@ -78,8 +76,7 @@ export default trpc
       id: z.number().int()
     }),
     resolve: async ({ input, ctx }) => {
-      const jwtToken = getJwt(ctx);
-      const userId = jwtToken?.id;
+      const userId = ctx.token?.id;
       const sudokuRaw = await ctx.prisma.sudoku.findUnique({
         where: { id: input.id },
         include: {
@@ -109,12 +106,11 @@ export default trpc
       id: z.number().int()
     }),
     resolve: async ({ input, ctx }) => {
-      const jwtToken = getJwt(ctx);
-      if (jwtToken == null) {
+      if (ctx.token == null) {
         throw new TRPCError({ message: 'You are not logged in', code: 'UNAUTHORIZED' });
       }
       const sudoku = await ctx.prisma.sudoku.findUnique({ where: { id: input.id } });
-      if (sudoku?.userId !== jwtToken.id) {
+      if (sudoku?.userId !== ctx.token.id) {
         throw new TRPCError({
           code: 'UNAUTHORIZED',
           message: 'You can only delete your own sudokus'
@@ -134,8 +130,7 @@ export default trpc
       public: z.boolean()
     }),
     resolve: async ({ input, ctx }) => {
-      const jwtToken = getJwt(ctx);
-      if (jwtToken == null) {
+      if (ctx.token == null) {
         throw new TRPCError({ message: 'You are not logged in', code: 'UNAUTHORIZED' });
       }
       // First check if the user has permission to update the sudoku.
@@ -145,7 +140,7 @@ export default trpc
           message: 'We could not find the sudoku you are trying to update',
           code: 'BAD_REQUEST'
         });
-      } else if (sudoku.userId !== jwtToken.id) {
+      } else if (sudoku.userId !== ctx.token.id) {
         throw new TRPCError({
           message: 'You are not allowed to edit this sudoku',
           code: 'UNAUTHORIZED'
@@ -188,8 +183,7 @@ export default trpc
       solution: SolutionValidator.optional()
     }),
     resolve: async ({ input, ctx }) => {
-      const jwtToken = getJwt(ctx);
-      if (jwtToken == null) {
+      if (ctx.token == null) {
         throw new TRPCError({ message: 'You are not logged in', code: 'UNAUTHORIZED' });
       }
       // First check if the user has permission to make a solution for the sudoku.
@@ -199,7 +193,7 @@ export default trpc
           message: 'We could not find the sudoku you are trying to update',
           code: 'BAD_REQUEST'
         });
-      } else if (sudoku.userId == null || sudoku.userId !== jwtToken.id) {
+      } else if (sudoku.userId == null || sudoku.userId !== ctx.token.id) {
         throw new TRPCError({
           message: 'You are not allowed to provide a solution to this sudoku',
           code: 'BAD_REQUEST'
@@ -233,8 +227,7 @@ export default trpc
       labels: z.array(z.number().int()).optional()
     }),
     resolve: async ({ input, ctx }) => {
-      const jwtToken = getJwt(ctx);
-      if (jwtToken == null) {
+      if (ctx.token == null) {
         throw new TRPCError({ message: 'You are not logged in', code: 'UNAUTHORIZED' });
       }
       validateCorrectDimensionsOfSudokuClues(input.sudoku);
@@ -261,7 +254,7 @@ export default trpc
           marginRight: dimensions.margins?.right,
           marginBottom: dimensions.margins?.bottom,
           marginLeft: dimensions.margins?.left,
-          userId: jwtToken.id,
+          userId: ctx.token.id,
           rank: 0,
           points: 0,
           labels: { connect: input.labels?.map((l) => ({ id: l })) ?? [] }
@@ -278,8 +271,7 @@ export default trpc
       labels: z.array(z.number().int()).optional()
     }),
     resolve: async ({ input, ctx }) => {
-      const jwtToken = getJwt(ctx);
-      if (jwtToken == null) {
+      if (ctx.token == null) {
         throw new TRPCError({ message: 'You are not logged in', code: 'UNAUTHORIZED' });
       }
       // First check if the user has permission to update the sudoku.
@@ -289,7 +281,7 @@ export default trpc
           message: 'We could not find the sudoku you are trying to update',
           code: 'BAD_REQUEST'
         });
-      } else if (oldSudoku.userId == null || oldSudoku.userId !== jwtToken.id) {
+      } else if (oldSudoku.userId == null || oldSudoku.userId !== ctx.token.id) {
         throw new TRPCError({
           message: 'You are not allowed to edit this sudoku',
           code: 'BAD_REQUEST'
@@ -324,7 +316,7 @@ export default trpc
           marginRight: dimensions?.margins?.right,
           marginBottom: dimensions?.margins?.bottom,
           marginLeft: dimensions?.margins?.left,
-          userId: jwtToken.id,
+          userId: ctx.token.id,
           rank: 0,
           points: 0,
           labels: { connect: input.labels?.map((l) => ({ id: l })) ?? [] }

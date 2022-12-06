@@ -36,6 +36,7 @@ model User {
   votes        Vote[]
   sudokus      Sudoku[]
   walkthroughs Walkthrough[]
+  comments     Comment[]
 }
 
 enum TokenKind {
@@ -80,6 +81,7 @@ model Sudoku {
   labels        Label[]
   votes         Vote[]
   walkthroughs  Walkthrough[]
+  comments      Comment[]
 
   @@unique([userId, title])
 }
@@ -103,4 +105,15 @@ model Walkthrough {
   steps    Json
 
   @@unique([userId, sudokuId])
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  sudokuId  Int
+  sudoku    Sudoku   @relation(fields: [sudokuId], references: [id], onDelete: Cascade)
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  body      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

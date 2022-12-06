@@ -49,6 +49,9 @@
   "type": "module",
   "dependencies": {
     "@prisma/client": "^4.7.1",
+    "@tiptap/core": "^2.0.0-beta.205",
+    "@tiptap/extension-placeholder": "^2.0.0-beta.205",
+    "@tiptap/starter-kit": "^2.0.0-beta.205",
     "@trpc/client": "^9.27.2",
     "@trpc/server": "^9.27.2",
     "argon2": "^0.29.1",
