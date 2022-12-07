@@ -107,6 +107,7 @@
   let gameInputModePreShortcut = get(inputMode);
 
   function handleKeyboardShortcuts(k: KeyboardEvent): void {
+    // Check whether any targets have explicitly stated that shortcuts should be ignored
     if (
       (k.target as HTMLElement)?.dataset?.ignoreshortcuts != null ||
       (k.target as HTMLElement).parentElement?.dataset.ignoreshortcuts != null
