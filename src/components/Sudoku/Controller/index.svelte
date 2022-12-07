@@ -107,7 +107,11 @@
   let gameInputModePreShortcut = get(inputMode);
 
   function handleKeyboardShortcuts(k: KeyboardEvent): void {
-    if (walkthroughModalOpen) return;
+    if (
+      (k.target as HTMLElement)?.dataset?.ignoreshortcuts != null ||
+      (k.target as HTMLElement).parentElement?.dataset.ignoreshortcuts != null
+    )
+      return;
     if ($mode === 'game') {
       // In notes mode, you should use command keys
       if ($inputMode === 'notes' && !isCommandKey(k)) return;
@@ -174,15 +178,9 @@
     openModal(ExportToFPuzzles);
   }
 
-  let walkthroughModalOpen = false;
-
   function showWalkthroughEditorModal(): void {
-    walkthroughModalOpen = true;
     openModal(WalkthroughModal, {
-      editable: $page.url.pathname.includes('/sudoku/editor'),
-      onClose: () => {
-        walkthroughModalOpen = false;
-      }
+      editable: $page.url.pathname.includes('/sudoku/editor')
     });
   }
 </script>

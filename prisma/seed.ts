@@ -11,7 +11,6 @@ const main = async (): Promise<void> => {
     where: { id: 1 },
     update: {},
     create: {
-      id: 1,
       email: 'admin@octopuzzles.com',
       createdAt: date1,
       updatedAt: date1,
@@ -26,7 +25,6 @@ const main = async (): Promise<void> => {
     where: { id: 2 },
     update: {},
     create: {
-      id: 2,
       email: 'dev@octopuzzles.com',
       createdAt: date2,
       updatedAt: date2,
@@ -274,7 +272,6 @@ const main = async (): Promise<void> => {
     where: { id: 1 },
     update: {},
     create: {
-      id: 1,
       userId: 1,
       publicSince: date1,
       title: 'Killercage sudoku',
@@ -329,7 +326,6 @@ const main = async (): Promise<void> => {
     where: { id: 2 },
     update: {},
     create: {
-      id: 2,
       userId: 2,
       publicSince: date2,
       title: '6x6 sudoku',
@@ -384,7 +380,6 @@ const main = async (): Promise<void> => {
     where: { id: 3 },
     update: {},
     create: {
-      id: 3,
       userId: 1,
       publicSince: date3,
       title: 'Harrowing Journey',

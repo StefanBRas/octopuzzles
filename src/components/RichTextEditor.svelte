@@ -109,7 +109,7 @@
     </div>
   {/if}
 
-  <div bind:this={element} />
+  <div bind:this={element} data-ignoreshortcuts />
 </div>
 
 <style global>
