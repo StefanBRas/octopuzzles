@@ -68,4 +68,23 @@ export default trpc
 
       return ctx.prisma.comment.delete({ where: { id: input.id } });
     }
+  })
+  .mutation('update', {
+    input: CommentValidator.pick({ body: true, id: true }),
+    resolve: async ({ input, ctx }) => {
+      const comment = await ctx.prisma.comment.findUnique({ where: { id: input.id } });
+      if (comment == null) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'We could not find the comment you are trying to update'
+        });
+      } else if (comment.userId !== ctx.token?.id) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'You have to be logged in to update a comment'
+        });
+      }
+
+      return ctx.prisma.comment.update({ where: { id: input.id }, data: { body: input.body } });
+    }
   });
