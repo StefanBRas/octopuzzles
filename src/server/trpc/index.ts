@@ -10,7 +10,7 @@ import votes from './votes';
 import comments from './comments';
 import prisma from '$utils/prisma';
 import { getJwt } from '$utils/jwt/getJwt';
-import type { DATABASE_URL } from '$env/static/private';
+import { DATABASE_URL } from '$env/static/private';
 
 export const createContext = async (event: RequestEvent) => {
   console.log('DATABASE_URL', DATABASE_URL);
