@@ -50,7 +50,7 @@
 </script>
 
 <aside class="p-8">
-  <div class="mb-4 flex items-center justify-between">
+  <div class="mb-4 flex flex-wrap space-y-4 items-center justify-between">
     <div class="flex items-center">
       <div class="flex flex-col text-sm text-gray-500 items-center">
         <button
