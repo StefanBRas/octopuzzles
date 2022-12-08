@@ -13,6 +13,7 @@
   import CenterMarksIcon from '$icons/CenterMarks.svelte';
   import CellsIcon from '$icons/Cells.svelte';
   import NotesIcon from '$icons/Notes.svelte';
+  import ScannerIcon from '$icons/Scanner.svelte';
   import Numbers from './components/Numbers.svelte';
   import Regions from './components/Regions.svelte';
   import ArrowUUpLeft from 'phosphor-svelte/lib/ArrowUUpLeft/ArrowUUpLeft.svelte';
@@ -50,6 +51,7 @@
   import { mode } from '$stores/sudokuStore';
   import { walkthroughStore } from '$stores/walkthroughStore';
   import type { EditorHistoryStep, GameHistoryStep, InputMode } from '$types';
+  import Scanner from './components/Scanner.svelte';
 
   $: canUndo = $mode === 'editor' ? editorHistory.canUndo : gameHistory.canUndo;
   $: canRedo = $mode === 'editor' ? editorHistory.canRedo : gameHistory.canRedo;
@@ -81,7 +83,8 @@
     cornermarks: { icon: CornerMarksIcon, controller: CornerMarks, label: 'Corner marks' },
     centermarks: { icon: CenterMarksIcon, controller: CenterMarks, label: 'Center marks' },
     colors: { icon: ColorPicker, controller: GameColors, label: 'Colors' },
-    notes: { icon: NotesIcon, controller: Notes, label: 'Notes' }
+    notes: { icon: NotesIcon, controller: Notes, label: 'Notes' },
+    scanner: { icon: ScannerIcon, controller: Scanner, label: 'Scanner' }
   } as Record<
     keyof GameHistoryStep,
     { icon: typeof NumbersIcon; controller: typeof Numbers; label: string }

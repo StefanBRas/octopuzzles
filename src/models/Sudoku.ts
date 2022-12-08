@@ -53,7 +53,8 @@ export const RegionValidator = z.object({
   positions: z.array(PositionValidator),
   type: RegionTypeValidator.nullish(),
   color: ColorValidator.nullish(),
-  borders: z.boolean().nullish()
+  borders: z.boolean().nullish(),
+  uniqueDigits: z.boolean().nullish()
 });
 
 export type Region = z.infer<typeof RegionValidator>;
@@ -78,7 +79,8 @@ export const ExtendedcageValidator = z.object({
   positions: z.array(PositionValidator),
   type: CageTypeValidator.nullish(),
   text: z.string().nullish(),
-  color: ColorValidator.nullish()
+  color: ColorValidator.nullish(),
+  uniqueDigits: z.boolean().nullish()
 });
 export type Extendedcage = z.infer<typeof ExtendedcageValidator>;
 
@@ -113,7 +115,8 @@ export const PathValidator = z.object({
   width: z.number().int().nullish(), // up to 100%
   form: FormValidator.nullish(),
   fill: FillValidator.nullish(),
-  arrow: z.boolean().nullish()
+  arrow: z.boolean().nullish(),
+  uniqueDigits: z.boolean().nullish()
 });
 export type Path = z.infer<typeof PathValidator>;
 

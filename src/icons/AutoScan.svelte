@@ -1,0 +1,30 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  width="192"
+  height="192"
+  fill="#000000"
+  viewBox="0 0 256 256"
+  ><rect width="256" height="256" fill="none" /><ellipse
+    cx="128"
+    cy="128"
+    rx="44"
+    ry="116"
+    transform="translate(-53 128) rotate(-45)"
+    fill="none"
+    stroke="#000000"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    stroke-width="16"
+  /><ellipse
+    cx="128"
+    cy="128"
+    rx="116"
+    ry="44"
+    transform="translate(-53 128) rotate(-45)"
+    fill="none"
+    stroke="#000000"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    stroke-width="16"
+  /><circle cx="128" cy="128" r="12" /></svg
+>

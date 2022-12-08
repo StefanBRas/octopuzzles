@@ -124,7 +124,8 @@ function regionsForFPuzzle(dimensions: Dimensions, grid: FPuzzlesJson['grid']): 
           positions: [],
           type: 'Normal',
           borders: undefined,
-          color: undefined
+          color: undefined,
+          uniqueDigits: undefined
         };
         regions[regionNo - 1] = newRegion;
         region = newRegion;
@@ -316,7 +317,8 @@ export function importFPuzzleIntoEditorHistory(fpuzzle: FPuzzlesJson): void {
             fill: circle.baseC === '#FFFFFF' ? 'Hollow' : 'Solid',
             form: 'Round',
             positions: positions,
-            width: Math.floor(circle.width * 100)
+            width: Math.floor(circle.width * 100),
+            uniqueDigits: undefined
           });
 
           if (circle.baseC !== '#FFFFFF' && circle.baseC !== circle.outlineC) {
@@ -328,7 +330,8 @@ export function importFPuzzleIntoEditorHistory(fpuzzle: FPuzzlesJson): void {
               fill: 'Solid',
               form: 'Round',
               positions: positions,
-              width: Math.min(Math.floor(circle.width * 100) - 3)
+              width: Math.min(Math.floor(circle.width * 100) - 3),
+              uniqueDigits: undefined
             });
           }
 
@@ -434,7 +437,8 @@ export function importFPuzzleIntoEditorHistory(fpuzzle: FPuzzlesJson): void {
             fill: 'Solid',
             form: 'Round',
             positions,
-            width: Math.floor(lines.width * 50)
+            width: Math.floor(lines.width * 50),
+            uniqueDigits: undefined
           });
         }
       }
@@ -603,7 +607,8 @@ export function importFPuzzleIntoEditorHistory(fpuzzle: FPuzzlesJson): void {
             fill: rectangle.baseC === '#FFFFFF' ? 'Hollow' : 'Solid',
             form: diamond ? 'Diamond' : 'Square',
             positions: positions,
-            width: Math.floor(rectangle.width * (diamond ? 141.4 : 100))
+            width: Math.floor(rectangle.width * (diamond ? 141.4 : 100)),
+            uniqueDigits: undefined
           });
 
           if (rectangle.baseC !== '#FFFFFF' && rectangle.baseC !== rectangle.outlineC) {
@@ -615,7 +620,8 @@ export function importFPuzzleIntoEditorHistory(fpuzzle: FPuzzlesJson): void {
               fill: 'Solid',
               form: diamond ? 'Diamond' : 'Square',
               positions: positions,
-              width: Math.min(Math.floor(rectangle.width * 100) - 3, 0)
+              width: Math.min(Math.floor(rectangle.width * 100) - 3, 0),
+              uniqueDigits: undefined
             });
           }
 

@@ -104,7 +104,7 @@ export default trpc
 
       const user = await ctx.prisma.user.findUnique({ where: { id: jwtToken.id } });
       if (user) {
-        return pick(user, ['id', 'email', 'role', 'username']);
+        return pick(user, ['id', 'email', 'role', 'username', 'settings']);
       }
 
       return null;

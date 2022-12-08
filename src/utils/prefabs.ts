@@ -21,11 +21,15 @@ import type {
 } from '$models/Sudoku';
 
 export function emptyCage(positions: Position[], type?: CageType): Extendedcage {
-  return { type, positions, text: undefined, color: undefined };
+  return { type, positions, text: undefined, color: undefined, uniqueDigits: undefined };
 }
 
-export function cageDefaults(): { text: string; color: Color } {
-  return { text: '', color: 'Black' };
+export function cageDefaults(type: CageType | null | 'CUSTOM'): {
+  text: string;
+  color: Color;
+  uniqueDigits: boolean;
+} {
+  return { text: '', color: 'Black', uniqueDigits: type === 'Killer' };
 }
 
 export function emptyPath(positions: Position[], type?: PathType): Path {
@@ -36,7 +40,8 @@ export function emptyPath(positions: Position[], type?: PathType): Path {
     width: undefined,
     form: undefined,
     fill: undefined,
-    arrow: undefined
+    arrow: undefined,
+    uniqueDigits: undefined
   };
 }
 
@@ -46,6 +51,7 @@ export function pathDefaults(type?: PathType | 'CUSTOM' | null): {
   form: Form;
   fill: Fill;
   arrow: boolean;
+  uniqueDigits: boolean;
 } {
   switch (type) {
     case 'Arrow':
@@ -54,7 +60,8 @@ export function pathDefaults(type?: PathType | 'CUSTOM' | null): {
         width: 5,
         form: 'Round',
         fill: 'Solid',
-        arrow: true
+        arrow: true,
+        uniqueDigits: true
       };
     case 'Thermo':
       return {
@@ -62,7 +69,8 @@ export function pathDefaults(type?: PathType | 'CUSTOM' | null): {
         color: 'Gray',
         fill: 'Solid',
         form: 'Round',
-        width: 20
+        width: 20,
+        uniqueDigits: true
       };
     case 'Between':
       return {
@@ -70,7 +78,8 @@ export function pathDefaults(type?: PathType | 'CUSTOM' | null): {
         color: 'Gray',
         fill: 'Solid',
         form: 'Round',
-        width: 5
+        width: 5,
+        uniqueDigits: false
       };
     case 'Lockout':
       return {
@@ -78,7 +87,8 @@ export function pathDefaults(type?: PathType | 'CUSTOM' | null): {
         color: 'Blue',
         fill: 'Solid',
         form: 'Diamond',
-        width: 5
+        width: 5,
+        uniqueDigits: false
       };
     case 'Renban':
       return {
@@ -86,7 +96,8 @@ export function pathDefaults(type?: PathType | 'CUSTOM' | null): {
         color: 'Purple',
         fill: 'Solid',
         form: 'Round',
-        width: 15
+        width: 15,
+        uniqueDigits: true
       };
     case 'Whisper':
       return {
@@ -94,7 +105,8 @@ export function pathDefaults(type?: PathType | 'CUSTOM' | null): {
         color: 'Green',
         fill: 'Solid',
         form: 'Round',
-        width: 15
+        width: 15,
+        uniqueDigits: false
       };
     case 'Palindrome':
       return {
@@ -102,7 +114,8 @@ export function pathDefaults(type?: PathType | 'CUSTOM' | null): {
         color: 'Gray',
         fill: 'Solid',
         form: 'Round',
-        width: 15
+        width: 15,
+        uniqueDigits: false
       };
     case 'AntiFactor':
       return {
@@ -110,7 +123,8 @@ export function pathDefaults(type?: PathType | 'CUSTOM' | null): {
         color: 'Yellow',
         fill: 'Solid',
         form: 'Round',
-        width: 15
+        width: 15,
+        uniqueDigits: false
       };
     case 'EqualSum':
       return {
@@ -118,7 +132,8 @@ export function pathDefaults(type?: PathType | 'CUSTOM' | null): {
         color: 'Blue',
         fill: 'Solid',
         form: 'Round',
-        width: 15
+        width: 15,
+        uniqueDigits: false
       };
     case 'ProductSum':
       return {
@@ -126,7 +141,8 @@ export function pathDefaults(type?: PathType | 'CUSTOM' | null): {
         color: 'Red',
         fill: 'Solid',
         form: 'Square',
-        width: 13
+        width: 13,
+        uniqueDigits: false
       };
     case 'Entropic':
       return {
@@ -134,7 +150,8 @@ export function pathDefaults(type?: PathType | 'CUSTOM' | null): {
         color: 'Gray',
         fill: 'Solid',
         form: 'Round',
-        width: 15
+        width: 15,
+        uniqueDigits: false
       };
     case 'Odd':
     case 'Even':
@@ -143,7 +160,8 @@ export function pathDefaults(type?: PathType | 'CUSTOM' | null): {
         color: 'Gray',
         fill: 'Solid',
         form: type === 'Even' ? 'Square' : 'Round',
-        width: 70
+        width: 70,
+        uniqueDigits: false
       };
     case 'Pill':
       return {
@@ -151,7 +169,8 @@ export function pathDefaults(type?: PathType | 'CUSTOM' | null): {
         width: 66,
         form: 'Round',
         fill: 'Hollow',
-        arrow: false
+        arrow: false,
+        uniqueDigits: false
       };
     default:
       return {
@@ -159,7 +178,8 @@ export function pathDefaults(type?: PathType | 'CUSTOM' | null): {
         width: 10,
         form: 'Round',
         fill: 'Solid',
-        arrow: false
+        arrow: false,
+        uniqueDigits: false
       };
   }
 }
@@ -175,7 +195,8 @@ export function getPathsToDraw(path: Path): Path[] {
       width: path.width ?? defaultSettings.width,
       form: path.form ?? defaultSettings.form,
       fill: path.fill ?? defaultSettings.fill,
-      arrow: path.arrow ?? defaultSettings.arrow
+      arrow: path.arrow ?? defaultSettings.arrow,
+      uniqueDigits: undefined
     }
   ];
   switch (path.type) {
@@ -197,7 +218,8 @@ export function getPathsToDraw(path: Path): Path[] {
         fill: path.fill ?? defaultSettings.fill,
         form: path.form ?? defaultSettings.form,
         positions: [path.positions[0]],
-        width: 66
+        width: 66,
+        uniqueDigits: undefined
       });
       break;
     }
@@ -217,7 +239,8 @@ export function getPathsToDraw(path: Path): Path[] {
             path.form ??
             (path.type === 'Between' ? 'Round' : path.type === 'Lockout' ? 'Diamond' : 'Square'),
           positions: [bulbPosition],
-          width: path.type === 'ProductSum' ? 70 : 81
+          width: path.type === 'ProductSum' ? 70 : 81,
+          uniqueDigits: undefined
         });
       }
       break;
@@ -452,23 +475,33 @@ export function emptyRegion(positions: Position[], type?: RegionType): Region {
   return { type, positions, borders: undefined, color: undefined };
 }
 
-export function regionDefaults(type?: RegionType | 'CUSTOM' | null): {
+export function regionDefaults(
+  type?: RegionType | 'CUSTOM' | null,
+  nonstandard = false
+): {
   borders: boolean;
   color: Color | 'NONE';
+  uniqueDigits: boolean;
 } {
   switch (type) {
     case 'Normal':
       return {
         borders: true,
-        color: 'NONE'
+        color: 'NONE',
+        uniqueDigits: !nonstandard
       };
     case 'Clone':
       return {
         borders: false,
-        color: 'LightGray'
+        color: 'LightGray',
+        uniqueDigits: false
       };
     default:
-      return { borders: false, color: 'Gray' };
+      return {
+        borders: false,
+        color: 'Gray',
+        uniqueDigits: type === 'Extra' || type === 'MagicSquare'
+      };
   }
 }
 
@@ -479,7 +512,8 @@ export function getRegionsToDraw(region: Region): Region[] {
       positions: region.positions,
       type: region.type,
       borders: region.borders ?? defaultSettings.borders,
-      color: region.color ?? (defaultSettings.color !== 'NONE' ? defaultSettings.color : undefined)
+      color: region.color ?? (defaultSettings.color !== 'NONE' ? defaultSettings.color : undefined),
+      uniqueDigits: undefined
     }
   ];
 }
