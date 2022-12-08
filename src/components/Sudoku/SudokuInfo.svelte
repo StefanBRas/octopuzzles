@@ -82,7 +82,7 @@
 </script>
 
 <aside class="p-8">
-  <div class="mb-4 flex items-center justify-between">
+  <div class="mb-4 flex flex-wrap space-y-4 space-x-4 items-center justify-between">
     <div class="flex items-center">
       <div class="flex flex-col text-sm text-gray-500 items-center">
         <button
@@ -193,7 +193,7 @@
     <li class="rounded-lg shadow border p-2">
       <h6>Write a new comment</h6>
       <RichTextEditor bind:content={commentContent} placeholder="New comment" />
-      <div class="flex w-full justify-end">
+      <div class="flex w-full justify-end mt-2">
         <Button
           loading={savingComment}
           variant="primary"
