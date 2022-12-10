@@ -169,14 +169,16 @@
 
 <!-- Header -->
 <div class="flex items-center justify-center h-20 absolute top-0 w-full pointer-events-none">
-  <div class="flex flex-col items-center">
-    <h1 class="text-xl font-medium text-center w-96 md:w-auto truncate">
-      {data.sudoku.title}
-    </h1>
-    <span>
-      {days}
-      {hours}{minutes}:{seconds}
-    </span>
+  <div class="flex w-full justify-end sm:justify-center">
+    <div class="flex flex-col items-center">
+      <h1 class="text-xl font-medium text-center w-96 md:w-auto truncate">
+        {data.sudoku.title}
+      </h1>
+      <span>
+        {days}
+        {hours}{minutes}:{seconds}
+      </span>
+    </div>
   </div>
 </div>
 

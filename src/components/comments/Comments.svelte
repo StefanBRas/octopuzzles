@@ -51,7 +51,7 @@
     <li class="rounded-lg shadow border p-2">
       <h6>Write a new comment</h6>
       <RichTextEditor bind:content={commentContent} placeholder="New comment" />
-      <div class="flex w-full justify-end">
+      <div class="flex w-full justify-end mt-4">
         <Button
           loading={savingComment}
           variant="primary"
