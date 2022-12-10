@@ -11,14 +11,12 @@
   import Checkbox from '$ui/Checkbox.svelte';
   import { cageDefaults, pathDefaults, regionDefaults } from '$utils/prefabs';
   import { defaultRegionSize } from '$utils/defaults';
-  import type { LogicFlag, Position } from '$models/Sudoku';
-  import type { ScannerMode, ScannerSettings, UserSettings } from '$models/User';
+  import type { Position } from '$models/Sudoku';
+  import type { ScannerSettings } from '$models/User';
 
   import { me } from '$stores/meStore';
 
-  let userSettings: UserSettings = $me?.settings ?? {};
-  let scannerSettings: ScannerSettings = userSettings.scanner ?? {};
-
+  let scannerSettings: ScannerSettings = me.getSettings().scanner ?? {};
   let highlightMode = scannerSettings.highlightMode ?? 'Seen';
   let mode = scannerSettings.mode ?? 'Basic';
   let autoScan = scannerSettings.autoScan ?? false;
@@ -75,7 +73,28 @@
 
   let playing = false;
 
-  function updateSettings(): void {}
+  function updateSettings(): void {
+    scannerSettings = {
+      highlightMode,
+      mode,
+      scannerSpeed,
+      autoScan,
+      useCentreMarks,
+      useCornerMarks,
+      scanDiagonals,
+      scanAntiKnight,
+      scanAntiKing,
+      scanDisjointSets,
+      scanCages,
+      scanPaths,
+      scanExtraRegions,
+      scanNegativeXV,
+      scanNegativeKropki,
+      scanNonConsecutive,
+      scanEntropy
+    };
+    me.saveSettings({ scanner: scannerSettings });
+  }
 
   function handleKeyDown(k: KeyboardEvent): void {}
 
@@ -288,7 +307,7 @@
           Tuples: 'Tuples'
         }}
         bind:value={highlightMode}
-        onChange={() => {}}
+        onChange={() => updateSettings()}
       />
     </div>
     <div>
@@ -300,7 +319,7 @@
           Extreme: 'Extreme'
         }}
         bind:value={mode}
-        onChange={() => {}}
+        onChange={() => updateSettings()}
       />
     </div>
 
@@ -474,7 +493,7 @@
           Instant: 'Instant'
         }}
         bind:value={scannerSpeed}
-        onChange={() => {}}
+        onChange={() => updateSettings()}
       />
     </div>
 

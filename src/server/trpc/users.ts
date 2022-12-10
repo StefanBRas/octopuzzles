@@ -5,7 +5,7 @@ import * as trpc from '@trpc/server';
 import type { TRPCContext } from '.';
 import { sendVerifyUserMail } from '$server/email';
 import pick from 'lodash/pick';
-import { UserValidator } from '$models/User';
+import { UpdateUserSettingsValidator, UserSettingsValidator, UserValidator } from '$models/User';
 import { setCookie } from '$utils/jwt/setCookie';
 import { getJwt } from '$utils/jwt/getJwt';
 import type { Prisma } from '@prisma/client';
@@ -104,7 +104,7 @@ export default trpc
 
       const user = await ctx.prisma.user.findUnique({ where: { id: jwtToken.id } });
       if (user) {
-        return pick(user, ['id', 'email', 'role', 'username', 'settings']);
+        return pick(user, ['id', 'email', 'role', 'username']);
       }
 
       return null;
@@ -162,5 +162,41 @@ export default trpc
     }),
     resolve: async ({ input, ctx }) => {
       return ctx.prisma.user.findUnique({ where: { id: input.id } });
+    }
+  })
+  .query('getSettings', {
+    resolve: async ({ ctx }) => {
+      const jwtToken = getJwt(ctx);
+      if (jwtToken != null) {
+        const settingsRaw = await ctx.prisma.userSettings.findUnique({ where: { userId: jwtToken.id } });
+        if (settingsRaw != null) {
+          const settings = UserSettingsValidator.parse(settingsRaw);
+          if (settings != null) {
+            return settings;
+          }
+        }     
+      }
+
+      return null;
+    }
+  })
+  .mutation('saveSettings', {
+    input: UpdateUserSettingsValidator,
+    resolve: async ({ input, ctx }) => {
+      const jwtToken = getJwt(ctx);
+      if (jwtToken == null) {
+        throw new TRPCError({ message: 'You are not logged in', code: 'UNAUTHORIZED' });
+      }
+      try {
+        await ctx.prisma.userSettings.create({
+          data: { userId: jwtToken.id, ...input }
+        });
+      } catch (e) {
+        
+      await ctx.prisma.userSettings.update({
+        where: { userId: jwtToken.id },
+        data: { userId: jwtToken.id, ...input}
+      });
+      }
     }
   });

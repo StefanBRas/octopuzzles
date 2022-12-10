@@ -32,11 +32,17 @@ model User {
   verified     Boolean
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
-  settings     Json?
   tokens       Token[]
   votes        Vote[]
   sudokus      Sudoku[]
   walkthroughs Walkthrough[]
+  UserSettings UserSettings?
+}
+
+model UserSettings {
+  userId  Int   @unique
+  user    User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  scanner Json?
 }
 
 enum TokenKind {
