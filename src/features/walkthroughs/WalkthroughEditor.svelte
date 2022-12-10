@@ -34,6 +34,9 @@
   </div>
 
   <div class="shrink overflow-y-auto p-4 flex flex-col">
+    {#if $walkthroughStore.length === 0}
+      <p class="text-gray-700">No steps added yet</p>
+    {/if}
     {#each $walkthroughStore as { step, description }, i}
       <div>
         <div>
@@ -96,13 +99,6 @@
                 placeholder="Add a description"
               />
             </div>
-            <!-- <textarea
-              on:change={(e) => updateStepDescription(i, e)}
-              class="border border-gray-300 py-2 px-4 leading-5 rounded-md w-full focus:ring focus:ring-blue-300 focus:border-blue-500 disabled:bg-gray-200 h-full min-h-full"
-              placeholder="Add a description"
-              value={description}
-              data-ignoreshortcuts
-            /> -->
           </div>
         </div>
       </div>

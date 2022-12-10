@@ -46,7 +46,7 @@
 
 <div class="rich-text-editor h-full flex flex-col">
   {#if editor}
-    <div class="flex">
+    <div class="flex mb-2">
       <div class="border-r pr-1 mr-1">
         <button
           type="button"
@@ -135,7 +135,7 @@
   }
 
   .rich-text-editor button {
-    @apply rounded p-1;
+    @apply rounded p-1 hover:bg-gray-100;
   }
 
   .rich-text-editor button.active {
