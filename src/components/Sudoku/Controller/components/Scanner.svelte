@@ -4,7 +4,15 @@
   import Pause from '$icons/Pause.svelte';
   import Step from '$icons/Step.svelte';
   import AutoScan from '$icons/AutoScan.svelte';
-  import { editorHistory, gameHistory } from '$stores/sudokuStore';
+  import {
+    editorHistory,
+    gameHistory,
+    handleArrows,
+    handleMouseDown,
+    handleMouseEnter,
+    selectedCells,
+    highlightedCells
+  } from '$stores/sudokuStore';
   import { onMount } from 'svelte';
   import Label from '$ui/Label.svelte';
   import RadioGroup from '$ui/RadioGroup.svelte';
@@ -15,6 +23,11 @@
   import type { ScannerSettings } from '$models/User';
 
   import { me } from '$stores/meStore';
+  import {
+    defaultHandleArrows,
+    defaultHandleMouseDown,
+    defaultHandleMouseEnter
+  } from '$stores/sudokuStore/interactionHandlers';
 
   let scannerSettings: ScannerSettings = me.getSettings().scanner ?? {};
   let highlightMode = scannerSettings.highlightMode ?? 'Seen';
@@ -94,9 +107,10 @@
       scanEntropy
     };
     me.saveSettings({ scanner: scannerSettings });
-  }
 
-  function handleKeyDown(k: KeyboardEvent): void {}
+    init();
+    updateHighlightedCells();
+  }
 
   function init(): void {
     allDigits = digits.split('');
@@ -277,6 +291,25 @@
     }
   }
 
+  function updateHighlightedCells(): void {
+    let cellsToHighlight: Position[] = [];
+    if (highlightMode == 'Seen') {
+      if ($selectedCells) {
+        $selectedCells.forEach((c) => {
+          let cellsToAdd = seen[c.row][c.column].filter(
+            (s) => !cellsToHighlight.some((d) => d.row == c.row && d.column == c.column)
+          );
+          if (cellsToAdd.length) {
+            cellsToHighlight = [...cellsToHighlight, ...cellsToAdd];
+          }
+        });
+      }
+    } else if (highlightMode == 'Tuples') {
+    }
+
+    $highlightedCells = cellsToHighlight;
+  }
+
   function step(position?: Position): Position {
     return { row: 1, column: 1 };
   }
@@ -290,11 +323,25 @@
   }
 
   onMount(() => {
+    $handleMouseDown = ({ cell, metaButtonClicked }) => {
+      defaultHandleMouseDown({ cell, metaButtonClicked });
+
+      updateHighlightedCells();
+    };
+    $handleMouseEnter = ({ cell, metaButtonClicked, mouseDown }) => {
+      defaultHandleMouseEnter({ cell, metaButtonClicked, mouseDown });
+
+      updateHighlightedCells();
+    };
+    $handleArrows = ({ k, metaButtonClicked }) => {
+      defaultHandleArrows({ k, metaButtonClicked });
+
+      updateHighlightedCells();
+    };
+
     init();
   });
 </script>
-
-<svelte:window on:keydown={handleKeyDown} />
 
 <div class="grid grid-cols-1 w-full h-full p-2">
   <div class="px-2 flex flex-col overflow-hidden justify-between">
@@ -498,7 +545,7 @@
     </div>
 
     <div class="grid grid-cols-3 grid-rows-1 h-max w-max m-auto p-4 gap-4">
-      <SquareButton text="Step" disabled={false} on:click={() => {}}>
+      <SquareButton text="Step" disabled={false} on:click={() => step()}>
         <Step />
       </SquareButton>
       <SquareButton
