@@ -366,6 +366,7 @@
       <Input label="Title" bind:value={$sudokuTitle} placeholder="My sudoku">
         <p slot="error">{errors.title ? errors.title : ''}</p>
       </Input>
+      <Label>Description</Label>
       <div class="relative">
         <button
           class="absolute top-2 p-1 right-2 w-6 h-6 rounded-full border border-orange-500 text-orange-500 bg-orange-100 hover:bg-orange-200 hover:text-orange-600 transition-colors shadow flex items-center justify-center"

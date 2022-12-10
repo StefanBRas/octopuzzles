@@ -27,13 +27,14 @@
     try {
       loading = true;
       await register({ username, email, password });
-      loading = false;
       registerCompleted = true;
       username = '';
       email = '';
       password = '';
     } catch (e) {
       errors = e as TRPCError;
+    } finally {
+      loading = false;
     }
   };
 </script>

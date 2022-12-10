@@ -14,6 +14,7 @@
 
   export let content: string;
   export let placeholder = '';
+  export let onChange: ((html: string) => void) | undefined = undefined;
 
   let element: HTMLDivElement;
   let editor: Editor;
@@ -30,7 +31,9 @@
     });
 
     editor.on('update', ({ editor }) => {
-      content = editor.getHTML();
+      const html = editor.getHTML();
+      content = html;
+      onChange?.(html);
     });
   });
 
@@ -41,7 +44,7 @@
   });
 </script>
 
-<div class="rich-text-editor">
+<div class="rich-text-editor h-full flex flex-col">
   {#if editor}
     <div class="flex">
       <div class="border-r pr-1 mr-1">
@@ -109,7 +112,7 @@
     </div>
   {/if}
 
-  <div bind:this={element} data-ignoreshortcuts />
+  <div bind:this={element} class="flex-1" data-ignoreshortcuts />
 </div>
 
 <style global>
@@ -123,6 +126,7 @@
 
   .ProseMirror {
     padding: 0.5rem;
+    height: 100%;
   }
 
   .ProseMirror ul,
