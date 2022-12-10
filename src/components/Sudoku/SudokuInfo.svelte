@@ -1,27 +1,25 @@
 <script lang="ts">
-  import classNames from 'classnames';
-  import CaretUp from 'phosphor-svelte/lib/CaretUp/CaretUp.svelte';
-  import CaretDown from 'phosphor-svelte/lib/CaretDown/CaretDown.svelte';
-  import FacebookLogo from 'phosphor-svelte/lib/FacebookLogo/FacebookLogo.svelte';
-  import RedditLogo from 'phosphor-svelte/lib/RedditLogo/RedditLogo.svelte';
-  import TwitterLogo from 'phosphor-svelte/lib/TwitterLogo/TwitterLogo.svelte';
-  import WhatsappLogo from 'phosphor-svelte/lib/WhatsappLogo/WhatsappLogo.svelte';
-  import Image from 'phosphor-svelte/lib/Image/Image.svelte';
-  import { formatDistanceToNowStrict } from 'date-fns';
-  import PuzzleLabel from '$ui/PuzzleLabel.svelte';
-  import TwitterLink from '$components/shareButtons/TwitterLink.svelte';
+  import Comments from '$components/comments/Comments.svelte';
   import FacebookLink from '$components/shareButtons/FacebookLink.svelte';
-  import WhatsAppLink from '$components/shareButtons/WhatsAppLink.svelte';
   import RedditLink from '$components/shareButtons/RedditLink.svelte';
+  import TwitterLink from '$components/shareButtons/TwitterLink.svelte';
+  import WhatsAppLink from '$components/shareButtons/WhatsAppLink.svelte';
+  import trpc from '$lib/client/trpc';
+  import type { Label } from '$models/Label';
   import type { Sudoku } from '$models/Sudoku';
   import type { User } from '$models/User';
   import type { Vote } from '$models/Vote';
-  import type { Label } from '$models/Label';
-  import trpc, { type InferQueryOutput } from '$lib/client/trpc';
-  import { onMount } from 'svelte';
-  import RichTextEditor from '$components/RichTextEditor.svelte';
+  import PuzzleLabel from '$ui/PuzzleLabel.svelte';
+  import classNames from 'classnames';
+  import { formatDistanceToNowStrict } from 'date-fns';
+  import CaretDown from 'phosphor-svelte/lib/CaretDown/CaretDown.svelte';
+  import CaretUp from 'phosphor-svelte/lib/CaretUp/CaretUp.svelte';
+  import FacebookLogo from 'phosphor-svelte/lib/FacebookLogo/FacebookLogo.svelte';
+  import Image from 'phosphor-svelte/lib/Image/Image.svelte';
+  import RedditLogo from 'phosphor-svelte/lib/RedditLogo/RedditLogo.svelte';
+  import TwitterLogo from 'phosphor-svelte/lib/TwitterLogo/TwitterLogo.svelte';
+  import WhatsappLogo from 'phosphor-svelte/lib/WhatsappLogo/WhatsappLogo.svelte';
   import HtmlContent from './HTMLContent.svelte';
-  import Button from '$ui/Button.svelte';
 
   export let sudoku: Sudoku & {
     user?: Pick<User, 'id' | 'username' | 'role'> | null;
@@ -29,36 +27,6 @@
     labels: Label[];
   };
   export let takeScreenshot: () => void;
-
-  onMount(() => {
-    getComments();
-  });
-
-  let savingComment = false;
-  let commentContent = '';
-
-  async function postComment() {
-    savingComment = true;
-    await trpc().mutation('comments:create', {
-      body: commentContent,
-      sudokuId: sudoku.id
-    });
-    commentContent = '';
-    savingComment = false;
-    await getComments();
-  }
-
-  let commentCursor: Date | null | undefined = undefined;
-  let comments: InferQueryOutput<'comments:onSudoku'>['comments'] = [];
-  async function getComments() {
-    const c = await trpc().query('comments:onSudoku', {
-      sudokuId: sudoku.id,
-      limit: 20,
-      cursor: commentCursor ?? undefined
-    });
-    commentCursor = c.nextCursor;
-    comments = c.comments;
-  }
 
   async function vote(value: number) {
     return await trpc().mutation('votes:vote', { sudokuId: sudoku.id, value });
@@ -82,7 +50,7 @@
 </script>
 
 <aside class="p-8">
-  <div class="mb-4 flex items-center justify-between">
+  <div class="mb-4 flex flex-wrap space-y-4 items-center justify-between">
     <div class="flex items-center">
       <div class="flex flex-col text-sm text-gray-500 items-center">
         <button
@@ -189,34 +157,5 @@
   {/if}
 
   <h2 class="mt-8 font-semibold mb-2">Comments</h2>
-  <ul class="space-y-2">
-    <li class="rounded-lg shadow border p-2">
-      <h6>Write a new comment</h6>
-      <RichTextEditor bind:content={commentContent} placeholder="New comment" />
-      <div class="flex w-full justify-end">
-        <Button
-          loading={savingComment}
-          variant="primary"
-          on:click={() => {
-            void postComment();
-          }}>Save</Button
-        >
-      </div>
-    </li>
-    {#if comments.length > 0}
-      {#each comments as comment}
-        <li class="rounded-lg shadow border p-2">
-          <div class="flex gap-2 items-center mb-2">
-            <h6 class="font-semibold">{comment.user.username}</h6>
-            <span class="text-sm text-gray-500"
-              >created {formatDistanceToNowStrict(comment.createdAt)} ago</span
-            >
-          </div>
-          <HtmlContent content={comment.body} />
-        </li>
-      {/each}
-    {:else}
-      <li class="text-gray-700 mt-2">No comments</li>
-    {/if}
-  </ul>
+  <Comments sudokuId={sudoku.id} />
 </aside>
