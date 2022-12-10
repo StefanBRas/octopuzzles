@@ -7,7 +7,6 @@
   import Trash from 'phosphor-svelte/lib/Trash/Trash.svelte';
   import Swap from 'phosphor-svelte/lib/Swap/Swap.svelte';
   import ArrowsOutLineVertical from 'phosphor-svelte/lib/ArrowsOutLineVertical/ArrowsOutLineVertical.svelte';
-  import classNames from 'classnames';
   import RichTextEditor from '$components/RichTextEditor.svelte';
 
   let givens = editorHistory.getClue('givens');

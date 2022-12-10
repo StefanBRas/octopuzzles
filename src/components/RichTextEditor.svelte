@@ -49,6 +49,7 @@
     <div class="flex mb-2">
       <div class="border-r pr-1 mr-1">
         <button
+          class="rounded p-1 hover:bg-gray-100"
           type="button"
           on:click={() => editor.chain().focus().toggleBold().run()}
           class:active={editor.isActive('bold')}
@@ -56,6 +57,7 @@
           <TextBolder />
         </button>
         <button
+          class="rounded p-1 hover:bg-gray-100"
           type="button"
           on:click={() => editor.chain().focus().toggleItalic().run()}
           class:active={editor.isActive('italic')}
@@ -63,6 +65,7 @@
           <TextItalic />
         </button>
         <button
+          class="rounded p-1 hover:bg-gray-100"
           type="button"
           on:click={() => editor.chain().focus().toggleStrike().run()}
           class:active={editor.isActive('strike')}
@@ -73,6 +76,7 @@
 
       <div>
         <button
+          class="rounded p-1 hover:bg-gray-100"
           type="button"
           on:click={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
           class:active={editor.isActive('heading', { level: 1 })}
@@ -80,6 +84,7 @@
           <TextHOne />
         </button>
         <button
+          class="rounded p-1 hover:bg-gray-100"
           type="button"
           on:click={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
           class:active={editor.isActive('heading', { level: 2 })}
@@ -87,6 +92,7 @@
           <TextHTwo />
         </button>
         <button
+          class="rounded p-1 hover:bg-gray-100"
           type="button"
           on:click={() => editor.chain().focus().setParagraph().run()}
           class:active={editor.isActive('paragraph')}
@@ -95,6 +101,7 @@
         </button>
 
         <button
+          class="rounded p-1 hover:bg-gray-100"
           type="button"
           on:click={() => editor.chain().focus().toggleBulletList().run()}
           class:active={editor.isActive('bulletList')}
@@ -102,6 +109,7 @@
           <ListBullets />
         </button>
         <button
+          class="rounded p-1 hover:bg-gray-100"
           type="button"
           on:click={() => editor.chain().focus().toggleOrderedList().run()}
           class:active={editor.isActive('orderedList')}
@@ -132,10 +140,6 @@
   .ProseMirror ul,
   .ProseMirror ol {
     padding-left: 1.5rem;
-  }
-
-  .rich-text-editor button {
-    @apply rounded p-1 hover:bg-gray-100;
   }
 
   .rich-text-editor button.active {
