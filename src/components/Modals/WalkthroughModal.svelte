@@ -10,10 +10,7 @@
 
   export let editable = false;
   export let isOpen: boolean;
-  export let onClose: () => void;
-  $: if (!isOpen) {
-    onClose();
-  }
+
   let givens = editorHistory.getClue('givens');
   let borderclues = editorHistory.getClue('borderclues');
   let cellclues = editorHistory.getClue('cellclues');
@@ -103,6 +100,7 @@
               class="border border-gray-300 py-2 px-4 leading-5 rounded-md w-full focus:ring focus:ring-blue-300 focus:border-blue-500 disabled:bg-gray-200 h-full"
               placeholder="Add a description"
               value={description}
+              data-ignoreshortcuts
             />
           {:else}
             <div>
