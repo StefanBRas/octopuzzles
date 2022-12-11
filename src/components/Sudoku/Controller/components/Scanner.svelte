@@ -450,7 +450,9 @@
       $selectedCells.forEach((c) => {
         if (highlightMode == 'Seen') {
           const cellsToAdd = getSeenCells(c).filter(
-            (p) => !cellsToHighlight.some((q) => q.row === p.row && q.column === p.column)
+            (p) =>
+              !$selectedCells.some((q) => q.row === p.row && q.column === p.column) &&
+              !cellsToHighlight.some((q) => q.row === p.row && q.column === p.column)
           );
           if (cellsToAdd.length) {
             cellsToHighlight = [...cellsToHighlight, ...cellsToAdd];
@@ -459,7 +461,7 @@
           getTuples(c, false).forEach((t) => {
             const cellsToAdd = t.cells.filter(
               (p) =>
-                (p.row !== c.row || p.column) !== c.column &&
+                !$selectedCells.some((q) => q.row === p.row && q.column === p.column) &&
                 !cellsToHighlight.some((q) => q.row === p.row && q.column === p.column)
             );
             if (cellsToAdd.length) {
