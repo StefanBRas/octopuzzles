@@ -28,6 +28,7 @@
     defaultHandleMouseDown,
     defaultHandleMouseEnter
   } from '$stores/sudokuStore/interactionHandlers';
+  import deepCopy from '$utils/deepCopy';
 
   let scannerSettings: ScannerSettings = me.getSettings().scanner ?? {};
   let highlightMode = scannerSettings.highlightMode ?? 'Seen';
@@ -48,17 +49,21 @@
   let scanNonConsecutive = scannerSettings.scanNonConsecutive ?? true;
   let scanEntropy = scannerSettings.scanEntropy ?? true;
 
-  let values = gameHistory.getValue('values');
-  let centermarks = gameHistory.getValue('centermarks');
-  let cornermarks = gameHistory.getValue('cornermarks');
   let dimensions = editorHistory.getClue('dimensions');
+  let givens = editorHistory.getClue('givens');
   let cells = editorHistory.getClue('cells');
   let regions = editorHistory.getClue('regions');
   let cages = editorHistory.getClue('cages');
   let paths = editorHistory.getClue('paths');
   let logic = editorHistory.getClue('logic');
 
-  let digits = $logic.digits ?? '1-9';
+  const rowOffset = $dimensions.margins?.top ?? 0;
+  const columnOffset = $dimensions.margins?.left ?? 0;
+  const rows = $dimensions.rows - rowOffset - ($dimensions.margins?.bottom ?? 0);
+  const columns = $dimensions.columns - columnOffset - ($dimensions.margins?.right ?? 0);
+  const { width, height } = defaultRegionSize($dimensions);
+
+  let digits = $logic.digits ?? '1-' + rows;
   let flags = $logic.flags ?? [];
   let nonstandard = flags.indexOf('NonStandard') !== -1;
   let diagonalPos = flags.indexOf('DiagonalPos') !== -1;
@@ -74,15 +79,13 @@
   let negativeBlack = flags.indexOf('NegativeBlack') !== -1;
   let negativeWhite = flags.indexOf('NegativeWhite') !== -1;
 
-  const rowOffset = $dimensions.margins?.top ?? 0;
-  const columnOffset = $dimensions.margins?.left ?? 0;
-  const rows = $dimensions.rows - rowOffset - ($dimensions.margins?.bottom ?? 0);
-  const columns = $dimensions.columns - columnOffset - ($dimensions.margins?.right ?? 0);
-  const { width, height } = defaultRegionSize($dimensions);
+  let values = gameHistory.getValue('values');
+  let centermarks = gameHistory.getValue('centermarks');
+  let cornermarks = gameHistory.getValue('cornermarks');
 
   let allDigits: string[] = [];
   let candidates: string[][][] = [];
-  let seen: { row: number; column: number; context: string }[][][] = [];
+  let queue: Position[] = [];
 
   let playing = false;
 
@@ -108,7 +111,6 @@
     };
     me.saveSettings({ scanner: scannerSettings });
 
-    init();
     updateHighlightedCells();
   }
 
@@ -133,193 +135,319 @@
         allDigits.splice(n, 1, ...range);
       }
     }
+  }
+
+  function findCandidates(): void {
+    candidates = [];
+    queue = [];
 
     for (let i = 0; i < rows; ++i) {
-      candidates[i + rowOffset] = [];
-      seen[i + rowOffset] = [];
+      const row = i + rowOffset;
+
+      candidates[row] = [];
 
       for (let j = 0; j < columns; ++j) {
-        if ($values[i + rowOffset][j + columnOffset] !== '') continue;
+        const column = j + columnOffset;
 
-        candidates[i + rowOffset][j + columnOffset] =
-          $centermarks[i + rowOffset][j + columnOffset].split('');
-        seen[i + rowOffset][j + columnOffset] = [];
+        if ($givens[row][column] === '' && $values[row][column] === '') {
+          queue.push({ row, column });
 
-        if (!nonstandard) {
-          for (let y = 0; y < rows; ++y) {
-            if (y !== i)
-              seen[i + rowOffset][j + columnOffset].push({
-                row: y + rowOffset,
-                column: j + columnOffset,
-                context: 'ROW'
-              });
-          }
-          for (let x = 0; x < rows; ++x) {
-            if (x != j)
-              seen[i + rowOffset][j + columnOffset].push({
-                row: i + rowOffset,
-                column: x + columnOffset,
-                context: 'COLUMN'
-              });
-          }
-        }
-        if (mode !== 'Basic') {
-          if (diagonalNeg && scanDiagonals) {
-            if (i === j) {
-              for (let k = 0; k < rows; ++k) {
-                if (k !== i)
-                  seen[i + rowOffset][j + columnOffset].push({
-                    row: k + rowOffset,
-                    column: k + columnOffset,
-                    context: 'DIAGONAL-'
-                  });
-              }
-            }
-          }
-          if (diagonalPos && scanDiagonals) {
-            if (i === rows - 1 - j) {
-              for (let k = 0; k < rows; ++k) {
-                if (k !== i)
-                  seen[i + rowOffset][j + columnOffset].push({
-                    row: k + rowOffset,
-                    column: rows - 1 - k + columnOffset,
-                    context: 'DIAGONAL+'
-                  });
-              }
-            }
-          }
-          if (antiking && scanAntiKing) {
-            [-1, 1].forEach((y) => {
-              [-1, 1].forEach((x) => {
-                if (i + y < 0 || i + y >= rows) return;
-                if (j + x < 0 || j + x >= columns) return;
-
-                seen[i + rowOffset][j + columnOffset].push({
-                  row: i + y + rowOffset,
-                  column: j + x + columnOffset,
-                  context: 'ANTIKING'
-                });
-              });
-            });
-          }
-          if (antiknight && scanAntiKnight) {
-            [-2, -1, 1, 2].forEach((y) => {
-              [-2, -1, 1, -2].forEach((x) => {
-                if (Math.abs(y) === Math.abs(x)) return;
-                if (i + y < 0 || i + y >= rows) return;
-                if (j + x < 0 || j + x >= columns) return;
-
-                seen[i + rowOffset][j + columnOffset].push({
-                  row: i + y + rowOffset,
-                  column: j + x + columnOffset,
-                  context: 'ANTIKNIGHT'
-                });
-              });
-            });
-          }
-          if (disjointsets && scanDisjointSets) {
-            for (let m = 0; m < rows / height; ++m) {
-              for (let n = 0; m < columns / width; ++n) {
-                if (Math.floor(i / height) !== m || Math.floor(j / width) !== n) {
-                  seen[i + rowOffset][j + columnOffset].push({
-                    row: (i % height) + m * height + rowOffset,
-                    column: (j % width) + n * width + columnOffset,
-                    context: 'DISJOINTSET'
-                  });
-                }
-              }
-            }
+          if ($centermarks[row][column].length) {
+            candidates[row][column] = $centermarks[row][column].split('');
+          } else {
+            candidates[row][column] = [...allDigits];
           }
         }
       }
     }
+  }
+
+  function getSeenCells(cell: Position): { row: number; column: number; context: string }[] {
+    const seen: { row: number; column: number; context: string }[] = [];
+
+    const i = cell.row - rowOffset;
+    const j = cell.column - columnOffset;
+
+    if (!nonstandard) {
+      for (let x = 0; x < rows; ++x) {
+        if (x != j)
+          seen.push({
+            row: cell.row,
+            column: x + columnOffset,
+            context: 'ROW'
+          });
+      }
+
+      for (let y = 0; y < rows; ++y) {
+        if (y !== i)
+          seen.push({
+            row: y + rowOffset,
+            column: cell.column,
+            context: 'COLUMN'
+          });
+      }
+    }
 
     $regions.forEach((r) => {
-      if (
-        (r.uniqueDigits ?? regionDefaults(r.type, nonstandard).uniqueDigits) &&
-        (r.type === 'Normal' || (mode !== 'Basic' && scanExtraRegions))
-      ) {
-        r.positions.forEach((p) => {
-          r.positions.forEach((q) => {
-            if (p === q) return;
+      if (r.type === 'Normal' && (r.uniqueDigits ?? !nonstandard)) {
+        if (r.positions.some((p) => p.row === cell.row && p.column === cell.column)) {
+          r.positions.forEach((p) => {
+            if (p.row === cell.row && p.column === cell.column) return;
 
-            seen[p.row][p.column].push({
-              row: q.row,
-              column: q.column,
-              context: 'REGION:' + r.type
-            });
+            seen.push({ row: p.row, column: p.column, context: 'REGION' });
           });
-        });
+        }
       }
     });
 
     if (mode !== 'Basic') {
+      if (diagonalNeg && scanDiagonals) {
+        if (i === j) {
+          for (let k = 0; k < rows; ++k) {
+            if (k !== i)
+              seen.push({
+                row: k + rowOffset,
+                column: k + columnOffset,
+                context: 'DIAGONAL-'
+              });
+          }
+        }
+      }
+      if (diagonalPos && scanDiagonals) {
+        if (i === rows - 1 - j) {
+          for (let k = 0; k < rows; ++k) {
+            if (k !== i)
+              seen.push({
+                row: k + rowOffset,
+                column: rows - 1 - k + columnOffset,
+                context: 'DIAGONAL+'
+              });
+          }
+        }
+      }
+      if (antiking && scanAntiKing) {
+        [-1, 1].forEach((y) => {
+          [-1, 1].forEach((x) => {
+            if (i + y < 0 || i + y >= rows) return;
+            if (j + x < 0 || j + x >= columns) return;
+
+            seen.push({
+              row: i + y + rowOffset,
+              column: j + x + columnOffset,
+              context: 'ANTIKING'
+            });
+          });
+        });
+      }
+      if (antiknight && scanAntiKnight) {
+        [-2, -1, 1, 2].forEach((y) => {
+          [-2, -1, 1, -2].forEach((x) => {
+            if (Math.abs(y) === Math.abs(x)) return;
+            if (i + y < 0 || i + y >= rows) return;
+            if (j + x < 0 || j + x >= columns) return;
+
+            seen.push({
+              row: i + y + rowOffset,
+              column: j + x + columnOffset,
+              context: 'ANTIKNIGHT'
+            });
+          });
+        });
+      }
+      if (disjointsets && scanDisjointSets) {
+        for (let m = 0; m < rows / height; ++m) {
+          for (let n = 0; m < columns / width; ++n) {
+            if (Math.floor(i / height) !== m || Math.floor(j / width) !== n) {
+              seen.push({
+                row: (i % height) + m * height + rowOffset,
+                column: (j % width) + n * width + columnOffset,
+                context: 'DISJOINTSET'
+              });
+            }
+          }
+        }
+      }
       if (scanCages) {
         $cages.forEach((c) => {
           if (c.uniqueDigits ?? cageDefaults(c.type ?? 'CUSTOM').uniqueDigits) {
-            c.positions.forEach((p) => {
-              c.positions.forEach((q) => {
-                if (p === q) return;
+            if (c.positions.some((p) => p.row === cell.row && p.column === cell.column)) {
+              c.positions.forEach((p) => {
+                if (p.row === cell.row && p.column === cell.column) return;
 
-                seen[p.row][p.column].push({
-                  row: q.row,
-                  column: q.column,
-                  context: 'CAGE:' + c.type
-                });
+                seen.push({ row: p.row, column: p.column, context: 'CAGE:' + c.type });
               });
-            });
+            }
           }
         });
       }
       if (scanPaths) {
         $paths.forEach((l) => {
           if (l.uniqueDigits ?? pathDefaults(l.type ?? 'CUSTOM').uniqueDigits) {
-            l.positions.forEach((p) => {
-              l.positions.forEach((q) => {
-                if (p === q) return;
+            if (l.positions.some((p) => p.row === cell.row && p.column === cell.column)) {
+              l.positions.forEach((p) => {
+                if (p.row === cell.row && p.column === cell.column) return;
 
-                seen[p.row][p.column].push({
-                  row: q.row,
-                  column: q.column,
-                  context: 'PATH:' + l.type
-                });
+                seen.push({ row: p.row, column: p.column, context: 'PATH:' + l.type });
               });
-            });
+            }
+          }
+        });
+      }
+      if (scanExtraRegions) {
+        $regions.forEach((r) => {
+          if (
+            (r.type ?? 'CUSTOM') !== 'Normal' &&
+            (r.uniqueDigits ?? regionDefaults(r.type, nonstandard).uniqueDigits)
+          ) {
+            if (r.positions.some((p) => p.row === cell.row && p.column === cell.column)) {
+              r.positions.forEach((p) => {
+                if (p.row === cell.row && p.column === cell.column) return;
+
+                seen.push({ row: p.row, column: p.column, context: 'REGION:' + r.type });
+              });
+            }
           }
         });
       }
     }
+
+    return seen;
   }
 
   function updateHighlightedCells(): void {
+    if (highlightMode == 'None') return;
+
     let cellsToHighlight: Position[] = [];
-    if (highlightMode == 'Seen') {
-      if ($selectedCells) {
-        $selectedCells.forEach((c) => {
-          let cellsToAdd = seen[c.row][c.column].filter(
-            (s) => !cellsToHighlight.some((d) => d.row == c.row && d.column == c.column)
+    if ($selectedCells) {
+      $selectedCells.forEach((c) => {
+        let seen = getSeenCells(c);
+        if (highlightMode == 'Seen') {
+          const cellsToAdd = seen.filter(
+            (s) => !cellsToHighlight.some((d) => d.row == s.row && d.column == s.column)
           );
           if (cellsToAdd.length) {
             cellsToHighlight = [...cellsToHighlight, ...cellsToAdd];
           }
-        });
-      }
-    } else if (highlightMode == 'Tuples') {
+        } else if (highlightMode == 'Tuples') {
+        }
+      });
     }
 
     $highlightedCells = cellsToHighlight;
   }
 
-  function step(position?: Position): Position {
-    return { row: 1, column: 1 };
-  }
-
-  function runScan(): void {
+  function step(): boolean {
     if (!playing) {
-      playing = true;
+      findCandidates();
     }
 
-    //while (playing) {}
+    for (let n = 0; n < queue.length; ++n) {
+      let cell = queue[n];
+      let seenCells = getSeenCells(cell);
+      let highlightCells: Position[] = [];
+      let candidateValues = candidates[cell.row][cell.column];
+      if (candidateValues.length > 1) {
+        let newCandidateValues = candidateValues.filter((v) => {
+          let found = seenCells.find(
+            (s) => $givens[s.row][s.column] === v || $values[s.row][s.column] === v
+          );
+          if (found) {
+            highlightCells.push(found);
+            return false;
+          }
+
+          return true;
+        });
+
+        if (newCandidateValues.length === candidateValues.length) continue;
+
+        candidates[cell.row][cell.column] = candidateValues = newCandidateValues;
+      }
+
+      let value: string = '';
+      let center: string = $centermarks[cell.row][cell.column];
+      let corner: string = $cornermarks[cell.row][cell.column];
+      let updateGame = false;
+
+      if (candidateValues.length === 1) {
+        value = candidateValues[0];
+        center = '';
+        corner = '';
+
+        updateGame = true;
+
+        queue.splice(n, 1);
+      } else {
+        if (center !== '') {
+          center = candidateValues.join('');
+
+          updateGame = true;
+        }
+        if (corner !== '') {
+          corner = corner
+            .split('')
+            .filter((u) => candidateValues.some((v) => v === u))
+            .join('');
+
+          updateGame = true;
+        }
+      }
+
+      if (updateGame) {
+        const newValues = deepCopy($values);
+        const newCentermarks = deepCopy($centermarks);
+        const newCornermarks = deepCopy($cornermarks);
+
+        newValues[cell.row][cell.column] = value;
+        newCentermarks[cell.row][cell.column] = center;
+        newCornermarks[cell.row][cell.column] = corner;
+
+        gameHistory.set({
+          values: newValues,
+          centermarks: newCentermarks,
+          cornermarks: newCornermarks
+        });
+
+        if (scannerSpeed !== 'Instant') {
+          $selectedCells = [cell];
+          $highlightedCells = highlightCells;
+        }
+
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  function fullScan(): void {
+    if ((playing = step())) {
+      nextStep();
+    }
+  }
+
+  function nextStep(): void {
+    let delay: number = 0;
+    switch (scannerSpeed) {
+      case 'Instant':
+        delay = 0;
+        break;
+      case 'Fast':
+        delay = 500;
+        break;
+      case 'Slow':
+        delay = 1000;
+        break;
+    }
+    setTimeout(() => {
+      if (playing) {
+        if (!step()) {
+          playing = false;
+        } else {
+          nextStep();
+        }
+      }
+    }, delay);
   }
 
   onMount(() => {
@@ -340,6 +468,8 @@
     };
 
     init();
+
+    updateHighlightedCells();
   });
 </script>
 
@@ -553,9 +683,10 @@
         disabled={false}
         variant={playing ? 'secondary' : 'default'}
         on:click={() => {
-          playing = !playing;
-          if (playing) {
-            runScan();
+          if (!playing) {
+            fullScan();
+          } else {
+            playing = false;
           }
         }}
       >
@@ -572,8 +703,8 @@
         on:click={() => {
           autoScan = !autoScan;
           updateSettings();
-          if (autoScan) {
-            runScan();
+          if (autoScan && !playing) {
+            fullScan();
           }
         }}
       >
