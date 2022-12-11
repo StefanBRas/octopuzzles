@@ -188,7 +188,7 @@
       }
     }
 
-    $regions.forEach((r) => {
+    $regions.forEach((r, n) => {
       if (r.type === 'Normal' && (r.uniqueDigits ?? !nonstandard)) {
         if (r.positions.some((p) => p.row === cell.row && p.column === cell.column)) {
           r.positions.forEach((p) => {
@@ -268,33 +268,41 @@
         }
       }
       if (scanCages) {
-        $cages.forEach((c) => {
+        $cages.forEach((c, n) => {
           if (c.uniqueDigits ?? cageDefaults(c.type ?? 'CUSTOM').uniqueDigits) {
             if (c.positions.some((p) => p.row === cell.row && p.column === cell.column)) {
               c.positions.forEach((p) => {
                 if (p.row === cell.row && p.column === cell.column) return;
 
-                seen.push({ row: p.row, column: p.column, context: 'CAGE:' + c.type });
+                seen.push({
+                  row: p.row,
+                  column: p.column,
+                  context: 'CAGE:' + c.type + '[' + n + ']'
+                });
               });
             }
           }
         });
       }
       if (scanPaths) {
-        $paths.forEach((l) => {
+        $paths.forEach((l, n) => {
           if (l.uniqueDigits ?? pathDefaults(l.type ?? 'CUSTOM').uniqueDigits) {
             if (l.positions.some((p) => p.row === cell.row && p.column === cell.column)) {
               l.positions.forEach((p) => {
                 if (p.row === cell.row && p.column === cell.column) return;
 
-                seen.push({ row: p.row, column: p.column, context: 'PATH:' + l.type });
+                seen.push({
+                  row: p.row,
+                  column: p.column,
+                  context: 'PATH:' + l.type + '[' + n + ']'
+                });
               });
             }
           }
         });
       }
       if (scanExtraRegions) {
-        $regions.forEach((r) => {
+        $regions.forEach((r, n) => {
           if (
             (r.type ?? 'CUSTOM') !== 'Normal' &&
             (r.uniqueDigits ?? regionDefaults(r.type, nonstandard).uniqueDigits)
@@ -303,7 +311,11 @@
               r.positions.forEach((p) => {
                 if (p.row === cell.row && p.column === cell.column) return;
 
-                seen.push({ row: p.row, column: p.column, context: 'REGION:' + r.type });
+                seen.push({
+                  row: p.row,
+                  column: p.column,
+                  context: 'REGION:' + r.type + '[' + n + ']'
+                });
               });
             }
           }
@@ -314,21 +326,92 @@
     return seen;
   }
 
+  function getTuples(
+    cell: Position,
+    seen: boolean = false
+  ): { tuple: string; context: string; cells: Position[] }[] {
+    if (!seen && $centermarks[cell.row][cell.column] === '') return [];
+
+    let tuples: { tuple: string; context: string; cells: Position[] }[] = [];
+    let seenCells = getSeenCells(cell);
+    let context = '';
+
+    seenCells.forEach((s) => {
+      if (s.context !== context) {
+        context = s.context;
+        const contextCells = seenCells.filter(
+          (c) => c.context === context && $centermarks[c.row][c.column] !== ''
+        );
+
+        if (contextCells.length) {
+          if (!seen) {
+            contextCells.unshift({ ...cell, context });
+          }
+          contextCells.sort((a, b) => {
+            const atuple = $centermarks[a.row][a.column];
+            const btuple = $centermarks[b.row][b.column];
+
+            if (atuple.length > btuple.length) return seen ? -1 : 1;
+            else if (atuple.length < btuple.length) return seen ? 1 : -1;
+            else return 0;
+          });
+
+          const skipIndexes: number[] = [];
+          for (let i = 0; i < contextCells.length; ++i) {
+            let c = contextCells[i];
+            let tuple = $centermarks[c.row][c.column];
+            let cells = [c];
+            for (let j = seen ? i + 1 : 0; j < contextCells.length; ++j) {
+              if (j == i || (seen && skipIndexes.indexOf(j) != -1)) continue;
+
+              let d = contextCells[j];
+              if ($centermarks[d.row][d.column].split('').every((v) => tuple.indexOf(v) != -1)) {
+                cells.push(d);
+
+                skipIndexes.push(j);
+              }
+            }
+            if (cells.length >= tuple.length) {
+              if (seen || cells.some((c) => c.row === cell.row && c.column === cell.column)) {
+                tuples.push({ tuple, context, cells });
+
+                if (!seen) break;
+              }
+            }
+          }
+        }
+      } else {
+        return;
+      }
+    });
+
+    return tuples;
+  }
+
   function updateHighlightedCells(): void {
     if (highlightMode == 'None') return;
 
     let cellsToHighlight: Position[] = [];
     if ($selectedCells) {
       $selectedCells.forEach((c) => {
-        let seen = getSeenCells(c);
         if (highlightMode == 'Seen') {
-          const cellsToAdd = seen.filter(
-            (s) => !cellsToHighlight.some((d) => d.row == s.row && d.column == s.column)
+          const cellsToAdd = getSeenCells(c).filter(
+            (p) => !cellsToHighlight.some((q) => q.row === p.row && q.column === p.column)
           );
           if (cellsToAdd.length) {
             cellsToHighlight = [...cellsToHighlight, ...cellsToAdd];
           }
-        } else if (highlightMode == 'Tuples') {
+        } else if (highlightMode == 'Tuples' && $centermarks[c.row][c.column] !== '') {
+          getTuples(c, false).forEach((t) => {
+            const cellsToAdd = t.cells.filter(
+              (p) =>
+                (p.row !== c.row || p.column) !== c.column &&
+                !cellsToHighlight.some((q) => q.row === p.row && q.column === p.column)
+            );
+            if (cellsToAdd.length) {
+              cellsToHighlight = [...cellsToHighlight, ...cellsToAdd];
+            }
+          });
         }
       });
     }
@@ -358,6 +441,25 @@
 
           return true;
         });
+
+        if (newCandidateValues.length > 1 && useCentreMarks) {
+          let tuples = getTuples(cell, true);
+          newCandidateValues = newCandidateValues.filter((v) => {
+            let found = tuples.find((t) => t.tuple.indexOf(v) !== -1);
+            if (found) {
+              highlightCells.push(...found.cells);
+              return false;
+            }
+
+            return true;
+          });
+        }
+
+        if (newCandidateValues.length > 1 && useCornerMarks) {
+        }
+
+        if (newCandidateValues.length > 1 && mode === 'Extreme') {
+        }
 
         if (newCandidateValues.length === candidateValues.length) continue;
 
