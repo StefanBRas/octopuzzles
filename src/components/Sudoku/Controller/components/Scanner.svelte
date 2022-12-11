@@ -188,7 +188,7 @@
       }
     }
 
-    $regions.forEach((r, n) => {
+    $regions.forEach((r) => {
       if (r.type === 'Normal' && (r.uniqueDigits ?? !nonstandard)) {
         if (r.positions.some((p) => p.row === cell.row && p.column === cell.column)) {
           r.positions.forEach((p) => {
@@ -388,6 +388,38 @@
     return tuples;
   }
 
+  function getCornerSets(cell: Position): { digit: string; cells: Position[] }[] {
+    let sets: { digit: string; cells: Position[] }[] = [];
+    let seenCells = getSeenCells(cell);
+
+    seenCells
+      .filter((s) => $cornermarks[s.row][s.column] !== '')
+      .forEach((c) => {
+        let regionCells =
+          $regions
+            .find(
+              (r) =>
+                r.type === 'Normal' &&
+                (r.uniqueDigits ?? true) &&
+                r.positions.some((p) => p.row === c.row && p.column === c.column)
+            )
+            ?.positions.filter((p) => $cornermarks[p.row][p.column] !== '') ?? [];
+
+        $cornermarks[c.row][c.column].split('').forEach((v) => {
+          let valueCells = regionCells.filter(
+            (p) => $cornermarks[c.row][c.column].indexOf(v) != -1
+          );
+          if (
+            valueCells.every((q) => seenCells.some((s) => s.row === q.row && s.column === q.column))
+          ) {
+            sets.push({ digit: v, cells: valueCells });
+          }
+        });
+      });
+
+    return sets;
+  }
+
   function updateHighlightedCells(): void {
     if (highlightMode == 'None') return;
 
@@ -455,7 +487,17 @@
           });
         }
 
-        if (newCandidateValues.length > 1 && useCornerMarks) {
+        if (newCandidateValues.length > 1 && !nonstandard && useCornerMarks) {
+          let sets = getCornerSets(cell);
+          newCandidateValues = newCandidateValues.filter((v) => {
+            let found = sets.find((s) => s.digit === v);
+            if (found) {
+              highlightCells.push(...found.cells);
+              return false;
+            }
+
+            return true;
+          });
         }
 
         if (newCandidateValues.length > 1 && mode === 'Extreme') {
@@ -486,12 +528,16 @@
           updateGame = true;
         }
         if (corner !== '') {
-          corner = corner
+          const newCorner = corner
             .split('')
             .filter((u) => candidateValues.some((v) => v === u))
             .join('');
 
-          updateGame = true;
+          if (newCorner !== corner) {
+            corner = newCorner;
+
+            updateGame = true;
+          }
         }
       }
 
