@@ -31,7 +31,7 @@
   import deepCopy from '$utils/deepCopy';
 
   let scannerSettings: ScannerSettings = me.getSettings().scanner ?? {};
-  let highlightMode = scannerSettings.highlightMode ?? 'Seen';
+  let highlightMode = scannerSettings.highlightMode ?? 'None';
   let mode = scannerSettings.mode ?? 'Basic';
   let autoScan = scannerSettings.autoScan ?? false;
   let scannerSpeed = scannerSettings.scannerSpeed ?? 'Slow';
