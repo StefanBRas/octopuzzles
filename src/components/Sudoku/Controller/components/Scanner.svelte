@@ -328,7 +328,7 @@
 
   function getTuples(
     cell: Position,
-    seen: boolean = false
+    seen = true
   ): { tuple: string; context: string; cells: Position[] }[] {
     if (!seen && $centermarks[cell.row][cell.column] === '') return [];
 
@@ -388,34 +388,56 @@
     return tuples;
   }
 
-  function getCornerSets(cell: Position): { digit: string; cells: Position[] }[] {
+  function getCornerSets(cell: Position, seen = true): { digit: string; cells: Position[] }[] {
     let sets: { digit: string; cells: Position[] }[] = [];
-    let seenCells = getSeenCells(cell);
 
-    seenCells
-      .filter((s) => $cornermarks[s.row][s.column] !== '')
-      .forEach((c) => {
-        let regionCells =
-          $regions
-            .find(
-              (r) =>
-                r.type === 'Normal' &&
-                (r.uniqueDigits ?? true) &&
-                r.positions.some((p) => p.row === c.row && p.column === c.column)
-            )
-            ?.positions.filter((p) => $cornermarks[p.row][p.column] !== '') ?? [];
+    if (seen) {
+      let seenCells = getSeenCells(cell);
 
-        $cornermarks[c.row][c.column].split('').forEach((v) => {
-          let valueCells = regionCells.filter(
-            (p) => $cornermarks[c.row][c.column].indexOf(v) != -1
-          );
-          if (
-            valueCells.every((q) => seenCells.some((s) => s.row === q.row && s.column === q.column))
-          ) {
-            sets.push({ digit: v, cells: valueCells });
-          }
+      seenCells
+        .filter((s) => $cornermarks[s.row][s.column] !== '')
+        .forEach((c) => {
+          let regionCells =
+            $regions
+              .find(
+                (r) =>
+                  r.type === 'Normal' &&
+                  (r.uniqueDigits ?? true) &&
+                  r.positions.some((p) => p.row === c.row && p.column === c.column)
+              )
+              ?.positions.filter((p) => $cornermarks[p.row][p.column] !== '') ?? [];
+
+          $cornermarks[c.row][c.column].split('').forEach((v) => {
+            let valueCells = regionCells.filter(
+              (p) => $cornermarks[p.row][p.column].indexOf(v) != -1
+            );
+            if (
+              valueCells.every((q) =>
+                seenCells.some((s) => s.row === q.row && s.column === q.column)
+              )
+            ) {
+              sets.push({ digit: v, cells: valueCells });
+            }
+          });
+        });
+    } else if ($cornermarks[cell.row][cell.column] !== '') {
+      let regionCells =
+        $regions
+          .find(
+            (r) =>
+              r.type === 'Normal' &&
+              (r.uniqueDigits ?? true) &&
+              r.positions.some((p) => p.row === cell.row && p.column === cell.column)
+          )
+          ?.positions.filter((p) => $cornermarks[p.row][p.column] !== '') ?? [];
+
+      $cornermarks[cell.row][cell.column].split('').forEach((v) => {
+        sets.push({
+          digit: v,
+          cells: regionCells.filter((p) => $cornermarks[p.row][p.column].indexOf(v) != -1)
         });
       });
+    }
 
     return sets;
   }
@@ -475,7 +497,7 @@
         });
 
         if (newCandidateValues.length > 1 && useCentreMarks) {
-          let tuples = getTuples(cell, true);
+          let tuples = getTuples(cell);
           newCandidateValues = newCandidateValues.filter((v) => {
             let found = tuples.find((t) => t.tuple.indexOf(v) !== -1);
             if (found) {
@@ -511,37 +533,30 @@
       let value: string = '';
       let center: string = $centermarks[cell.row][cell.column];
       let corner: string = $cornermarks[cell.row][cell.column];
-      let updateGame = false;
 
       if (candidateValues.length === 1) {
         value = candidateValues[0];
         center = '';
         corner = '';
 
-        updateGame = true;
-
         queue.splice(n, 1);
       } else {
         if (center !== '') {
           center = candidateValues.join('');
-
-          updateGame = true;
         }
         if (corner !== '') {
-          const newCorner = corner
+          corner = corner
             .split('')
             .filter((u) => candidateValues.some((v) => v === u))
             .join('');
-
-          if (newCorner !== corner) {
-            corner = newCorner;
-
-            updateGame = true;
-          }
         }
       }
 
-      if (updateGame) {
+      if (
+        value !== $values[cell.row][cell.column] ||
+        center !== $centermarks[cell.row][cell.column] ||
+        corner !== $cornermarks[cell.row][cell.column]
+      ) {
         const newValues = deepCopy($values);
         const newCentermarks = deepCopy($centermarks);
         const newCornermarks = deepCopy($cornermarks);
@@ -549,6 +564,22 @@
         newValues[cell.row][cell.column] = value;
         newCentermarks[cell.row][cell.column] = center;
         newCornermarks[cell.row][cell.column] = corner;
+
+        if (corner !== $cornermarks[cell.row][cell.column]) {
+          getCornerSets(cell, false).forEach((s) => {
+            if (s.cells.length === 2 && corner.indexOf(s.digit) === -1) {
+              s.cells.some((c) => {
+                if (c.row !== cell.row || c.column !== cell.column) {
+                  candidates[c.row][c.column] = [s.digit];
+                  newCentermarks[c.row][c.column] = s.digit;
+                  newCornermarks[c.row][c.column] = '';
+                  return true;
+                }
+                return false;
+              });
+            }
+          });
+        }
 
         gameHistory.set({
           values: newValues,
