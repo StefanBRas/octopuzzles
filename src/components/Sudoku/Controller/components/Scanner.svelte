@@ -569,7 +569,11 @@
 
         if (corner !== $cornermarks[cell.row][cell.column]) {
           getCornerSets(cell, false).forEach((s) => {
-            if (s.cells.length === 2 && corner.indexOf(s.digit) === -1) {
+            if (s.digit === value) {
+              s.cells.forEach((c) => {
+                newCornermarks[c.row][c.column] = '';
+              });
+            } else if (s.cells.length === 2 && corner.indexOf(s.digit) === -1) {
               s.cells.some((c) => {
                 if (c.row !== cell.row || c.column !== cell.column) {
                   candidates[c.row][c.column] = [s.digit];
