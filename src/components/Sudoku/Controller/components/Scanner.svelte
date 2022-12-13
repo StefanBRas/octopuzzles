@@ -92,7 +92,7 @@
       />
     </div>
     <div>
-      <Label id="mode">Scanning</Label>
+      <Label id="mode">Options</Label>
       <RadioGroup
         options={{
           Basic: 'Basic',
@@ -267,6 +267,7 @@
       </div>
     </div>
     <div>
+      <Label id="mode">Speed</Label>
       <RadioGroup
         options={{
           Slow: 'Slow',
@@ -278,27 +279,29 @@
       />
     </div>
 
-    <div class="grid grid-cols-3 grid-rows-1 h-max w-max m-auto p-4 gap-4">
+    <div class="grid grid-cols-4 grid-rows-1 h-max w-max m-auto p-1 gap-4">
       <SquareButton text="Step" disabled={false} on:click={() => scanner.step()}>
         <Step />
       </SquareButton>
       <SquareButton
-        text="Play"
-        disabled={false}
-        variant={scanner.isScanning() ? 'secondary' : 'default'}
+        text="Scan"
         on:click={() => {
           if (!scanner.isScanning()) {
             scanner.startScan();
-          } else {
+          }
+        }}
+      >
+        <Play />
+      </SquareButton>
+      <SquareButton
+        text="Stop"
+        on:click={() => {
+          if (scanner.isScanning()) {
             scanner.stopScan();
           }
         }}
       >
-        {#if scanner.isScanning()}
-          <Pause />
-        {:else}
-          <Play />
-        {/if}
+        <Pause />
       </SquareButton>
       <SquareButton
         text="Auto"
