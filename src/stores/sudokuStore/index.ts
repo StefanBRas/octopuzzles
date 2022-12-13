@@ -32,6 +32,7 @@ import type {
   InputMode,
   Mode
 } from '$types';
+import { scanner } from './scanner';
 
 // WRITABLES
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
@@ -333,14 +334,19 @@ function createSelectedCellsStore() {
   function set(newSelectedCells: Position[]): void {
     selectedItemIndex.set(-1);
     highlightedItemIndex.set(-1);
-    highlightedCells.set([]);
+    if (get(mode) === 'game') {
+      highlightedCells.set(scanner.getHighlightedCells(newSelectedCells));
+    }
+    else {
+      highlightedCells.set([]);
+    }
     _set(newSelectedCells);
   }
 
   function addCell(cell: Position, keepIfAlreadySelected = true): void {
     let found = false;
     _update((oldSelectedCells) => {
-      const newSelectedCells = oldSelectedCells.filter((c) => {
+      let newSelectedCells = oldSelectedCells.filter((c) => {
         if (c.row === cell.row && c.column === cell.column) {
           found = true;
           return keepIfAlreadySelected;
@@ -349,7 +355,11 @@ function createSelectedCellsStore() {
         }
       });
       if (!found) {
-        return [...newSelectedCells, cell];
+        newSelectedCells =  [...newSelectedCells, cell];
+
+        if (get(mode) === 'game') {
+          highlightedCells.set(scanner.getHighlightedCells(newSelectedCells));
+        }
       }
       return newSelectedCells;
     });

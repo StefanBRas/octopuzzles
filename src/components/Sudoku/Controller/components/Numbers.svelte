@@ -6,6 +6,8 @@
   import { get } from 'svelte/store';
   import { isDeleteKey } from '$utils/isDeleteKey';
   import { hasOpenModals } from '$stores/modalStore';
+  import { me } from '$stores/meStore';
+  import { scanner } from '$stores/sudokuStore/scanner';
 
   function handleClick(newValue: string): void {
     const positions = get(selectedCells);
@@ -24,6 +26,7 @@
     } else {
       // Whether there has been any changes
       let anyChanges = false;
+      let runScan = false;
 
       for (const position of positions) {
         // don't put anything on top of a given
@@ -48,6 +51,7 @@
             // Insert the number
             newValues[position.row][position.column] = newValue;
             anyChanges = true;
+            runScan = me.getSettings().scanner?.autoScan ?? false;
           }
         }
       }
@@ -55,6 +59,10 @@
       // If there has actually been any changes, update the game history
       if (anyChanges) {
         gameHistory.set({ values: newValues });
+
+        if (runScan) {
+          scanner.startScan();
+        }
       }
     }
   }
