@@ -642,13 +642,33 @@ function createScannerStore() {
     return cellsToHighlight;
   }
 
+  function toggleSeen() {
+    const settings = get(scannerSettings);
+    if (settings.highlightMode !== 'Seen') {
+      settings.highlightMode = 'Seen'
+    } else {
+      settings.highlightMode = 'None'
+    }
+  }
+
+  function toggleTuples() {
+    const settings = get(scannerSettings);
+    if (settings.highlightMode !== 'Tuples') {
+      settings.highlightMode = 'Tuples'
+    } else {
+      settings.highlightMode = 'None'
+    }    
+  }
+
   return {
     configure,
     step,
     startScan,
     stopScan,
     isScanning,
-    getHighlightedCells
+    getHighlightedCells,
+    toggleSeen,
+    toggleTuples
   };
 }
 /**

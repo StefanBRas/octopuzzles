@@ -27,7 +27,13 @@
   import classNames from 'classnames';
   import BorderClues from './components/BorderClues.svelte';
   import CellClues from './components/CellClues.svelte';
-  import { editorHistory, gameHistory, inputMode } from '$stores/sudokuStore';
+  import {
+    editorHistory,
+    gameHistory,
+    highlightedCells,
+    inputMode,
+    selectedCells
+  } from '$stores/sudokuStore';
   import { onMount } from 'svelte';
   import Cells from './components/Cells.svelte';
   import EditorColors from './components/EditorColors.svelte';
@@ -152,6 +158,35 @@
           k.preventDefault();
           $inputMode = 'centermarks';
           break;
+        case 's':
+          k.preventDefault();
+          if (!scanner.isScanning()) {
+            scanner.startScan();
+          } else {
+            scanner.stopScan();
+          }
+          break;
+        case 'a':
+          k.preventDefault();
+          if (scanner.isScanning()) {
+            scanner.stopScan();
+          }
+          scanner.step();
+          break;
+        case 'h': {
+          k.preventDefault();
+          scanner.toggleSeen();
+
+          highlightedCells.set(scanner.getHighlightedCells(get(selectedCells)));
+          break;
+        }
+        case 't': {
+          k.preventDefault();
+          scanner.toggleTuples();
+
+          highlightedCells.set(scanner.getHighlightedCells(get(selectedCells)));
+          break;
+        }
       }
     }
     // TODO: Handle editor
