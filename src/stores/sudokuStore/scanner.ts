@@ -57,6 +57,10 @@ function createScannerStore() {
 
     if (get(mode) === 'game')
       highlightedCells.set(getHighlightedCells(get(selectedCells)));
+
+    if ((settings?.autoScan ?? false) && !isScanning()) {
+      startScan();
+    }
   }
 
   const scanning = writable(false);
@@ -344,19 +348,20 @@ function createScannerStore() {
             const c = contextCells[i];
             const tuple = centermarks[c.row][c.column];
             const cells = [c];
+            const indexes = [];
             for (let j = seen ? i + 1 : 0; j < contextCells.length; ++j) {
               if (j == i || (seen && skipIndexes.indexOf(j) != -1)) continue;
 
               const d = contextCells[j];
               if (centermarks[d.row][d.column].split('').every((v) => tuple.indexOf(v) != -1)) {
                 cells.push(d);
-
-                skipIndexes.push(j);
+                indexes.push(j);
               }
             }
             if (cells.length >= tuple.length) {
               if (seen || cells.some((c) => c.row === cell.row && c.column === cell.column)) {
                 tuples.push({ tuple, context, cells });
+                skipIndexes.push(...indexes);
 
                 if (!seen) break;
               }
@@ -371,7 +376,7 @@ function createScannerStore() {
     return tuples;
   }
 
-  function doGetCornerSets(cell: Position, seen = true): { digit: string; cells: Position[] }[] {
+  function getCornerSets(cell: Position, seen = true): { digit: string; cells: Position[] }[] {
     const sets: { digit: string; cells: Position[] }[] = [];
 
     const regions = get(editorHistory.getClue('regions'));
@@ -428,6 +433,39 @@ function createScannerStore() {
     return sets;
   }
 
+  function getNbrCells(cell:Position) : Position[] {
+    const dimensions = get(editorHistory.getClue('dimensions'));
+    const rowOffset = dimensions.margins?.top ?? 0;
+    const columnOffset = dimensions.margins?.left ?? 0;
+    const rows = dimensions.rows - rowOffset - (dimensions.margins?.bottom ?? 0);
+    const columns = dimensions.columns - columnOffset - (dimensions.margins?.right ?? 0);
+
+    const nbrCells:Position[] = [];
+    
+    const i = cell.row - columnOffset;
+    const j = cell.column - columnOffset;
+
+    if (i - 1 >= 0 ) {nbrCells.push({
+      row: i - 1 + rowOffset,
+      column: cell.column
+    });}
+    if (j - 1 >= 0) {nbrCells.push({
+      row: cell.row,
+      column: j - 1 + columnOffset
+    });}
+
+    if (i + 1 < rows) {nbrCells.push({
+      row: i + 1 + rowOffset,
+      column: cell.column
+    });}
+    if (j + 1 <  columns) {nbrCells.push({
+      row: cell.row,
+      column: j + 1
+    });}
+
+    return nbrCells;
+  }
+
   function step(): boolean {
     if (!isScanning()) {
       initScan();
@@ -440,6 +478,8 @@ function createScannerStore() {
     const values = get(gameHistory.getValue('values'));
     const centermarks = get(gameHistory.getValue('centermarks'));
     const cornermarks = get(gameHistory.getValue('cornermarks'));
+
+    const flags = logic.flags ?? [];
 
     for (let n = 0; n < context.queue.length; ++n) {
       const cell = context.queue[n];
@@ -474,10 +514,10 @@ function createScannerStore() {
 
         if (
           newCandidateValues.length > 1 &&
-          !((logic.flags ?? []).indexOf('NonStandard') !== -1) &&
+          !(flags.indexOf('NonStandard') !== -1) &&
           settings.useCornerMarks
         ) {
-          const sets = doGetCornerSets(cell);
+          const sets = getCornerSets(cell);
           newCandidateValues = newCandidateValues.filter((v) => {
             const found = sets.find((s) => s.digit === v);
             if (found) {
@@ -489,8 +529,103 @@ function createScannerStore() {
           });
         }
 
-        //if (newCandidateValues.length > 1 && settings.mode === 'Extreme') {
-        //}
+        if (newCandidateValues.length > 1 && settings.mode === 'Extreme') {
+          const borderclues = get(editorHistory.getClue('borderclues'));
+          if ((flags.indexOf('Nonconsecutive') !== -1 && settings.scanNonConsecutive) || (flags.indexOf('NegativeWhite') !== -1 && settings.scanNegativeKropki)) {
+            let nbrCells = getNbrCells(cell);
+            if (flags.indexOf('NegativeWhite') !== -1 && settings.scanNegativeKropki) {
+              nbrCells = nbrCells.filter(n => !borderclues.some(c => c.type === 'KropkiWhite' && c.positions.every(p => (p.row === cell.row && p.column === cell.column) || (p.row === n.row && p.column === n.column))));
+            }
+
+            newCandidateValues = newCandidateValues.filter((v) => 
+              !nbrCells.some(n => {
+                let value = givens[n.row][n.column];
+                if (value === '') {
+                  value = values[n.row][n.column];
+                }
+                if (value !== '') {
+                  if (Math.abs(parseInt(value) - parseInt(v)) === 1) {
+                    return true;
+                  }
+                }
+
+                return false;
+              })
+            );
+          }
+          if (flags.indexOf('NegativeBlack') !== -1 && settings.scanNegativeKropki) {
+            const nbrCells = getNbrCells(cell).filter(n => !borderclues.some(c => c.type === 'KropkiBlack' && c.positions.every(p => (p.row === cell.row && p.column === cell.column) || (p.row === n.row && p.column === n.column))));
+
+            newCandidateValues = newCandidateValues.filter((v) => 
+              !nbrCells.some(n => {
+                let value = givens[n.row][n.column];
+                if (value === '') {
+                  value = values[n.row][n.column];
+                }
+                if (value !== '') {
+                  if (parseInt(value) === 2 * parseInt(v) || 2 * parseInt(value) === parseInt(v)) {
+                    return true;
+                  }
+                }
+
+                return false;
+              })
+            );
+            
+          }
+          if (flags.indexOf('NegativeX') !== -1 && settings.scanNegativeXV) {
+            const nbrCells = getNbrCells(cell).filter(n => !borderclues.some(c => c.type === 'XvX' && c.positions.every(p => (p.row === cell.row && p.column === cell.column) || (p.row === n.row && p.column === n.column))));            
+
+            newCandidateValues = newCandidateValues.filter((v) => 
+              !nbrCells.some(n => {
+                let value = givens[n.row][n.column];
+                if (value === '') {
+                  value = values[n.row][n.column];
+                }
+                if (value !== '') {
+                  if (parseInt(value) + parseInt(v) === 10) {
+                    return true;
+                  }
+                }
+
+                return false;
+              })
+            );
+          }
+          if (flags.indexOf('NegativeV') !== -1 && settings.scanNegativeXV) {
+            const nbrCells = getNbrCells(cell).filter(n => !borderclues.some(c => c.type === 'XvV' && c.positions.every(p => (p.row === cell.row && p.column === cell.column) || (p.row === n.row && p.column === n.column))));
+
+            newCandidateValues = newCandidateValues.filter((v) => 
+              !nbrCells.some(n => {
+                let value = givens[n.row][n.column];
+                if (value === '') {
+                  value = values[n.row][n.column];
+                }
+                if (value !== '') {
+                  if (parseInt(value) + parseInt(v) === 5) {
+                    return true;
+                  }
+                }
+
+                return false;
+              })
+            );
+          }
+          /*if (flags.indexOf('Entropy') !== -1 && settings.scanEntropy) {
+            [-1, 1].forEach((y) => {
+              [-1, 1].forEach((x) => {
+                if (i + y < 0 || i + y >= rows) return;
+                if (j + x < 0 || j + x >= columns) return;
+    
+                seen.push({
+                  row: i + y + rowOffset,
+                  column: j + x + columnOffset,
+                  context: 'ANTIKING'
+                });
+              });
+            });            
+          }*/
+        }
 
         if (newCandidateValues.length === candidateValues.length) continue;
 
@@ -533,7 +668,7 @@ function createScannerStore() {
         newCornermarks[cell.row][cell.column] = corner;
 
         if (corner !== cornermarks[cell.row][cell.column]) {
-          doGetCornerSets(cell, false).forEach((s) => {
+          getCornerSets(cell, false).forEach((s) => {
             if (s.digit === value) {
               s.cells.forEach((c) => {
                 newCornermarks[c.row][c.column] = '';
@@ -571,16 +706,20 @@ function createScannerStore() {
   }
 
   function startScan(): void {
-    if (step()) {
-      scanning.set(true);
-      nextStep();
-    } else {
-      scanning.set(false);
+    if (!isScanning()) {
+      if (step()) {
+        scanning.set(true);
+        nextStep();
+      } else {
+        scanning.set(false);
+      }
     }
   }
 
   function stopScan() : void {
-    scanning.set(false)
+    if (isScanning()) {
+      scanning.set(false);
+    }
   }
 
   function nextStep(): void {

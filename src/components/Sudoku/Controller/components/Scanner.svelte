@@ -280,27 +280,13 @@
     </div>
 
     <div class="grid grid-cols-4 grid-rows-1 h-max w-max m-auto p-1 gap-4">
-      <SquareButton text="Step" disabled={false} on:click={() => scanner.step()}>
+      <SquareButton text="Step" on:click={() => scanner.step()}>
         <Step />
       </SquareButton>
-      <SquareButton
-        text="Scan"
-        on:click={() => {
-          if (!scanner.isScanning()) {
-            scanner.startScan();
-          }
-        }}
-      >
+      <SquareButton text="Scan" on:click={() => scanner.startScan()}>
         <Play />
       </SquareButton>
-      <SquareButton
-        text="Stop"
-        on:click={() => {
-          if (scanner.isScanning()) {
-            scanner.stopScan();
-          }
-        }}
-      >
+      <SquareButton text="Stop" on:click={() => scanner.stopScan()}>
         <Pause />
       </SquareButton>
       <SquareButton
@@ -310,9 +296,6 @@
         on:click={() => {
           autoScan = !autoScan;
           updateSettings();
-          if (autoScan && !scanner.isScanning) {
-            scanner.startScan();
-          }
         }}
       >
         <AutoScan />
