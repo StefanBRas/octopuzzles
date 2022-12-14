@@ -53,8 +53,7 @@ export const ScannerSettingsValidator = z.object({
   scanExtraRegions: z.boolean().nullish(),
   scanNegativeXV: z.boolean().nullish(),
   scanNegativeKropki: z.boolean().nullish(),
-  scanNonConsecutive: z.boolean().nullish(),
-  scanEntropy: z.boolean().nullish(),
+  scanNonConsecutive: z.boolean().nullish()
 });
 export type ScannerSettings = z.infer<typeof ScannerSettingsValidator>;
 

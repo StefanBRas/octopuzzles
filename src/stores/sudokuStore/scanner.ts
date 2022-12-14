@@ -25,8 +25,7 @@ function createScannerStore() {
     scanExtraRegions: true,
     scanNegativeXV: true,
     scanNegativeKropki: true,
-    scanNonConsecutive: true,
-    scanEntropy: true
+    scanNonConsecutive: true
   });
 
   const scannerContext = writable<{ candidates: string[][][]; queue: Position[] }>({
@@ -51,8 +50,7 @@ function createScannerStore() {
       scanExtraRegions: settings?.scanExtraRegions ?? true,
       scanNegativeXV: settings?.scanNegativeXV ?? true,
       scanNegativeKropki: settings?.scanNegativeKropki ?? true,
-      scanNonConsecutive: settings?.scanNonConsecutive ?? true,
-      scanEntropy: settings?.scanEntropy ?? true
+      scanNonConsecutive: settings?.scanNonConsecutive ?? true
     });
 
     if (get(mode) === 'game')
@@ -611,20 +609,6 @@ function createScannerStore() {
               })
             );
           }
-          /*if (flags.indexOf('Entropy') !== -1 && settings.scanEntropy) {
-            [-1, 1].forEach((y) => {
-              [-1, 1].forEach((x) => {
-                if (i + y < 0 || i + y >= rows) return;
-                if (j + x < 0 || j + x >= columns) return;
-    
-                seen.push({
-                  row: i + y + rowOffset,
-                  column: j + x + columnOffset,
-                  context: 'ANTIKING'
-                });
-              });
-            });            
-          }*/
         }
 
         if (newCandidateValues.length === candidateValues.length) continue;

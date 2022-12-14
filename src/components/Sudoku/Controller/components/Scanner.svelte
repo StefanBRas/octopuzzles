@@ -31,7 +31,6 @@
   let scanNegativeXV = scannerSettings.scanNegativeXV ?? true;
   let scanNegativeKropki = scannerSettings.scanNegativeKropki ?? true;
   let scanNonConsecutive = scannerSettings.scanNonConsecutive ?? true;
-  let scanEntropy = scannerSettings.scanEntropy ?? true;
 
   let regions = editorHistory.getClue('regions');
   let cages = editorHistory.getClue('cages');
@@ -68,8 +67,7 @@
       scanExtraRegions,
       scanNegativeXV,
       scanNegativeKropki,
-      scanNonConsecutive,
-      scanEntropy
+      scanNonConsecutive
     };
     me.saveSettings({ scanner: scannerSettings });
 
@@ -246,18 +244,6 @@
                 label="Scan Non-Consecutive"
                 on:change={() => {
                   scanNonConsecutive = !scanNonConsecutive;
-                  updateSettings();
-                }}
-              />
-            </div>
-          {/if}
-          {#if entropy}
-            <div>
-              <Checkbox
-                bind:checked={scanEntropy}
-                label="Scan Entropy"
-                on:change={() => {
-                  scanEntropy = !scanEntropy;
                   updateSettings();
                 }}
               />
