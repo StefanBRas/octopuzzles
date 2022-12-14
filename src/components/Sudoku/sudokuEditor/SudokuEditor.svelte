@@ -1,10 +1,10 @@
 <script lang="ts">
   import { cellSize } from '$constants';
-  import SudokuDisplay from './Display/index.svelte';
   import Controller from './Controller/index.svelte';
-  import Interface from './Display/Clues/Interface.svelte';
   import { highlightedCells, selectedCells, wrongCells, mode } from '$stores/sudokuStore';
-  import type { EditorHistoryStep, GameHistoryStep } from '$types';
+  import type { EditorHistoryStep } from '$types';
+  import SudokuDisplay from '../Display/SudokuDisplay.svelte';
+  import Interface from '../Display/Clues/Interface.svelte';
 
   // SIZING
   let windowHeight: number;
@@ -15,45 +15,14 @@
    */
   $: sudokuSize = Math.max(Math.min(windowHeight - 88, windowWidth), 300);
 
-  export let givens: EditorHistoryStep['givens'];
-  export let borderClues: EditorHistoryStep['borderclues'];
-  export let cellClues: EditorHistoryStep['cellclues'];
-  export let regions: EditorHistoryStep['regions'];
-  export let cells: EditorHistoryStep['cells'];
-  export let editorColors: EditorHistoryStep['editorcolors'];
-  export let cages: EditorHistoryStep['cages'];
-  export let paths: EditorHistoryStep['paths'];
-  export let dimensions: EditorHistoryStep['dimensions'];
-  export let logic: EditorHistoryStep['logic'];
-
-  export let values: GameHistoryStep['values'];
-  export let gameColors: GameHistoryStep['colors'];
-  export let cornermarks: GameHistoryStep['cornermarks'];
-  export let centermarks: GameHistoryStep['centermarks'];
-  export let notes: GameHistoryStep['notes'];
+  export let sudoku: EditorHistoryStep;
 </script>
 
 <svelte:window bind:innerHeight={windowHeight} bind:innerWidth={windowWidth} />
 
 <div class="flex flex-wrap w-full justify-around">
   <div class="p-2 mb-2" style="height: {sudokuSize}px; width: {sudokuSize}px" id="sudoku-display">
-    <SudokuDisplay
-      {borderClues}
-      {cages}
-      {cellClues}
-      {cells}
-      {dimensions}
-      {editorColors}
-      {givens}
-      {logic}
-      {notes}
-      {paths}
-      {regions}
-      cornermarks={$mode === 'editor' ? undefined : cornermarks}
-      centermarks={$mode === 'editor' ? undefined : centermarks}
-      values={$mode === 'editor' ? undefined : values}
-      gameColors={$mode === 'editor' ? undefined : gameColors}
-    >
+    <SudokuDisplay {sudoku}>
       <g slot="highlights">
         {#if $mode === 'game' && $wrongCells}
           {#each $wrongCells as cell}
@@ -87,7 +56,7 @@
         {/if}
       </g>
 
-      <Interface {cells} {dimensions} slot="interface" />
+      <Interface cells={sudoku.cells} dimensions={sudoku.dimensions} slot="interface" />
     </SudokuDisplay>
   </div>
   <div class="my-auto">

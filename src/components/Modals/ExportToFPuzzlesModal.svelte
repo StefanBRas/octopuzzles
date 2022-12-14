@@ -3,12 +3,16 @@
   import FPuzzlesLink from '$components/shareButtons/FPuzzlesLink.svelte';
   import CtC from '$icons/CtC.svelte';
   import FPuzzles from '$icons/FPuzzles.svelte';
+  import type { EditorHistoryStep } from '$types';
   import { compressToBase64 } from '$utils/compressor';
+  import { getSudokuGameContext } from '$utils/context/sudoku';
   import { exportAsFPuzzlesJson } from '$utils/exportAsFPuzzlesJson';
 
   export let isOpen: boolean;
+  export let sudoku: EditorHistoryStep;
+  const gameHistory = getSudokuGameContext();
 
-  let puzzleData = compressToBase64(exportAsFPuzzlesJson());
+  let puzzleData = compressToBase64(exportAsFPuzzlesJson(sudoku, gameHistory.getValues()));
 </script>
 
 {#if isOpen}

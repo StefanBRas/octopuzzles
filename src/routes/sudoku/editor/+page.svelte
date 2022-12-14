@@ -1,9 +1,8 @@
 <script lang="ts">
-  import SudokuGame from '$components/Sudoku/Game.svelte';
   import Button from '$ui/Button.svelte';
   import Input from '$ui/Input.svelte';
   import RadioGroup from '$ui/RadioGroup.svelte';
-  import { onMount } from 'svelte';
+  import { onMount, setContext } from 'svelte';
   import { goto } from '$app/navigation';
   import {
     defaultCentermarks,
@@ -18,22 +17,28 @@
   import { getUserSolution } from '$utils/getSolution';
   import {
     description,
-    editorHistory,
-    gameHistory,
     sudokuTitle,
     labels,
-    mode
+    mode,
+    createEditorHistoryStore,
+    createGameHistoryStore
   } from '$stores/sudokuStore';
   import Label from '$ui/Label.svelte';
   import classNames from 'classnames';
-  import ImportFromFPuzzles from '$components/Modals/ImportFromFPuzzles.svelte';
   import { walkthroughStore } from '$stores/walkthroughStore';
   import type { PageData } from './$types';
   import trpc, { type InferMutationInput } from '$lib/client/trpc';
   import { fillWalkthroughStore } from '$utils/fillWalkthroughStore';
   import RichTextEditor from '$components/RichTextEditor.svelte';
+  import { SUDOKU_EDITOR_CONTEXT_KEY, SUDOKU_GAME_CONTEXT_KEY } from '$utils/context/sudoku';
+  import SudokuEditor from '$components/Sudoku/sudokuEditor/SudokuEditor.svelte';
+  import SudokuGame from '$components/Sudoku/sudokuGame/SudokuGame.svelte';
 
   export let data: PageData;
+  const editorHistory = createEditorHistoryStore();
+  const gameHistory = createGameHistoryStore();
+  setContext(SUDOKU_EDITOR_CONTEXT_KEY, editorHistory);
+  setContext(SUDOKU_GAME_CONTEXT_KEY, gameHistory);
 
   $: if (data.walkthrough?.steps) {
     // Just so ts will shut up
@@ -75,7 +80,7 @@
   onMount(async () => {
     let sud = data.sudoku;
 
-    gameHistory.reset();
+    gameHistory.reset(editorHistory.getClue('dimensions'));
     $labels =
       data.labels.map((l) => ({
         label: l,
@@ -100,8 +105,8 @@
         regions: sud.regions ?? undefined,
         givens: sud.givens ?? undefined,
         cells: sud.cells ?? undefined,
-        editorcolors: sud.colors ?? undefined,
-        cages: sud.extendedcages ?? undefined,
+        colors: sud.colors ?? undefined,
+        extendedcages: sud.extendedcages ?? undefined,
         paths: sud.paths ?? undefined,
         dimensions: sud.dimensions,
         logic: sud.logic ?? undefined
@@ -116,10 +121,6 @@
       $description = '';
 
       editorHistory.reset();
-    }
-
-    if ($page.url.searchParams.get('import')) {
-      openModal(ImportFromFPuzzles);
     }
   });
 
@@ -137,22 +138,22 @@
   let loading = false;
   let provideSolution = false;
 
-  let givens = editorHistory.getClue('givens');
-  let borderclues = editorHistory.getClue('borderclues');
-  let cellclues = editorHistory.getClue('cellclues');
-  let regions = editorHistory.getClue('regions');
-  let cells = editorHistory.getClue('cells');
-  let editorColors = editorHistory.getClue('editorcolors');
-  let cages = editorHistory.getClue('cages');
-  let paths = editorHistory.getClue('paths');
-  let dimensions = editorHistory.getClue('dimensions');
-  let logic = editorHistory.getClue('logic');
+  let givens = editorHistory.subscribeToClue('givens');
+  let borderclues = editorHistory.subscribeToClue('borderclues');
+  let cellclues = editorHistory.subscribeToClue('cellclues');
+  let regions = editorHistory.subscribeToClue('regions');
+  let cells = editorHistory.subscribeToClue('cells');
+  let editorColors = editorHistory.subscribeToClue('colors');
+  let extendedcages = editorHistory.subscribeToClue('extendedcages');
+  let paths = editorHistory.subscribeToClue('paths');
+  let dimensions = editorHistory.subscribeToClue('dimensions');
+  let logic = editorHistory.subscribeToClue('logic');
 
-  let values = gameHistory.getValue('values');
-  let gameColors = gameHistory.getValue('colors');
-  let cornermarks = gameHistory.getValue('cornermarks');
-  let centermarks = gameHistory.getValue('centermarks');
-  let notes = gameHistory.getValue('notes');
+  let values = gameHistory.subscribeToValue('values');
+  let gameColors = gameHistory.subscribeToValue('colors');
+  let cornermarks = gameHistory.subscribeToValue('cornermarks');
+  let centermarks = gameHistory.subscribeToValue('centermarks');
+  let notes = gameHistory.subscribeToValue('notes');
 
   async function save(): Promise<void> {
     loading = true;
@@ -169,7 +170,7 @@
           cells: $cells,
           colors: $editorColors,
           givens: $givens,
-          extendedcages: $cages,
+          extendedcages: $extendedcages,
           paths: $paths,
           logic: $logic
         },
@@ -216,7 +217,7 @@
           cells: $cells,
           colors: $editorColors,
           givens: $givens,
-          extendedcages: $cages,
+          extendedcages: $extendedcages,
           paths: $paths,
           logic: $logic
         },
@@ -311,35 +312,34 @@
 </div>
 
 {#if tab === 'editor'}
-  <SudokuGame
-    givens={$givens}
-    borderClues={$borderclues}
-    cellClues={$cellclues}
-    regions={$regions}
-    cells={$cells}
-    editorColors={$editorColors}
-    cages={$cages}
-    paths={$paths}
-    dimensions={$dimensions}
-    logic={$logic}
-    values={[]}
-    gameColors={[]}
-    cornermarks={[]}
-    centermarks={[]}
-    notes={[]}
+  <SudokuEditor
+    sudoku={{
+      givens: $givens,
+      borderclues: $borderclues,
+      cellclues: $cellclues,
+      regions: $regions,
+      cells: $cells,
+      colors: $editorColors,
+      extendedcages: $extendedcages,
+      paths: $paths,
+      dimensions: $dimensions,
+      logic: $logic
+    }}
   />
 {:else if tab === 'game'}
   <SudokuGame
-    givens={$givens}
-    borderClues={$borderclues}
-    cellClues={$cellclues}
-    regions={$regions}
-    cells={$cells}
-    editorColors={$editorColors}
-    cages={$cages}
-    paths={$paths}
-    dimensions={$dimensions}
-    logic={$logic}
+    sudoku={{
+      givens: $givens,
+      borderclues: $borderclues,
+      cellclues: $cellclues,
+      regions: $regions,
+      cells: $cells,
+      colors: $editorColors,
+      extendedcages: $extendedcages,
+      paths: $paths,
+      dimensions: $dimensions,
+      logic: $logic
+    }}
     values={$values}
     gameColors={$gameColors}
     cornermarks={$cornermarks}

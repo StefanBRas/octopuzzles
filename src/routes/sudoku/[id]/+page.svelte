@@ -1,25 +1,49 @@
 <script lang="ts">
   import html2canvas from 'html2canvas';
-  import SudokuGame from '$components/Sudoku/Game.svelte';
   import SudokuInfo from '$components/Sudoku/SudokuInfo.svelte';
   import {
+    createGameHistoryStore,
     description,
-    editorHistory,
-    gameHistory,
     sudokuTitle,
     wrongCells
   } from '$stores/sudokuStore';
   import { onMount } from 'svelte';
-  import { goto } from '$app/navigation';
   import { openModal } from '$stores/modalStore';
   import FinishedSudokuModal from '$components/Modals/FinishedSudokuModal.svelte';
   import { getUserSolution } from '$utils/getSolution';
-  import { get } from 'svelte/store';
   import type { PageData } from './$types';
   import { walkthroughStore } from '$stores/walkthroughStore';
   import { fillWalkthroughStore } from '$utils/fillWalkthroughStore';
+  import SudokuGame from '$components/Sudoku/sudokuGame/SudokuGame.svelte';
+  import {
+    defaultBorderclues,
+    defaultCages,
+    defaultCellclues,
+    defaultCells,
+    defaultEditorColors,
+    defaultGivens,
+    defaultLogic,
+    defaultPaths,
+    defaultRegions
+  } from '$utils/defaults';
+  import type { EditorHistoryStep } from '$types';
 
   export let data: PageData;
+
+  const sudoku: EditorHistoryStep = {
+    borderclues: data.sudoku.borderclues ?? defaultBorderclues(),
+    cellclues: data.sudoku.cellclues ?? defaultCellclues(),
+    cells: data.sudoku.cells ?? defaultCells(data.sudoku.dimensions),
+    colors: data.sudoku.colors ?? defaultEditorColors(data.sudoku.dimensions),
+    dimensions: data.sudoku.dimensions,
+    extendedcages: data.sudoku.extendedcages ?? defaultCages(),
+    givens: data.sudoku.givens ?? defaultGivens(data.sudoku.dimensions),
+    logic: data.sudoku.logic ?? defaultLogic(),
+    paths: data.sudoku.paths ?? defaultPaths(),
+    regions: data.sudoku.regions ?? defaultRegions(data.sudoku.dimensions)
+  };
+
+  const gameHistory = createGameHistoryStore();
 
   $: if (data.walkthrough?.steps) {
     // Just so ts will shut up
@@ -58,46 +82,17 @@
   });
 
   onMount(async () => {
-    let sud = data.sudoku;
-    if (!sud) {
-      await goto('/');
-      return;
-    }
+    $sudokuTitle = data.sudoku.title;
+    $description = data.sudoku.description;
 
-    $sudokuTitle = sud.title;
-    $description = sud.description;
-
-    editorHistory.reset({
-      borderclues: sud.borderclues ?? undefined,
-      cellclues: sud.cellclues ?? undefined,
-      regions: sud.regions ?? undefined,
-      givens: sud.givens ?? undefined,
-      cells: sud.cells ?? undefined,
-      editorcolors: sud.colors ?? undefined,
-      cages: sud.extendedcages ?? undefined,
-      paths: sud.paths ?? undefined,
-      dimensions: sud.dimensions,
-      logic: sud.logic ?? undefined
-    });
-    gameHistory.reset();
+    gameHistory.reset(data.sudoku.dimensions);
   });
 
-  let givens = editorHistory.getClue('givens');
-  let borderClues = editorHistory.getClue('borderclues');
-  let cellClues = editorHistory.getClue('cellclues');
-  let regions = editorHistory.getClue('regions');
-  let cells = editorHistory.getClue('cells');
-  let editorColors = editorHistory.getClue('editorcolors');
-  let cages = editorHistory.getClue('cages');
-  let paths = editorHistory.getClue('paths');
-  let dimensions = editorHistory.getClue('dimensions');
-  let logic = editorHistory.getClue('logic');
-
-  let values = gameHistory.getValue('values');
-  let gameColors = gameHistory.getValue('colors');
-  let cornermarks = gameHistory.getValue('cornermarks');
-  let centermarks = gameHistory.getValue('centermarks');
-  let notes = gameHistory.getValue('notes');
+  let values = gameHistory.subscribeToValue('values');
+  let gameColors = gameHistory.subscribeToValue('colors');
+  let cornermarks = gameHistory.subscribeToValue('cornermarks');
+  let centermarks = gameHistory.subscribeToValue('centermarks');
+  let notes = gameHistory.subscribeToValue('notes');
 
   function checkSolution(numbers: string[][]): boolean {
     $wrongCells = [];
@@ -112,7 +107,7 @@
     }
 
     let userSolution = getUserSolution({
-      givens: get(editorHistory.getClue('givens')),
+      givens: data.sudoku.givens ?? defaultGivens(data.sudoku.dimensions),
       values: numbers
     });
 
@@ -183,16 +178,7 @@
 </div>
 
 <SudokuGame
-  givens={$givens}
-  borderClues={$borderClues}
-  cellClues={$cellClues}
-  regions={$regions}
-  cells={$cells}
-  editorColors={$editorColors}
-  cages={$cages}
-  paths={$paths}
-  dimensions={$dimensions}
-  logic={$logic}
+  {sudoku}
   values={$values}
   gameColors={$gameColors}
   cornermarks={$cornermarks}

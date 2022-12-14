@@ -3,9 +3,12 @@
   import Button from '$ui/Button.svelte';
   import Input from '$ui/Input.svelte';
   import { decompressFromBase64 } from '$utils/compressor';
+  import { getSudokuEditorContext, getSudokuGameContext } from '$utils/context/sudoku';
   import { importFPuzzleIntoEditorHistory } from '$utils/importFPuzzleIntoEditor';
 
   export let isOpen: boolean;
+  const gameHistory = getSudokuGameContext();
+  const editorHistory = getSudokuEditorContext();
 
   let url = '';
   let loading = false;
@@ -27,7 +30,10 @@
       return;
     }
 
-    importFPuzzleIntoEditorHistory(jsonString);
+    const { newGameHistory, newEditorHistory } = importFPuzzleIntoEditorHistory(jsonString);
+
+    gameHistory.set(newGameHistory);
+    editorHistory.set(newEditorHistory);
 
     closeModal();
   }

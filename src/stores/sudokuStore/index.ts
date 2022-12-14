@@ -35,15 +35,15 @@ import type {
 
 // WRITABLES
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-function createEditorHistoryStore() {
+export function createEditorHistoryStore() {
   // Step
   const step = writable(0);
   // History
   const history = writable<EditorHistoryStepWithNumbers[]>([
     {
       givens: defaultGivens(),
-      cages: defaultCages(),
-      editorcolors: defaultEditorColors(),
+      extendedcages: defaultCages(),
+      colors: defaultEditorColors(),
       paths: defaultPaths(),
       borderclues: defaultBorderclues(),
       cellclues: defaultCellclues(),
@@ -79,9 +79,11 @@ function createEditorHistoryStore() {
    * Get the state of the editor at the current step.
    * @example
    * // To get the current killercages
-   * const killercages = getEditorState("killercages");
+   * const killercages = getEditorState.subscribeToClue("killercages");
    */
-  function getClue<T extends keyof EditorHistoryStep>(type: T): Readable<EditorHistoryStep[T]> {
+  function subscribeToClue<T extends keyof EditorHistoryStep>(
+    type: T
+  ): Readable<EditorHistoryStep[T]> {
     return derived([history, step], ([$editorHistory, $editorStep]) => {
       const res = $editorHistory[$editorStep]?.[type];
       if (typeof res === 'number') {
@@ -90,6 +92,35 @@ function createEditorHistoryStore() {
         return res as EditorHistoryStep[T];
       }
     });
+  }
+
+  /**
+   * Gets a single clue
+   */
+  function getClue<T extends keyof EditorHistoryStep>(type: T): EditorHistoryStep[T] {
+    const localHistory = get(history);
+    const res = localHistory[get(step)]?.[type];
+    if (typeof res === 'number') {
+      return localHistory[res]?.[type] as EditorHistoryStep[T];
+    } else {
+      return res as EditorHistoryStep[T];
+    }
+  }
+
+  /**
+   * Gets all the clues
+   */
+  function getClues(): EditorHistoryStep {
+    const localHistory = get(history);
+    const res = localHistory[get(step)];
+    for (const [key, value] of Object.entries(res)) {
+      const k = key as keyof EditorHistoryStep;
+      if (typeof value === 'number') {
+        res[k] = localHistory[value][k] as any;
+      }
+    }
+
+    return res as EditorHistoryStep;
   }
 
   /**
@@ -114,8 +145,8 @@ function createEditorHistoryStore() {
     history.set([
       {
         givens: startState?.givens || defaultGivens(dim),
-        cages: startState?.cages || defaultCages(),
-        editorcolors: startState?.editorcolors || defaultEditorColors(dim),
+        extendedcages: startState?.extendedcages || defaultCages(),
+        colors: startState?.colors || defaultEditorColors(dim),
         paths: startState?.paths || defaultPaths(),
         borderclues: startState?.borderclues || defaultBorderclues(),
         cellclues: startState?.cellclues || defaultCellclues(),
@@ -129,8 +160,8 @@ function createEditorHistoryStore() {
 
   /** Clear every input-values, and colors from the specified cells in the editor */
   function clearCells(cells: Position[]): void {
-    const newGivens = get(getClue('givens'));
-    const newColors = get(getClue('editorcolors'));
+    const newGivens = getClue('givens');
+    const newColors = getClue('colors');
     let changes = false;
     cells.forEach((cell) => {
       let newGiven = newGivens[cell.row]?.[cell.column];
@@ -147,7 +178,7 @@ function createEditorHistoryStore() {
     if (changes) {
       set({
         givens: newGivens,
-        editorcolors: newColors
+        colors: newColors
       });
     }
   }
@@ -160,17 +191,14 @@ function createEditorHistoryStore() {
     reset,
     clearCells,
     set,
-    getClue
+    subscribeToClue,
+    getClue,
+    getClues
   };
 }
-/**
- * The history of editor steps.
- * A field is either the current value, or an index of the last time it changed
- */
-export const editorHistory = createEditorHistoryStore();
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-function createGameHistoryStore() {
+export function createGameHistoryStore() {
   // Step
   const step = writable(0);
   // History
@@ -204,7 +232,9 @@ function createGameHistoryStore() {
    * // To get the current killercages
    * const killercages = getEditorState("killercages");
    */
-  function getValue<T extends keyof GameHistoryStep>(type: T): Readable<GameHistoryStep[T]> {
+  function subscribeToValue<T extends keyof GameHistoryStep>(
+    type: T
+  ): Readable<GameHistoryStep[T]> {
     return derived([history, step], ([$gameHistory, $gameStep]) => {
       const res = $gameHistory[$gameStep]?.[type];
       if (typeof res === 'number') {
@@ -213,6 +243,32 @@ function createGameHistoryStore() {
         return res as GameHistoryStep[T];
       }
     });
+  }
+
+  function getValue<T extends keyof GameHistoryStep>(type: T): GameHistoryStep[T] {
+    const localHistory = get(history);
+    const res = localHistory[get(step)]?.[type];
+    if (typeof res === 'number') {
+      return localHistory[res]?.[type] as GameHistoryStep[T];
+    } else {
+      return res as GameHistoryStep[T];
+    }
+  }
+
+  /**
+   * Gets all the clues
+   */
+  function getValues(): GameHistoryStep {
+    const localHistory = get(history);
+    const res = localHistory[get(step)];
+    for (const [key, value] of Object.entries(res)) {
+      const k = key as keyof GameHistoryStep;
+      if (typeof value === 'number') {
+        res[k] = localHistory[value][k] as any;
+      }
+    }
+
+    return res as GameHistoryStep;
   }
 
   /**
@@ -231,30 +287,29 @@ function createGameHistoryStore() {
   const canRedo = derived([history, step], ([$history, $step]) => $step < $history.length - 1);
 
   /** Reset the game */
-  function reset(): void {
+  function reset(dimensions: Dimensions): void {
     selectedItemIndex.set(-1);
     highlightedItemIndex.set(-1);
     selectedCells.set([]);
     highlightedCells.set([]);
     step.set(0);
-    const dim = get(editorHistory.getClue('dimensions'));
     history.set([
       {
-        values: defaultValues(dim),
-        colors: defaultGameColors(dim),
-        cornermarks: defaultCornermarks(dim),
-        centermarks: defaultCentermarks(dim),
-        notes: defaultNotes(dim)
+        values: defaultValues(dimensions),
+        colors: defaultGameColors(dimensions),
+        cornermarks: defaultCornermarks(dimensions),
+        centermarks: defaultCentermarks(dimensions),
+        notes: defaultNotes(dimensions)
       }
     ]);
   }
 
   /** Clear every input-values, and colors from the specified cells in the editor */
   function clearCells(cells: Position[]): void {
-    const newValues = get(getValue('values'));
-    const newCornerMarks = get(getValue('cornermarks'));
-    const newCenterMarks = get(getValue('centermarks'));
-    const newColors = get(getValue('colors'));
+    const newValues = getValue('values');
+    const newCornerMarks = getValue('cornermarks');
+    const newCenterMarks = getValue('centermarks');
+    const newColors = getValue('colors');
     let changes = false;
     cells.forEach((cell) => {
       if (newValues[cell.row]?.[cell.column] !== '') {
@@ -292,15 +347,15 @@ function createGameHistoryStore() {
     reset,
     clearCells,
     set,
-    getValue
+    subscribeToValue,
+    getValue,
+    getValues
   };
 }
 
 export const sudokuTitle = writable('');
 export const description = writable('');
 export const labels = writable<{ label: Label; selected: boolean }[]>([]);
-
-export const gameHistory = createGameHistoryStore();
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function createInputModeStore() {
@@ -389,36 +444,21 @@ export const handleMouseEnter = writable<MouseEnterHandler>(defaultHandleMouseEn
  */
 export const handleArrows = writable<ArrowHandler>(defaultHandleArrows);
 
-// DERIVED STORES
-
-export function resetAll(): void {
-  handleArrows.set(defaultHandleArrows);
-  handleMouseDown.set(defaultHandleMouseDown);
-  handleMouseEnter.set(defaultHandleMouseEnter);
-  wrongCells.set([]);
-  selectedItemIndex.set(-1);
-  highlightedItemIndex.set(-1);
-  selectedCells.set([]);
-  highlightedCells.set([]);
-  gameHistory.reset();
-  editorHistory.reset();
-}
-
 export function setMargins(margins?: Margins | null): void {
-  const dimensions = get(editorHistory.getClue('dimensions'));
-  const borderclues = get(editorHistory.getClue('borderclues'));
-  const cellclues = get(editorHistory.getClue('cellclues'));
-  const editorColors = get(editorHistory.getClue('editorcolors'));
-  const cages = get(editorHistory.getClue('cages'));
-  const givens = get(editorHistory.getClue('givens'));
-  const paths = get(editorHistory.getClue('paths'));
-  const cells = get(editorHistory.getClue('cells'));
-  const regions = get(editorHistory.getClue('regions'));
-  const values = get(gameHistory.getValue('values'));
-  const gamecolors = get(gameHistory.getValue('colors'));
-  const cornermarks = get(gameHistory.getValue('cornermarks'));
-  const centermarks = get(gameHistory.getValue('centermarks'));
-  const notes = get(gameHistory.getValue('notes'));
+  const dimensions = editorHistory.getClue('dimensions');
+  const borderclues = editorHistory.getClue('borderclues');
+  const cellclues = editorHistory.getClue('cellclues');
+  const editorColors = editorHistory.getClue('editorcolors');
+  const cages = editorHistory.getClue('cages');
+  const givens = editorHistory.getClue('givens');
+  const paths = editorHistory.getClue('paths');
+  const cells = editorHistory.getClue('cells');
+  const regions = editorHistory.getClue('regions');
+  const values = gameHistory.getClue('values');
+  const gamecolors = gameHistory.getClue('colors');
+  const cornermarks = gameHistory.getClue('cornermarks');
+  const centermarks = gameHistory.getClue('centermarks');
+  const notes = gameHistory.getClue('notes');
 
   const offsets: Margins = {
     left: (margins?.left ?? 0) - (dimensions.margins?.left ?? 0),

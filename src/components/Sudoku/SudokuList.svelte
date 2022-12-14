@@ -1,10 +1,14 @@
 <script lang="ts">
-  import SudokuDisplay from './Display/index.svelte';
   import { formatDistanceToNowStrict } from 'date-fns';
   import Button from '$ui/Button.svelte';
   import Trash from 'phosphor-svelte/lib/Trash/Trash.svelte';
   import NotePencil from 'phosphor-svelte/lib/NotePencil/NotePencil.svelte';
   import LoadingIndicator from '$ui/LoadingIndicator.svelte';
+  import type { Sudoku } from '$models/Sudoku';
+  import type { User } from '$models/User';
+  import type { Label } from '$models/Label';
+  import PuzzleLabel from '$ui/PuzzleLabel.svelte';
+  import SudokuDisplay from './Display/SudokuDisplay.svelte';
   import {
     defaultBorderclues,
     defaultCages,
@@ -16,10 +20,6 @@
     defaultPaths,
     defaultRegions
   } from '$utils/defaults';
-  import type { Sudoku } from '$models/Sudoku';
-  import type { User } from '$models/User';
-  import type { Label } from '$models/Label';
-  import PuzzleLabel from '$ui/PuzzleLabel.svelte';
 
   export let sudokus:
     | (Sudoku & { user?: Pick<User, 'id' | 'username' | 'role'>; labels: Label[] })[]
@@ -48,16 +48,18 @@
         >
           <div class="h-96 w-full p-4 justify-center">
             <SudokuDisplay
-              cells={sudoku.cells ?? defaultCells(sudoku.dimensions)}
-              regions={sudoku.regions ?? defaultRegions(sudoku.dimensions)}
-              dimensions={sudoku.dimensions}
-              logic={sudoku.logic ?? defaultLogic()}
-              givens={sudoku.givens ?? defaultGivens(sudoku.dimensions)}
-              paths={sudoku.paths ?? defaultPaths()}
-              cages={sudoku.extendedcages ?? defaultCages()}
-              editorColors={sudoku.colors ?? defaultEditorColors(sudoku.dimensions)}
-              borderClues={sudoku.borderclues ?? defaultBorderclues()}
-              cellClues={sudoku.cellclues ?? defaultCellclues()}
+              sudoku={{
+                borderclues: sudoku.borderclues ?? defaultBorderclues(),
+                cellclues: sudoku.cellclues ?? defaultCellclues(),
+                cells: sudoku.cells ?? defaultCells(sudoku.dimensions),
+                colors: sudoku.colors ?? defaultEditorColors(sudoku.dimensions),
+                dimensions: sudoku.dimensions,
+                extendedcages: sudoku.extendedcages ?? defaultCages(),
+                givens: sudoku.givens ?? defaultGivens(sudoku.dimensions),
+                logic: sudoku.logic ?? defaultLogic(),
+                paths: sudoku.paths ?? defaultPaths(),
+                regions: sudoku.regions ?? defaultRegions(sudoku.dimensions)
+              }}
             />
           </div>
           <div class="h-32 bg-gray-100 w-full border-t p-2">

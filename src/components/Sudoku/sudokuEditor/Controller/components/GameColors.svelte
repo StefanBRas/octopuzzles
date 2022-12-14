@@ -25,7 +25,7 @@
     const positions = get(selectedCells);
     if (positions.length === 0) return;
 
-    const currentColors = get(gameHistory.getValue('colors'));
+    const currentColors = gameHistory.getValue('colors');
     const newColors = deepCopy(currentColors);
 
     // Check if we should clear all game cells

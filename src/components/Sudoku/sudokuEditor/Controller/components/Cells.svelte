@@ -1,11 +1,14 @@
 <script lang="ts">
   import Button from '$ui/Button.svelte';
-  import { editorHistory, selectedCells } from '$stores/sudokuStore';
+  import { selectedCells } from '$stores/sudokuStore';
   import deepCopy from '$utils/deepCopy';
   import { isDeleteKey } from '$utils/isDeleteKey';
   import { hasOpenModals } from '$stores/modalStore';
+  import { getSudokuEditorContext } from '$utils/context/sudoku';
 
-  let cells = editorHistory.getClue('cells');
+  const editorHistory = getSudokuEditorContext();
+
+  let cells = editorHistory.subscribeToClue('cells');
 
   function handleClick(b: boolean): void {
     const newCells = deepCopy($cells);

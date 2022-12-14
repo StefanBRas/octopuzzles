@@ -1,15 +1,9 @@
 <script lang="ts">
   import Button from '$ui/Button.svelte';
-  import Input from '$ui/Input.svelte';
-  import Label from '$ui/Label.svelte';
-  import ColorSelect from '$ui/ColorSelect.svelte';
-  import OldSelect from '$ui/OldSelect.svelte';
-  import { cageTypeNames, cageTypesToLabel } from '$constants';
   import CaretUp from 'phosphor-svelte/lib/CaretUp/CaretUp.svelte';
   import CaretDown from 'phosphor-svelte/lib/CaretDown/CaretDown.svelte';
   import Trash from 'phosphor-svelte/lib/Trash/Trash.svelte';
   import {
-    editorHistory,
     handleArrows,
     handleMouseDown,
     handleMouseEnter,
@@ -28,79 +22,112 @@
   import classNames from 'classnames';
   import { onMount } from 'svelte';
   import { get } from 'svelte/store';
-  import isArrowKey from '$utils/isArrowKey';
   import { isCommandKey } from '$utils/isCommandKey';
   import { isDeleteKey } from '$utils/isDeleteKey';
-  import { cageDefaults } from '$utils/prefabs';
+  import deepCopy from '$utils/deepCopy';
+  import Checkbox from '$ui/Checkbox.svelte';
+  import OldSelect from '$ui/OldSelect.svelte';
+  import ColorSelect from '$ui/ColorSelect.svelte';
+  import { regionDefaults } from '$utils/prefabs';
+  import { regionTypeNames, regionTypesToLabel } from '$constants';
   import moveArrayElement from '$utils/moveArrayElement';
-  import type { CageType, Extendedcage, Position } from '$models/Sudoku';
+  import type { Position, Region, RegionType } from '$models/Sudoku';
   import { hasOpenModals } from '$stores/modalStore';
+  import { getSudokuEditorContext } from '$utils/context/sudoku';
 
-  const cages = editorHistory.getClue('cages');
+  const editorHistory = getSudokuEditorContext();
+  const regions = editorHistory.subscribeToClue('regions');
 
-  let type: CageType | 'CUSTOM' = 'Killer';
-  let defaultSettings = cageDefaults();
-  let { text, color } = defaultSettings;
+  let type: RegionType | 'CUSTOM' = 'Normal';
+  let defaultSettings = regionDefaults(type);
+  let { borders, color } = defaultSettings;
 
-  $: color, updateSelectedCage();
+  $: color, updateSelectedRegion();
 
-  const cageTypes: CageType[] = ['Killer'];
-
-  let input: Input;
+  const regionTypes: RegionType[] = ['Normal', 'Extra', 'Clone', 'MagicSquare'];
 
   $: if ($selectedItemIndex >= 0) {
-    cageSelected($selectedItemIndex);
+    regionSelected($selectedItemIndex);
   }
 
-  function cageSelected(selectedItemIndex: number): void {
-    updateSettings($cages[selectedItemIndex]);
+  function regionSelected(selectedItemIndex: number): void {
+    const region = $regions[selectedItemIndex];
+    if (region == null) return;
+    updateSettings(region);
   }
 
-  function updateSettings(cage: Partial<Extendedcage>) {
-    type = cage.type ?? 'CUSTOM';
-    defaultSettings = cageDefaults();
-    text = cage.text ?? defaultSettings.text;
-    color = cage.color ?? defaultSettings.color;
+  function updateSettings(region: Partial<Region>) {
+    type = region.type ?? 'CUSTOM';
+    defaultSettings = regionDefaults(type);
+    borders = region.borders ?? defaultSettings.borders;
+    color = region.color ?? defaultSettings.color;
   }
 
-  function changeType(type: CageType | 'CUSTOM') {
+  function changeType(type: RegionType | 'CUSTOM') {
     updateSettings(type !== 'CUSTOM' ? { type } : {});
-    updateSelectedCage();
+    updateSelectedRegion();
   }
 
-  function newCage(positions: Position[]): Extendedcage {
-    return {
-      positions,
-      type: type !== 'CUSTOM' ? type : undefined,
-      text: text != defaultSettings.text ? text : undefined,
-      color: color != defaultSettings.color ? color : undefined
-    };
+  function toggleBorders(): void {
+    borders = !borders;
+
+    updateSelectedRegion();
   }
 
-  const updateSelectedCage = (): void => {
+  function updateSelectedRegion(): void {
     if ($selectedItemIndex === -1) return;
 
-    let newCages: Extendedcage[] = [];
-    $cages.forEach((cage: Extendedcage, i: number) => {
+    let newRegions: Region[] = [];
+    $regions.forEach((region, i) => {
       if (i !== $selectedItemIndex) {
-        newCages = [...newCages, cage];
+        newRegions = [...newRegions, region];
       } else {
-        newCages = [...newCages, newCage(cage.positions)];
+        newRegions = [...newRegions, newRegion(region.positions)];
 
-        if (type !== cage.type) {
+        if (type !== region.type) {
           addLabel();
         }
       }
     });
-    editorHistory.set({ cages: newCages });
-  };
+    editorHistory.set({ regions: newRegions });
+  }
 
-  function newKillerCageFromSelection(): void {
+  function newRegion(positions: Position[]): Region {
+    return {
+      positions,
+      type: type !== 'CUSTOM' ? type : undefined,
+      borders: borders != defaultSettings.borders ? borders : undefined,
+      color:
+        (type === 'CUSTOM' || color != defaultSettings.color) && color !== 'NONE'
+          ? color
+          : undefined
+    };
+  }
+
+  function newRegionFromSelection(): void {
     if ($selectedCells.length > 0) {
-      const newCages = [...$cages, newCage($selectedCells)];
+      const newRegions: Region[] = type !== 'Normal' ? deepCopy($regions) : [];
+      if (type === 'Normal') {
+        $regions.forEach((region) => {
+          if (region.type === 'Normal') {
+            let newRegion = {
+              ...region,
+              positions: region.positions.filter(
+                (c) => !$selectedCells.some((s) => s.row === c.row && s.column === c.column)
+              )
+            };
+            if (newRegion.positions.length) {
+              newRegions.push(newRegion);
+            }
+          } else {
+            newRegions.push(region);
+          }
+        });
+      }
 
-      editorHistory.set({ cages: newCages });
-      $selectedItemIndex = newCages.length - 1;
+      newRegions.push(newRegion(deepCopy($selectedCells)));
+      editorHistory.set({ regions: newRegions });
+      $selectedItemIndex = newRegions.length - 1;
 
       addLabel();
     }
@@ -108,74 +135,91 @@
 
   function addLabel() {
     if (type !== 'CUSTOM') {
-      const label = $labels.find((l) => l.label.name === cageTypesToLabel[type as CageType]);
+      const label = $labels.find((l) => l.label.name === regionTypesToLabel[type as RegionType]);
       if (label) {
         label.selected = true;
       }
     }
   }
 
-  const deleteKillerCageAtIndex = (index: number): void => {
-    const newCages = $cages.filter((_, i) => index !== i);
+  const deleteRegionAtIndex = (index: number): void => {
+    const newRegions = $regions.filter((_, i) => index !== i);
     $selectedCells = [];
     $highlightedCells = [];
     $selectedItemIndex = -1;
-    editorHistory.set({ cages: newCages });
+    editorHistory.set({ regions: newRegions });
   };
 
   function handleKeyDown(k: KeyboardEvent): void {
     //do not accept keyboard input when any modal controls are open
     if (hasOpenModals()) return;
 
-    if (!isArrowKey(k.key)) {
-      input.focus();
-    }
-
-    if (isDeleteKey(k) && text === '') {
+    if (isDeleteKey(k)) {
       if ($selectedItemIndex !== undefined) {
-        deleteKillerCageAtIndex($selectedItemIndex);
+        deleteRegionAtIndex($selectedItemIndex);
       } else {
         editorHistory.clearCells(get(selectedCells));
       }
     } else if (k.key === 'Enter') {
-      newKillerCageFromSelection();
+      newRegionFromSelection();
     }
   }
 
-  function addCellToSelectedKillerCage(cell: Position, keep = true): void {
-    const newCages: Extendedcage[] = [];
-    const selectedCageIndex = $selectedItemIndex;
+  function addCellToSelectedRegion(cell: Position, keep = true): void {
+    const newRegions: Region[] = [];
+    let selectedRegionIndex = $selectedItemIndex;
     let removed = false;
 
-    $cages.forEach((cage, i) => {
-      if (i === selectedCageIndex) {
+    $regions.forEach((region, i) => {
+      if (i === $selectedItemIndex) {
         let found = false;
-        let newPositions = cage.positions.filter((c) => {
-          if (c.row === cell.row && c.column === cell.column) {
-            found = true;
-            return keep;
-          }
-          return true;
-        });
+        let newRegion = {
+          ...region,
+          positions: region.positions.filter((c) => {
+            if (c.row === cell.row && c.column === cell.column) {
+              found = true;
+              return keep;
+            }
+            return true;
+          })
+        };
         if (!found) {
-          newPositions = [...newPositions, cell];
+          newRegion.positions = [...newRegion.positions, cell];
         }
-
-        if (newPositions.length > 0) {
-          newCages.push({ ...cage, positions: newPositions });
+        if (newRegion.positions.length > 0) {
+          newRegions.push(newRegion);
         } else {
           removed = true;
         }
+      } else if (type === 'Normal' && region.type === 'Normal') {
+        let newRegion = {
+          ...region,
+          positions: region.positions.filter((c) => {
+            if (c.row === cell.row && c.column === cell.column) {
+              return false;
+            }
+            return true;
+          })
+        };
+        if (newRegion.positions.length) {
+          newRegions.push(newRegion);
+        } else if (i < selectedRegionIndex) {
+          --selectedRegionIndex;
+        }
       } else {
-        newCages.push(cage);
+        newRegions.push(region);
       }
     });
-    editorHistory.set({ cages: newCages });
+    editorHistory.set({ regions: newRegions });
     if (!removed) {
-      $selectedCells = newCages[selectedCageIndex].positions;
-      $selectedItemIndex = selectedCageIndex;
+      $selectedCells = newRegions[selectedRegionIndex].positions;
+      $selectedItemIndex = selectedRegionIndex;
     } else {
       $selectedCells = [];
+    }
+
+    if (type === 'Normal') {
+      addLabel();
     }
   }
 
@@ -184,7 +228,7 @@
       selectedCells.set([cell]);
     } else {
       if ($selectedItemIndex > -1) {
-        addCellToSelectedKillerCage(cell, false);
+        addCellToSelectedRegion(cell, false);
       } else {
         selectedCells.addCell(cell);
       }
@@ -193,12 +237,11 @@
 
   const customHandleMouseEnter: MouseEnterHandler = ({ cell, mouseDown }) => {
     if (!mouseDown) return;
-
     if ($selectedItemIndex === -1) {
       selectedCells.addCell(cell);
     } else {
       if ($selectedCells.length > 0) {
-        addCellToSelectedKillerCage(cell);
+        addCellToSelectedRegion(cell);
       }
     }
   };
@@ -214,7 +257,7 @@
     let lastSelectedCell = $selectedCells[$selectedCells.length - 1];
     if (lastSelectedCell) {
       const { row, column } = lastSelectedCell;
-      let dim = get(editorHistory.getClue('dimensions'));
+      let dim = editorHistory.getClue('dimensions');
       let newCell: Position | undefined = undefined;
       switch (k.key) {
         case 'ArrowUp':
@@ -252,7 +295,7 @@
         k.preventDefault();
         if (isCommandKey(k)) {
           if ($selectedItemIndex > -1) {
-            addCellToSelectedKillerCage(newCell);
+            addCellToSelectedRegion(newCell);
           } else {
             selectedCells.addCell(newCell);
           }
@@ -264,38 +307,36 @@
     }
   };
 
-  const reorderKillerCage = (index: number, way: 'up' | 'down'): void => {
-    let newCages: Extendedcage[] = [];
+  const reorderRegion = (index: number, way: 'up' | 'down'): void => {
+    let newRegions: Region[] = [];
     if (way === 'up') {
       if (index === 0) return;
-      newCages = moveArrayElement($cages, index, index - 1);
+      newRegions = moveArrayElement($regions, index, index - 1);
       if (index === $selectedItemIndex) {
         $selectedItemIndex--;
       } else if (index - 1 === $selectedItemIndex) {
         $selectedItemIndex++;
       }
     } else if (way === 'down') {
-      if (index === $cages.length - 1) return;
-      newCages = moveArrayElement($cages, index, index + 1);
+      if (index === $regions.length - 1) return;
+      newRegions = moveArrayElement($regions, index, index + 1);
       if (index === $selectedItemIndex) {
         $selectedItemIndex++;
       } else if (index + 1 === $selectedItemIndex) {
         $selectedItemIndex--;
       }
     }
-    editorHistory.set({ cages: newCages });
+    editorHistory.set({ regions: newRegions });
   };
 
   onMount(() => {
     $handleMouseDown = customHandleMouseDown;
-
     $handleMouseEnter = customHandleMouseEnter;
-
     $handleArrows = customHandleArrows;
   });
 </script>
 
-<svelte:window on:keydown={handleKeyDown} />
+<svelte:window on:keydown|preventDefault={handleKeyDown} />
 
 <div class="grid grid-cols-2 w-full h-full p-2">
   <div class="px-2 flex flex-col overflow-hidden justify-between">
@@ -303,18 +344,18 @@
       class="bg-gray-200 rounded-md shadow-inner flex flex-col items-center p-2 overflow-hidden h-full"
     >
       <div class="h-full overflow-y-auto w-full">
-        {#each $cages as cage, index}
+        {#each $regions as region, index}
           <button
             class={classNames(
               'h-12 w-full flex rounded-md bg-white border border-gray-300 font-medium text-gray-700 overflow-hidden mb-2',
               { 'border-blue-500': index === $selectedItemIndex }
             )}
             on:mouseover={() => {
-              $highlightedCells = cage.positions;
+              $highlightedCells = region.positions;
               $highlightedItemIndex = index;
             }}
             on:focus={() => {
-              $highlightedCells = cage.positions;
+              $highlightedCells = region.positions;
               $highlightedItemIndex = index;
             }}
             on:mouseout={() => {
@@ -329,30 +370,36 @@
             <div class="h-full w-8 bg-gray-100 border-r border-gray-300">
               <div
                 class="h-1/2 flex justify-center items-center hover:bg-gray-200 p-1 border-b border-gray-300"
-                on:click={() => reorderKillerCage(index, 'up')}
+                on:click={() => reorderRegion(index, 'up')}
               >
-                <CaretUp size={32} />
+                <CaretUp size={16} />
               </div>
               <div
                 class="h-1/2 flex justify-center items-center hover:bg-gray-200 p-1"
-                on:click={() => reorderKillerCage(index, 'down')}
+                on:click={() => reorderRegion(index, 'down')}
               >
-                <CaretDown size={32} />
+                <CaretDown size={16} />
               </div>
             </div>
             <span
               class="hover:bg-gray-100 w-full h-full flex items-center justify-center"
               on:click={() => {
-                $selectedCells = cage.positions;
+                $selectedCells = region.positions;
                 $selectedItemIndex = index;
               }}
             >
-              {cage.type ? cageTypeNames[cage.type] : 'Custom'}: <br /> ({cage.positions
-                .length}-cell{cage.positions.length > 1 ? 's' : ''})
+              {region.type !== 'Normal'
+                ? region.type
+                  ? regionTypeNames[region.type]
+                  : 'Custom'
+                : `Region ${index + 1}`}: <br /> ({region.positions.length}-cell{region.positions
+                .length > 1
+                ? 's'
+                : ''})
             </span>
             <div
               class="h-full w-8 p-1 flex justify-center items-center hover:bg-red-100 hover:text-red-500 border-l border-gray-300"
-              on:click={() => deleteKillerCageAtIndex(index)}
+              on:click={() => deleteRegionAtIndex(index)}
             >
               <Trash size={20} />
             </div>
@@ -363,11 +410,11 @@
 
     <Button
       variant="secondary"
-      on:click={() => newKillerCageFromSelection()}
+      on:click={() => newRegionFromSelection()}
       class="w-full"
       disabled={$selectedCells.length < 1}
     >
-      New Cage From Selection
+      New Region From Selection
     </Button>
   </div>
 
@@ -380,8 +427,8 @@
         bind:value={type}
         class="mr-0.5 w-full capitalize"
       >
-        {#each cageTypes as cageType}
-          <option value={cageType} class="capitalize">{cageTypeNames[cageType]}</option>
+        {#each regionTypes as regionType}
+          <option value={regionType} class="capitalize">{regionTypeNames[regionType]}</option>
         {/each}
         <option value={'CUSTOM'} class="capitalize">Custom</option>
       </OldSelect>
@@ -389,25 +436,9 @@
     <div>
       <ColorSelect bind:color class="w-full" />
     </div>
+
     <div>
-      <Label id="text">Text</Label>
-      <Input
-        bind:this={input}
-        maxlength={20}
-        placeholder="Text"
-        bind:value={text}
-        autocomplete="off"
-        name="text"
-        id="text"
-        on:input={() => updateSelectedCage()}
-        on:focus={() => {
-          // eslint-disable-next-line @typescript-eslint/no-empty-function
-          $handleArrows = () => {};
-        }}
-        on:blur={() => {
-          $handleArrows = defaultHandleArrows;
-        }}
-      />
+      <Checkbox bind:checked={borders} label="Borders" on:change={() => toggleBorders()} />
     </div>
   </div>
 </div>

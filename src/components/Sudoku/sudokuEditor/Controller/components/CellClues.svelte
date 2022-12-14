@@ -17,7 +17,6 @@
   import CaretDown from 'phosphor-svelte/lib/CaretDown/CaretDown.svelte';
   import Trash from 'phosphor-svelte/lib/Trash/Trash.svelte';
   import {
-    editorHistory,
     handleArrows,
     highlightedCells,
     highlightedItemIndex,
@@ -44,9 +43,12 @@
     SymbolType
   } from '$models/Sudoku';
   import { hasOpenModals } from '$stores/modalStore';
+  import { getSudokuEditorContext } from '$utils/context/sudoku';
 
-  let cellClues = editorHistory.getClue('cellclues');
-  let dimensions = editorHistory.getClue('dimensions');
+  const editorHistory = getSudokuEditorContext();
+
+  let cellClues = editorHistory.subscribeToClue('cellclues');
+  let dimensions = editorHistory.subscribeToClue('dimensions');
   const margins = $dimensions.margins;
 
   let type: CellClueType | 'CUSTOM' = $cellClues[0]?.type ?? 'CUSTOM';

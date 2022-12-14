@@ -15,10 +15,14 @@
     defaultValues,
     defaultRegions
   } from '$utils/defaults';
-  import { editorHistory, gameHistory, setMargins } from '$stores/sudokuStore';
+  import { setMargins } from '$stores/sudokuStore';
   import type { Dimensions } from '$models/Sudoku';
+  import { getSudokuEditorContext, getSudokuGameContext } from '$utils/context/sudoku';
 
-  let dimensions = editorHistory.getClue('dimensions');
+  const editorHistory = getSudokuEditorContext();
+  const gameHistory = getSudokuGameContext();
+
+  let dimensions = editorHistory.subscribeToClue('dimensions');
 
   let marginLeft = String($dimensions.margins ? $dimensions.margins.left : 0);
   let marginRight = String($dimensions.margins ? $dimensions.margins.right : 0);
@@ -70,8 +74,8 @@
         dimensions: newDimensions,
         borderclues: defaultBorderclues(),
         cellclues: defaultCellclues(),
-        editorcolors: defaultEditorColors(newDimensions),
-        cages: defaultCages(),
+        colors: defaultEditorColors(newDimensions),
+        extendedcages: defaultCages(),
         givens: defaultGivens(newDimensions),
         paths: defaultPaths(),
         cells: defaultCells(newDimensions),

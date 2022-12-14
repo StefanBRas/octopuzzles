@@ -1,61 +1,56 @@
 <script lang="ts">
   import SquareButton from '$ui/SquareButton.svelte';
   import Backspace from 'phosphor-svelte/lib/Backspace/Backspace.svelte';
-  import { editorHistory, gameHistory, selectedCells } from '$stores/sudokuStore';
+  import { selectedCells } from '$stores/sudokuStore';
   import deepCopy from '$utils/deepCopy';
   import { get } from 'svelte/store';
   import { isDeleteKey } from '$utils/isDeleteKey';
   import { hasOpenModals } from '$stores/modalStore';
+  import { getSudokuEditorContext } from '$utils/context/sudoku';
 
-  function handleClick(newValue: string): void {
+  const editorHistory = getSudokuEditorContext();
+  function handleClick(newGiven: string): void {
     const positions = get(selectedCells);
     if (positions.length === 0) return;
 
-    const currentValues = get(gameHistory.getValue('values'));
-    const newValues = deepCopy(currentValues);
-    const givens = get(editorHistory.getClue('givens'));
+    const currentGivens = editorHistory.getClue('givens');
+    const newGivens = deepCopy(currentGivens);
+
+    // Whether there has been any changes
+    let anyChanges = false;
 
     // Check if we should clear all game cells
-    const clearAllGameCells =
-      newValue === '' && positions.every((p) => currentValues[p.row]?.[p.column] === '');
-    if (clearAllGameCells) {
+    const clearAllEditorCells =
+      newGiven === '' && positions.every((p) => newGivens[p.row]?.[p.column] === '');
+    if (clearAllEditorCells) {
       // clear all the cells in the game
-      gameHistory.clearCells(positions);
+      editorHistory.clearCells(positions);
     } else {
-      // Whether there has been any changes
-      let anyChanges = false;
-
       for (const position of positions) {
-        // don't put anything on top of a given
-        if (givens[position.row]?.[position.column] !== '') continue;
-
         // If we are deleting a cell
-        if (newValue === '') {
+
+        if (newGiven === '') {
           // If the cell is already empty
-          if (newValues[position.row][position.column] === '') return;
+          if (newGivens[position.row][position.column] === '') continue;
 
           // Delete the value in the cell
-          newValues[position.row][position.column] = '';
+          newGivens[position.row][position.column] = '';
           anyChanges = true;
         } else {
           // We are putting some number in the cell
 
           // If the cell already contains the number, delete it
-          if (newValues[position.row][position.column] === newValue) {
-            newValues[position.row][position.column] = '';
-            anyChanges = true;
-          } else {
-            // Insert the number
-            newValues[position.row][position.column] = newValue;
-            anyChanges = true;
-          }
+          newGivens[position.row][position.column] = (
+            newGivens[position.row][position.column] + newGiven
+          ).slice(0, 3);
+          anyChanges = true;
         }
       }
+    }
 
-      // If there has actually been any changes, update the game history
-      if (anyChanges) {
-        gameHistory.set({ values: newValues });
-      }
+    // If there has actually been any changes, update the game history
+    if (anyChanges) {
+      editorHistory.set({ givens: newGivens });
     }
   }
 
@@ -77,9 +72,9 @@
   <div class="grid grid-cols-3 grid-rows-4 h-max w-max m-auto p-4 gap-4">
     {#each [1, 2, 3, 4, 5, 6, 7, 8, 9, 0] as i}
       <div>
-        <SquareButton variant="secondary" class="text-3xl" on:click={() => handleClick(String(i))}
-          >{String(i)}</SquareButton
-        >
+        <SquareButton variant="secondary" class="text-3xl" on:click={() => handleClick(String(i))}>
+          {String(i)}
+        </SquareButton>
       </div>
     {/each}
     <div class="col-span-2">

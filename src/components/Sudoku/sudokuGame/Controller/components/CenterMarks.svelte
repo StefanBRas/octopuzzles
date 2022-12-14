@@ -1,19 +1,25 @@
 <script lang="ts">
   import Backspace from 'phosphor-svelte/lib/Backspace/Backspace.svelte';
-  import { editorHistory, gameHistory, selectedCells } from '$stores/sudokuStore';
+  import { selectedCells } from '$stores/sudokuStore';
   import { get } from 'svelte/store';
   import deepCopy from '$utils/deepCopy';
   import SquareButton from '$ui/SquareButton.svelte';
   import { isDeleteKey } from '$utils/isDeleteKey';
   import { hasOpenModals } from '$stores/modalStore';
+  import { getSudokuBeingPlayedContext, getSudokuGameContext } from '$utils/context/sudoku';
+
+  const sudoku = getSudokuBeingPlayedContext();
+  const gameHistory = getSudokuGameContext();
 
   const handleClick = (newCentermark: string): void => {
-    let currentCentermarks = get(gameHistory.getValue('centermarks'));
+    let currentCentermarks = gameHistory.getValue('centermarks');
     let newCentermarks = deepCopy(currentCentermarks);
-    const givens = get(editorHistory.getClue('givens'));
     let positions = deepCopy(get(selectedCells));
 
-    positions = positions.filter((p) => givens[p.row][p.column] === '');
+    positions =
+      sudoku.givens != null
+        ? positions.filter((p) => sudoku.givens[p.row][p.column] === '')
+        : positions;
     if (positions.length === 0) return;
 
     const clearAllGameCells =

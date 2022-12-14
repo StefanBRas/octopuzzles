@@ -1,25 +1,25 @@
 <script lang="ts">
   import { cellSize } from '$constants';
   import type { Cells, Dimensions, Position } from '$models/Sudoku';
-  import { handleArrows, handleMouseDown, handleMouseEnter, mode } from '$stores/sudokuStore';
-  import { defaultCells } from '$utils/defaults';
+  import { handleArrows, handleMouseDown, handleMouseEnter } from '$stores/sudokuStore';
   import { isCommandKey } from '$utils/isCommandKey';
 
   export let cells: Cells;
   export let dimensions: Dimensions;
 
-  $: cells =
-    cells && $mode === 'game'
-      ? cells
-      : defaultCells(
-          dimensions.margins
-            ? {
-                rows: dimensions.rows + dimensions.margins.top + dimensions.margins.bottom,
-                columns: dimensions.columns + dimensions.margins.left + dimensions.margins.right,
-                margins: { left: 0, right: 0, top: 0, bottom: 0 }
-              }
-            : dimensions
-        );
+  // TODO: is this needed?
+  // $: cells =
+  //   cells && $mode === 'game'
+  //     ? cells
+  //     : defaultCells(
+  //         dimensions.margins
+  //           ? {
+  //               rows: dimensions.rows + dimensions.margins.top + dimensions.margins.bottom,
+  //               columns: dimensions.columns + dimensions.margins.left + dimensions.margins.right,
+  //               margins: { left: 0, right: 0, top: 0, bottom: 0 }
+  //             }
+  //           : dimensions
+  //       );
 
   let mouseDown = false;
 

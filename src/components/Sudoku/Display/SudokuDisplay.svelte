@@ -1,6 +1,6 @@
 <script lang="ts">
   import { cellSize } from '$constants';
-  import type { EditorHistoryStep, GameHistoryStep } from '$types';
+  import type { GameHistoryStep, EditorHistoryStep } from '$types';
   import BorderClues from './Clues/BorderClues.svelte';
   import CellClues from './Clues/CellClues.svelte';
   import Cells from './Clues/Cells.svelte';
@@ -15,17 +15,7 @@
   import Regions from './Clues/Regions.svelte';
 
   // EDITOR STATE
-  export let regions: EditorHistoryStep['regions'];
-  export let editorColors: EditorHistoryStep['editorcolors'];
-  export let cells: EditorHistoryStep['cells'];
-  export let cages: EditorHistoryStep['cages'];
-  export let givens: EditorHistoryStep['givens'];
-  export let paths: EditorHistoryStep['paths'];
-  export let borderClues: EditorHistoryStep['borderclues'];
-  export let cellClues: EditorHistoryStep['cellclues'];
-  export let dimensions: EditorHistoryStep['dimensions'];
-  export let logic: EditorHistoryStep['logic'];
-
+  export let sudoku: EditorHistoryStep;
   export let interactive = false;
 
   // GAME STATE
@@ -37,21 +27,21 @@
 </script>
 
 <svg
-  viewBox="-2 -2 {dimensions.columns * cellSize + 4} {dimensions.rows * cellSize + 4}"
+  viewBox="-2 -2 {sudoku.dimensions.columns * cellSize + 4} {sudoku.dimensions.rows * cellSize + 4}"
   class="max-h-full max-w-full"
 >
-  <Colors {editorColors} {gameColors} {dimensions} />
+  <Colors editorColors={sudoku.colors} {gameColors} dimensions={sudoku.dimensions} />
   <slot name="highlights" />
   <slot name="interface" />
-  <Paths {paths} />
-  <KillerCages {cages} {dimensions} />
-  <Cells {cells} />
+  <Paths paths={sudoku.paths} />
+  <KillerCages cages={sudoku.extendedcages} dimensions={sudoku.dimensions} />
+  <Cells cells={sudoku.cells} />
   <Notes {notes} />
-  <Regions {regions} {dimensions} />
-  <BorderClues {borderClues} {interactive} />
-  <CellClues {cellClues} {interactive} />
-  <CornerMarks {values} {givens} {dimensions} {cornermarks} />
-  <CenterMarks {values} {givens} {dimensions} {centermarks} />
-  <Numbers {values} {givens} {dimensions} />
-  <Logic {logic} {dimensions} />
+  <Regions regions={sudoku.regions} dimensions={sudoku.dimensions} />
+  <BorderClues borderClues={sudoku.borderclues} {interactive} />
+  <CellClues cellClues={sudoku.cellclues} {interactive} />
+  <CornerMarks {values} givens={sudoku.givens} dimensions={sudoku.dimensions} {cornermarks} />
+  <CenterMarks {values} givens={sudoku.givens} dimensions={sudoku.dimensions} {centermarks} />
+  <Numbers {values} givens={sudoku.givens} dimensions={sudoku.dimensions} />
+  <Logic logic={sudoku.logic} dimensions={sudoku.dimensions} />
 </svg>

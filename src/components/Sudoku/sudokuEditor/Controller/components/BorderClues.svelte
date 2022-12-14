@@ -10,7 +10,6 @@
   import CaretDown from 'phosphor-svelte/lib/CaretDown/CaretDown.svelte';
   import Trash from 'phosphor-svelte/lib/Trash/Trash.svelte';
   import {
-    editorHistory,
     handleArrows,
     highlightedCells,
     highlightedItemIndex,
@@ -32,8 +31,10 @@
   import Line from '$icons/shapes/Line.svelte';
   import type { Borderclue, BorderClueType, Position } from '$models/Sudoku';
   import { hasOpenModals } from '$stores/modalStore';
+  import { getSudokuEditorContext } from '$utils/context/sudoku';
 
-  let borderClues = editorHistory.getClue('borderclues');
+  const editorHistory = getSudokuEditorContext();
+  let borderClues = editorHistory.subscribeToClue('borderclues');
 
   let type: BorderClueType | 'CUSTOM' = $borderClues[0]?.type ?? 'CUSTOM';
   let defaultSettings = borderClueDefaults(type);

@@ -3,7 +3,6 @@
   import CaretDown from 'phosphor-svelte/lib/CaretDown/CaretDown.svelte';
   import Trash from 'phosphor-svelte/lib/Trash/Trash.svelte';
   import {
-    editorHistory,
     handleArrows,
     handleMouseDown,
     handleMouseEnter,
@@ -40,8 +39,10 @@
   import Diamond from '$icons/shapes/Diamond.svelte';
   import type { Path, PathType, Position } from '$models/Sudoku';
   import { hasOpenModals } from '$stores/modalStore';
+  import { getSudokuEditorContext } from '$utils/context/sudoku';
 
-  const paths = editorHistory.getClue('paths');
+  const editorHistory = getSudokuEditorContext();
+  const paths = editorHistory.subscribeToClue('paths');
 
   let type: PathType | 'CUSTOM' = $paths[0]?.type ?? 'CUSTOM';
   let defaultSettings = pathDefaults(type);
@@ -259,7 +260,7 @@
     const lastSelectedCell = $selectedCells[$selectedCells.length - 1];
     if (lastSelectedCell) {
       const { row, column } = lastSelectedCell;
-      let dim = get(editorHistory.getClue('dimensions'));
+      let dim = editorHistory.getClue('dimensions');
       let newCell: Position | undefined = undefined;
       switch (k.key) {
         case 'ArrowUp':

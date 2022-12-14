@@ -1,12 +1,14 @@
 <script lang="ts">
   import Input from '$ui/Input.svelte';
   import Checkbox from '$ui/Checkbox.svelte';
-  import { editorHistory, labels } from '$stores/sudokuStore';
+  import { labels } from '$stores/sudokuStore';
   import Label from '$ui/Label.svelte';
   import { logicFlagNames, logicFlagsToLabel } from '$constants';
   import type { Logic, LogicFlag } from '$models/Sudoku';
+  import { getSudokuEditorContext } from '$utils/context/sudoku';
 
-  let logic = editorHistory.getClue('logic');
+  const editorHistory = getSudokuEditorContext();
+  let logic = editorHistory.subscribeToClue('logic');
 
   let digits = $logic.digits ?? '1-9';
   let flags = $logic.flags ?? [];

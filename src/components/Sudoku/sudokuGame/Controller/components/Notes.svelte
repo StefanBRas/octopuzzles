@@ -1,11 +1,13 @@
 <script lang="ts">
   import type { Position } from '$models/Sudoku';
-  import { gameHistory, selectedCells } from '$stores/sudokuStore';
+  import { selectedCells } from '$stores/sudokuStore';
   import Button from '$ui/Button.svelte';
   import Input from '$ui/Input.svelte';
+  import { getSudokuGameContext } from '$utils/context/sudoku';
   import deepCopy from '$utils/deepCopy';
 
-  let notes = gameHistory.getValue('notes');
+  const gameHistory = getSudokuGameContext();
+  let notes = gameHistory.subscribeToValue('notes');
   let input: Input;
   $: firstSelectedCell = $selectedCells.length === 1 ? $selectedCells[0] : undefined;
 

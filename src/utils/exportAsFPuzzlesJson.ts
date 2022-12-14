@@ -1,4 +1,4 @@
-import { description, editorHistory, gameHistory, sudokuTitle } from '$stores/sudokuStore';
+import { description, sudokuTitle } from '$stores/sudokuStore';
 import type { FPuzzlesJson, HexColor, PositionString } from './compressor';
 import { get } from 'svelte/store';
 import deepCopy from './deepCopy';
@@ -11,28 +11,15 @@ import {
   getRegionsToDraw
 } from './prefabs';
 import type { Color, Position } from '$models/Sudoku';
+import type { GameHistoryStep, EditorHistoryStep } from '$types';
 
-export function exportAsFPuzzlesJson(): FPuzzlesJson {
-  const givens = get(editorHistory.getClue('givens'));
-  const borderClues = get(editorHistory.getClue('borderclues'));
-  const cellClues = get(editorHistory.getClue('cellclues'));
-  const regions = get(editorHistory.getClue('regions'));
-  //const cells = get(editorHistory.getClue('cells'));
-  const editorColors = get(editorHistory.getClue('editorcolors'));
-  const cages = get(editorHistory.getClue('cages'));
-  const paths = get(editorHistory.getClue('paths'));
-  const dimensions = get(editorHistory.getClue('dimensions'));
-  const logic = get(editorHistory.getClue('logic'));
-
-  const values = get(gameHistory.getValue('values'));
-  const gameColors = get(gameHistory.getValue('colors'));
-  const cornermarks = get(gameHistory.getValue('cornermarks'));
-  const centermarks = get(gameHistory.getValue('centermarks'));
-  //const notes = get(gameHistory.getValue('notes'));
-
+export function exportAsFPuzzlesJson(
+  sudoku: EditorHistoryStep,
+  solution: GameHistoryStep
+): FPuzzlesJson {
   const getPositionString = (position: Position): PositionString => {
-    return `R${position.row + 1 - (dimensions.margins?.top ?? 0)}C${
-      position.column + 1 - (dimensions.margins?.left ?? 0)
+    return `R${position.row + 1 - (sudoku.dimensions.margins?.top ?? 0)}C${
+      position.column + 1 - (sudoku.dimensions.margins?.left ?? 0)
     }`;
   };
   const getPositionStrings = (positions: Position[]): PositionString[] => {
@@ -53,32 +40,36 @@ export function exportAsFPuzzlesJson(): FPuzzlesJson {
   };
 
   const size = Math.max(
-    dimensions.rows - (dimensions.margins?.top ?? 0) - (dimensions.margins?.bottom ?? 0),
-    dimensions.columns - (dimensions.margins?.left ?? 0) - (dimensions.margins?.right ?? 0)
+    sudoku.dimensions.rows -
+      (sudoku.dimensions.margins?.top ?? 0) -
+      (sudoku.dimensions.margins?.bottom ?? 0),
+    sudoku.dimensions.columns -
+      (sudoku.dimensions.margins?.left ?? 0) -
+      (sudoku.dimensions.margins?.right ?? 0)
   );
   const grid = deepCopy(new Array(size).fill(new Array(size).fill({})));
 
   const fPuzzle: FPuzzlesJson = {
     author: '',
-    antiking: logic.flags?.indexOf('Antiking') !== -1 ? true : undefined,
-    antiknight: logic.flags?.indexOf('Antiknight') !== -1 ? true : undefined,
+    antiking: sudoku.logic.flags?.indexOf('Antiking') !== -1 ? true : undefined,
+    antiknight: sudoku.logic.flags?.indexOf('Antiknight') !== -1 ? true : undefined,
     //author: string,
-    'diagonal+': logic.flags?.indexOf('DiagonalPos') !== -1 ? true : undefined,
-    'diagonal-': logic.flags?.indexOf('DiagonalNeg') !== -1 ? true : undefined,
-    disjointgroups: logic.flags?.indexOf('DisjointSets') !== -1 ? true : undefined,
+    'diagonal+': sudoku.logic.flags?.indexOf('DiagonalPos') !== -1 ? true : undefined,
+    'diagonal-': sudoku.logic.flags?.indexOf('DiagonalNeg') !== -1 ? true : undefined,
+    disjointgroups: sudoku.logic.flags?.indexOf('DisjointSets') !== -1 ? true : undefined,
     grid,
-    negative: logic.flags?.some(
+    negative: sudoku.logic.flags?.some(
       (f) => f === 'NegativeBlack' || f === 'NegativeX' || f === 'NegativeV'
     )
       ? [
-          ...(logic.flags?.some((f) => f === 'NegativeBlack') ? ['ratio'] : []),
-          ...(logic.flags?.some((f) => f === 'NegativeX') &&
-          logic.flags?.some((f) => f === 'NegativeV')
+          ...(sudoku.logic.flags?.some((f) => f === 'NegativeBlack') ? ['ratio'] : []),
+          ...(sudoku.logic.flags?.some((f) => f === 'NegativeX') &&
+          sudoku.logic.flags?.some((f) => f === 'NegativeV')
             ? ['xv']
             : [])
         ]
       : undefined,
-    nonconsecutive: logic.flags?.some((f) => f === 'Nonconsecutive' || f === 'NegativeWhite')
+    nonconsecutive: sudoku.logic.flags?.some((f) => f === 'Nonconsecutive' || f === 'NegativeWhite')
       ? true
       : undefined,
     ruleset: get(description),
@@ -88,40 +79,41 @@ export function exportAsFPuzzlesJson(): FPuzzlesJson {
   };
 
   for (
-    let i = dimensions.margins?.top ?? 0;
-    i < dimensions.rows - (dimensions.margins?.bottom ?? 0);
+    let i = sudoku.dimensions.margins?.top ?? 0;
+    i < sudoku.dimensions.rows - (sudoku.dimensions.margins?.bottom ?? 0);
     ++i
   ) {
     for (
-      let j = dimensions.margins?.left ?? 0;
-      j < dimensions.columns - (dimensions.margins?.right ?? 0);
+      let j = sudoku.dimensions.margins?.left ?? 0;
+      j < sudoku.dimensions.columns - (sudoku.dimensions.margins?.right ?? 0);
       ++j
     ) {
-      const gridRow = i - (dimensions.margins?.top ?? 0);
-      const gridColumn = j - (dimensions.margins?.top ?? 0);
-      if (givens[i][j] !== '') {
-        fPuzzle.grid[gridRow][gridColumn].value = parseInt(givens[i][j]);
+      const gridRow = i - (sudoku.dimensions.margins?.top ?? 0);
+      const gridColumn = j - (sudoku.dimensions.margins?.top ?? 0);
+      if (sudoku.givens[i][j] !== '') {
+        fPuzzle.grid[gridRow][gridColumn].value = parseInt(sudoku.givens[i][j]);
         fPuzzle.grid[gridRow][gridColumn].given = true;
       }
-      if (logic.flags?.some((f) => f === 'Indexed159') && (j === 0 || j === 4 || j === 8)) {
+      if (sudoku.logic.flags?.some((f) => f === 'Indexed159') && (j === 0 || j === 4 || j === 8)) {
         fPuzzle.grid[gridRow][gridColumn].c = colorToHexColor.Red;
       }
-      if (editorColors[i][j] !== null) {
-        fPuzzle.grid[gridRow][gridColumn].c = colorToHexColor[editorColors[i][j] as Color];
+      if (sudoku.colors[i][j] !== null) {
+        fPuzzle.grid[gridRow][gridColumn].c = colorToHexColor[sudoku.colors[i][j] as Color];
       }
-      if (values[i][j] !== '') {
-        fPuzzle.grid[gridRow][gridColumn].value = parseInt(values[i][j]);
+      if (solution.values[i][j] !== '') {
+        fPuzzle.grid[gridRow][gridColumn].value = parseInt(solution.values[i][j]);
       }
-      if (gameColors[i][j].length !== 0) {
-        fPuzzle.grid[gridRow][gridColumn].highlight = colorToHexColor[gameColors[i][j][0] as Color];
+      if (solution.colors[i][j].length !== 0) {
+        fPuzzle.grid[gridRow][gridColumn].highlight =
+          colorToHexColor[solution.colors[i][j][0] as Color];
       }
-      if (cornermarks[i][j] !== '') {
-        fPuzzle.grid[gridRow][gridColumn].cornerPencilMarks = cornermarks[i][j]
+      if (solution.cornermarks[i][j] !== '') {
+        fPuzzle.grid[gridRow][gridColumn].cornerPencilMarks = solution.cornermarks[i][j]
           .split('')
           .map((m) => parseInt(m));
       }
-      if (centermarks[i][j] !== '') {
-        fPuzzle.grid[gridRow][gridColumn].centerPencilMarks = centermarks[i][j]
+      if (solution.centermarks[i][j] !== '') {
+        fPuzzle.grid[gridRow][gridColumn].centerPencilMarks = solution.centermarks[i][j]
           .split('')
           .map((m) => parseInt(m));
       }
@@ -129,9 +121,9 @@ export function exportAsFPuzzlesJson(): FPuzzlesJson {
   }
 
   const handledRegions: number[] = [];
-  const defaultNormalRegions = defaultRegions(dimensions);
+  const defaultNormalRegions = defaultRegions(sudoku.dimensions);
   let regionNumber = 0;
-  regions.forEach((r, i) => {
+  sudoku.regions.forEach((r, i) => {
     if (handledRegions.indexOf(i) !== -1) return;
 
     switch (r.type) {
@@ -142,8 +134,8 @@ export function exportAsFPuzzlesJson(): FPuzzlesJson {
               (q) => q.row === p.row && q.column === p.column
             )
           ) {
-            fPuzzle.grid[p.row - (dimensions.margins?.top ?? 0)][
-              p.column - (dimensions.margins?.left ?? 0)
+            fPuzzle.grid[p.row - (sudoku.dimensions.margins?.top ?? 0)][
+              p.column - (sudoku.dimensions.margins?.left ?? 0)
             ].region = regionNumber;
           }
         });
@@ -159,7 +151,7 @@ export function exportAsFPuzzlesJson(): FPuzzlesJson {
         const clone = fPuzzle.clone ?? (fPuzzle.clone = []);
 
         const topLeftR = topLeftOfPositions(r.positions);
-        regions.forEach((s, j) => {
+        sudoku.regions.forEach((s, j) => {
           if (j > i && handledRegions.indexOf(j) === -1) {
             if (s.color === r.color && s.positions.length === r.positions.length) {
               const topLeftS = topLeftOfPositions(s.positions);
@@ -189,8 +181,8 @@ export function exportAsFPuzzlesJson(): FPuzzlesJson {
     getRegionsToDraw(r).forEach((s) => {
       if (s.color) {
         s.positions.forEach((p) => {
-          fPuzzle.grid[p.row - (dimensions.margins?.top ?? 0)][
-            p.column - (dimensions.margins?.left ?? 0)
+          fPuzzle.grid[p.row - (sudoku.dimensions.margins?.top ?? 0)][
+            p.column - (sudoku.dimensions.margins?.left ?? 0)
           ].c = colorToHexColor[s.color as Color];
         });
       }
@@ -198,14 +190,14 @@ export function exportAsFPuzzlesJson(): FPuzzlesJson {
   });
 
   const handledPaths: number[] = [];
-  paths.forEach((p, i) => {
+  sudoku.paths.forEach((p, i) => {
     if (handledPaths.indexOf(i) !== -1) return;
 
     switch (p.type) {
       case 'Arrow': {
         const arrow = fPuzzle.arrow ?? (fPuzzle.arrow = []);
 
-        const pillIndex = paths.findIndex(
+        const pillIndex = sudoku.paths.findIndex(
           (q, j) =>
             j > i &&
             q.type === 'Pill' &&
@@ -217,7 +209,7 @@ export function exportAsFPuzzlesJson(): FPuzzlesJson {
         arrow.push({
           cells:
             pillIndex !== -1
-              ? getPositionStrings(paths[pillIndex].positions)
+              ? getPositionStrings(sudoku.paths[pillIndex].positions)
               : [getPositionString(p.positions[0])],
           lines: p.positions.length > 1 ? [getPositionStrings(p.positions)] : []
         });
@@ -316,7 +308,7 @@ export function exportAsFPuzzlesJson(): FPuzzlesJson {
     });
   });
 
-  borderClues.forEach((c) => {
+  sudoku.borderclues.forEach((c) => {
     const minRow = Math.min(c.positions[0].row, c.positions[1].row);
     const maxRow = Math.max(c.positions[0].row, c.positions[1].row);
     const minColumn = Math.min(c.positions[0].column, c.positions[1].column);
@@ -442,7 +434,7 @@ export function exportAsFPuzzlesJson(): FPuzzlesJson {
     });
   });
 
-  cellClues.forEach((c) => {
+  sudoku.cellclues.forEach((c) => {
     switch (c.type) {
       case 'Maximum': {
         const maximum = fPuzzle.maximum ?? (fPuzzle.maximum = []);
@@ -525,7 +517,7 @@ export function exportAsFPuzzlesJson(): FPuzzlesJson {
     });
   });
 
-  cages.forEach((c) => {
+  sudoku.extendedcages.forEach((c) => {
     switch (c.type) {
       case 'Killer': {
         const killercage = fPuzzle.killercage ?? (fPuzzle.killercage = []);
