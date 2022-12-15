@@ -5,6 +5,7 @@ import type { Position } from '$models/Sudoku';
 import type { ScannerSettings } from '$models/User';
 import { editorHistory, gameHistory, highlightedCells, mode, selectedCells } from '.';
 import { cageDefaults, pathDefaults, regionDefaults } from '$utils/prefabs';
+import { getValuesFromRange } from '$utils/getValuesFromRange';
 
 // WRITABLES
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
@@ -28,9 +29,10 @@ function createScannerStore() {
     scanNonConsecutive: true
   });
 
-  const scannerContext = writable<{ candidates: string[][][]; queue: Position[] }>({
+  const scannerContext = writable<{ candidates: string[][][]; queue: Position[], highlightedCells: Position[] }>({
     candidates: [],
-    queue: []
+    queue: [],
+    highlightedCells: []
   });
 
   function configure(settings?: ScannerSettings): void {
@@ -82,26 +84,7 @@ function createScannerStore() {
     let candidates: string[][][] = [];
     let queue: Position[] = [];
 
-    allDigits = (logic.digits ?? '1-' + rows).split('');
-    for (let n = allDigits.length - 1; n >= 0; --n) {
-      if (allDigits[n] === ';' || allDigits[n] === ' ') {
-        allDigits.splice(n, 1);
-        continue;
-      }
-      if (allDigits[n] === '-') {
-        const range: string[] = [];
-        if (n > 0 && n < allDigits.length - 1) {
-          const start = allDigits[n - 1].charCodeAt(0);
-          const end = allDigits[n + 1].charCodeAt(0);
-          let char = start + 1;
-          while (char < end) {
-            range.push(String.fromCharCode(char));
-            ++char;
-          }
-        }
-        allDigits.splice(n, 1, ...range);
-      }
-    }
+    allDigits = getValuesFromRange(logic.digits ?? '1-' + rows);
 
     candidates = [];
     queue = [];
@@ -126,7 +109,7 @@ function createScannerStore() {
       }
     }
 
-    scannerContext.set({ candidates, queue });
+    scannerContext.set({ candidates, queue, highlightedCells:[] });
   }
 
   function getSeenCells(cell: Position): { row: number; column: number; context: string }[] {
@@ -464,6 +447,168 @@ function createScannerStore() {
     return nbrCells;
   }
 
+  function updateCandidateValues(cell:Position) : boolean {
+    const context = get(scannerContext);
+    const settings = get(scannerSettings);
+    const flags = get(editorHistory.getClue('logic')).flags ?? [];
+    const givens = get(editorHistory.getClue('givens'));
+    const values = get(gameHistory.getValue('values'));
+
+    const candidateValues = context.candidates[cell.row][cell.column];
+    if (candidateValues.length <= 1) return true;
+
+    const highlightedCells:Position[] = [];
+
+    //eliminate any given or filled values that are seen by this cell
+    let newCandidateValues = candidateValues.filter((v) => {
+      const seenCells = getSeenCells(cell);
+      const found = seenCells.find(
+        (s) => givens[s.row][s.column] === v || values[s.row][s.column] === v
+      );
+      if (found) {
+        highlightedCells.push(found);
+        return false;
+      }
+
+      return true;
+    });
+
+    if (newCandidateValues.length > 1 && settings.useCentreMarks) {
+      //eliminate all values of any tuple seen by this cell
+      const tuples = getTuples(cell);
+      newCandidateValues = newCandidateValues.filter((v) => {
+        const found = tuples.find((t) => t.tuple.indexOf(v) !== -1);
+        if (found) {
+          highlightedCells.push(...found.cells);
+          return false;
+        }
+
+        return true;
+      });
+    }
+
+    if (
+      newCandidateValues.length > 1 &&
+      !(flags.indexOf('NonStandard') !== -1) &&
+      settings.useCornerMarks
+    ) {
+      //if all cells that contain a cornermark within a region for a value are seen by this cell we can eliminate that value
+      const sets = getCornerSets(cell);
+      newCandidateValues = newCandidateValues.filter((v) => {
+        const found = sets.find((s) => s.digit === v);
+        if (found) {
+          highlightedCells.push(...found.cells);
+          return false;
+        }
+
+        return true;
+      });
+    }
+
+    if (newCandidateValues.length > 1 && settings.mode === 'Extreme') {
+      //check negative constraints and eliminate any values that would be invalid
+      const borderclues = get(editorHistory.getClue('borderclues'));
+      const nbrCells = getNbrCells(cell);
+      
+      if ((flags.indexOf('Nonconsecutive') !== -1 && settings.scanNonConsecutive) || (flags.indexOf('NegativeWhite') !== -1 && settings.scanNegativeKropki)) {
+        newCandidateValues = newCandidateValues.filter((v) => 
+          !nbrCells.some(n => {
+            if (flags.indexOf('NegativeWhite') !== -1 && settings.scanNegativeKropki && borderclues.some(c => c.type === 'KropkiWhite' && c.positions.every(p => (p.row === cell.row && p.column === cell.column) || (p.row === n.row && p.column === n.column))))
+              return false;
+
+            let value = givens[n.row][n.column];
+            if (value === '') {
+              value = values[n.row][n.column];
+            }
+            if (value !== '') {
+              if (Math.abs(parseInt(value) - parseInt(v)) === 1) {
+                highlightedCells.push(n);
+
+                return true;
+              }
+            }
+
+            return false;
+          })
+        );
+      }
+      if (flags.indexOf('NegativeBlack') !== -1 && settings.scanNegativeKropki) {
+        newCandidateValues = newCandidateValues.filter((v) => 
+          !nbrCells.some(n => {
+            if (borderclues.some(c => c.type === 'KropkiBlack' && c.positions.every(p => (p.row === cell.row && p.column === cell.column) || (p.row === n.row && p.column === n.column))))
+              return false;
+
+            let value = givens[n.row][n.column];
+            if (value === '') {
+              value = values[n.row][n.column];
+            }
+            if (value !== '') {
+              if (parseInt(value) === 2 * parseInt(v) || 2 * parseInt(value) === parseInt(v)) {
+                highlightedCells.push(n);
+
+                return true;
+              }
+            }
+
+            return false;
+          })
+        );
+        
+      }
+      if (flags.indexOf('NegativeX') !== -1 && settings.scanNegativeXV) {
+        newCandidateValues = newCandidateValues.filter((v) => 
+          !nbrCells.some(n => {
+            if (borderclues.some(c => c.type === 'XvX' && c.positions.every(p => (p.row === cell.row && p.column === cell.column) || (p.row === n.row && p.column === n.column))))
+              return false;
+
+            let value = givens[n.row][n.column];
+            if (value === '') {
+              value = values[n.row][n.column];
+            }
+            if (value !== '') {
+              if (parseInt(value) + parseInt(v) === 10) {
+                highlightedCells.push(n);
+
+                return true;
+              }
+            }
+
+            return false;
+          })
+        );
+      }
+      if (flags.indexOf('NegativeV') !== -1 && settings.scanNegativeXV) {
+        newCandidateValues = newCandidateValues.filter((v) => 
+          !nbrCells.some(n => {
+            if (borderclues.some(c => c.type === 'XvV' && c.positions.every(p => (p.row === cell.row && p.column === cell.column) || (p.row === n.row && p.column === n.column))))
+              return false;
+
+            let value = givens[n.row][n.column];
+            if (value === '') {
+              value = values[n.row][n.column];
+            }
+            if (value !== '') {
+              if (parseInt(value) + parseInt(v) === 5) {
+                highlightedCells.push(n);
+
+                return true;
+              }
+            }
+
+            return false;
+          })
+        );
+      }
+    }
+
+    if (newCandidateValues.length === candidateValues.length) return false;
+
+    context.candidates[cell.row][cell.column] = newCandidateValues;
+    context.highlightedCells = highlightedCells;
+
+    return true;
+  }
+
   function step(): boolean {
     if (!isScanning()) {
       initScan();
@@ -471,162 +616,30 @@ function createScannerStore() {
 
     const context = get(scannerContext);
     const settings = get(scannerSettings);
-    const logic = get(editorHistory.getClue('logic'));
-    const givens = get(editorHistory.getClue('givens'));
     const values = get(gameHistory.getValue('values'));
     const centermarks = get(gameHistory.getValue('centermarks'));
     const cornermarks = get(gameHistory.getValue('cornermarks'));
 
-    const flags = logic.flags ?? [];
-
+    //iterate through every cell in the queue in order
     for (let n = 0; n < context.queue.length; ++n) {
       const cell = context.queue[n];
-      const seenCells = getSeenCells(cell);
-      const highlightCells: Position[] = [];
-      let candidateValues = context.candidates[cell.row][cell.column];
-      if (candidateValues.length > 1) {
-        let newCandidateValues = candidateValues.filter((v) => {
-          const found = seenCells.find(
-            (s) => givens[s.row][s.column] === v || values[s.row][s.column] === v
-          );
-          if (found) {
-            highlightCells.push(found);
-            return false;
-          }
-
-          return true;
-        });
-
-        if (newCandidateValues.length > 1 && settings.useCentreMarks) {
-          const tuples = getTuples(cell);
-          newCandidateValues = newCandidateValues.filter((v) => {
-            const found = tuples.find((t) => t.tuple.indexOf(v) !== -1);
-            if (found) {
-              highlightCells.push(...found.cells);
-              return false;
-            }
-
-            return true;
-          });
-        }
-
-        if (
-          newCandidateValues.length > 1 &&
-          !(flags.indexOf('NonStandard') !== -1) &&
-          settings.useCornerMarks
-        ) {
-          const sets = getCornerSets(cell);
-          newCandidateValues = newCandidateValues.filter((v) => {
-            const found = sets.find((s) => s.digit === v);
-            if (found) {
-              highlightCells.push(...found.cells);
-              return false;
-            }
-
-            return true;
-          });
-        }
-
-        if (newCandidateValues.length > 1 && settings.mode === 'Extreme') {
-          const borderclues = get(editorHistory.getClue('borderclues'));
-          if ((flags.indexOf('Nonconsecutive') !== -1 && settings.scanNonConsecutive) || (flags.indexOf('NegativeWhite') !== -1 && settings.scanNegativeKropki)) {
-            let nbrCells = getNbrCells(cell);
-            if (flags.indexOf('NegativeWhite') !== -1 && settings.scanNegativeKropki) {
-              nbrCells = nbrCells.filter(n => !borderclues.some(c => c.type === 'KropkiWhite' && c.positions.every(p => (p.row === cell.row && p.column === cell.column) || (p.row === n.row && p.column === n.column))));
-            }
-
-            newCandidateValues = newCandidateValues.filter((v) => 
-              !nbrCells.some(n => {
-                let value = givens[n.row][n.column];
-                if (value === '') {
-                  value = values[n.row][n.column];
-                }
-                if (value !== '') {
-                  if (Math.abs(parseInt(value) - parseInt(v)) === 1) {
-                    return true;
-                  }
-                }
-
-                return false;
-              })
-            );
-          }
-          if (flags.indexOf('NegativeBlack') !== -1 && settings.scanNegativeKropki) {
-            const nbrCells = getNbrCells(cell).filter(n => !borderclues.some(c => c.type === 'KropkiBlack' && c.positions.every(p => (p.row === cell.row && p.column === cell.column) || (p.row === n.row && p.column === n.column))));
-
-            newCandidateValues = newCandidateValues.filter((v) => 
-              !nbrCells.some(n => {
-                let value = givens[n.row][n.column];
-                if (value === '') {
-                  value = values[n.row][n.column];
-                }
-                if (value !== '') {
-                  if (parseInt(value) === 2 * parseInt(v) || 2 * parseInt(value) === parseInt(v)) {
-                    return true;
-                  }
-                }
-
-                return false;
-              })
-            );
-            
-          }
-          if (flags.indexOf('NegativeX') !== -1 && settings.scanNegativeXV) {
-            const nbrCells = getNbrCells(cell).filter(n => !borderclues.some(c => c.type === 'XvX' && c.positions.every(p => (p.row === cell.row && p.column === cell.column) || (p.row === n.row && p.column === n.column))));            
-
-            newCandidateValues = newCandidateValues.filter((v) => 
-              !nbrCells.some(n => {
-                let value = givens[n.row][n.column];
-                if (value === '') {
-                  value = values[n.row][n.column];
-                }
-                if (value !== '') {
-                  if (parseInt(value) + parseInt(v) === 10) {
-                    return true;
-                  }
-                }
-
-                return false;
-              })
-            );
-          }
-          if (flags.indexOf('NegativeV') !== -1 && settings.scanNegativeXV) {
-            const nbrCells = getNbrCells(cell).filter(n => !borderclues.some(c => c.type === 'XvV' && c.positions.every(p => (p.row === cell.row && p.column === cell.column) || (p.row === n.row && p.column === n.column))));
-
-            newCandidateValues = newCandidateValues.filter((v) => 
-              !nbrCells.some(n => {
-                let value = givens[n.row][n.column];
-                if (value === '') {
-                  value = values[n.row][n.column];
-                }
-                if (value !== '') {
-                  if (parseInt(value) + parseInt(v) === 5) {
-                    return true;
-                  }
-                }
-
-                return false;
-              })
-            );
-          }
-        }
-
-        if (newCandidateValues.length === candidateValues.length) continue;
-
-        context.candidates[cell.row][cell.column] = candidateValues = newCandidateValues;
-      }
+      //if we are not able to eliminate any possible candidate values, move on to the next cell
+      if (!updateCandidateValues(cell)) continue;
 
       let value = '';
       let center: string = centermarks[cell.row][cell.column];
       let corner: string = cornermarks[cell.row][cell.column];
 
-      if (candidateValues.length === 1) {
+      const candidateValues = context.candidates[cell.row][cell.column];
+      if (candidateValues.length <= 1) {
+        //update the grid and remove the cell from the scanning queue
         value = candidateValues[0];
         center = '';
         corner = '';
 
         context.queue.splice(n, 1);
       } else {
+        //remove eliminated values from any pencil marks
         if (center !== '') {
           center = candidateValues.join('');
         }
@@ -638,6 +651,7 @@ function createScannerStore() {
         }
       }
 
+      //update the game history if there are any changes
       if (
         value !== values[cell.row][cell.column] ||
         center !== centermarks[cell.row][cell.column] ||
@@ -652,12 +666,15 @@ function createScannerStore() {
         newCornermarks[cell.row][cell.column] = corner;
 
         if (corner !== cornermarks[cell.row][cell.column]) {
+          //find the set of cornermarks that this cell is part of 
           getCornerSets(cell, false).forEach((s) => {
             if (s.digit === value) {
+              //remove all cornermarks that match the placed digit
               s.cells.forEach((c) => {
                 newCornermarks[c.row][c.column] = '';
               });
             } else if (s.cells.length === 2 && corner.indexOf(s.digit) === -1) {
+              //if there is only one possible cornermark for this digit left, set it as the sole candidate value
               s.cells.some((c) => {
                 if (c.row !== cell.row || c.column !== cell.column) {
                   context.candidates[c.row][c.column] = [s.digit];
@@ -679,7 +696,7 @@ function createScannerStore() {
 
         if (settings.scannerSpeed !== 'Instant') {
           selectedCells.set([cell]);
-          highlightedCells.set(highlightCells);
+          highlightedCells.set(context.highlightedCells);
         }
 
         return true;
