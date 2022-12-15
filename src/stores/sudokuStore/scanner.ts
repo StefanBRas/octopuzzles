@@ -57,10 +57,6 @@ function createScannerStore() {
 
     if (get(mode) === 'game')
       highlightedCells.set(getHighlightedCells(get(selectedCells)));
-
-    if ((settings?.autoScan ?? false) && !isScanning()) {
-      startScan();
-    }
   }
 
   const scanning = writable(false);
