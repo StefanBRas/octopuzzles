@@ -14,6 +14,7 @@
 
   export let content: string;
   export let placeholder = '';
+  export let onChange: ((html: string) => void) | undefined = undefined;
 
   let element: HTMLDivElement;
   let editor: Editor;
@@ -30,7 +31,9 @@
     });
 
     editor.on('update', ({ editor }) => {
-      content = editor.getHTML();
+      const html = editor.getHTML();
+      content = html;
+      onChange?.(html);
     });
   });
 
@@ -41,11 +44,12 @@
   });
 </script>
 
-<div class="rich-text-editor">
+<div class="rich-text-editor h-full flex flex-col">
   {#if editor}
-    <div class="flex">
+    <div class="flex mb-2">
       <div class="border-r pr-1 mr-1">
         <button
+          class="rounded p-1 hover:bg-gray-100"
           type="button"
           on:click={() => editor.chain().focus().toggleBold().run()}
           class:active={editor.isActive('bold')}
@@ -53,6 +57,7 @@
           <TextBolder />
         </button>
         <button
+          class="rounded p-1 hover:bg-gray-100"
           type="button"
           on:click={() => editor.chain().focus().toggleItalic().run()}
           class:active={editor.isActive('italic')}
@@ -60,6 +65,7 @@
           <TextItalic />
         </button>
         <button
+          class="rounded p-1 hover:bg-gray-100"
           type="button"
           on:click={() => editor.chain().focus().toggleStrike().run()}
           class:active={editor.isActive('strike')}
@@ -70,6 +76,7 @@
 
       <div>
         <button
+          class="rounded p-1 hover:bg-gray-100"
           type="button"
           on:click={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
           class:active={editor.isActive('heading', { level: 1 })}
@@ -77,6 +84,7 @@
           <TextHOne />
         </button>
         <button
+          class="rounded p-1 hover:bg-gray-100"
           type="button"
           on:click={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
           class:active={editor.isActive('heading', { level: 2 })}
@@ -84,6 +92,7 @@
           <TextHTwo />
         </button>
         <button
+          class="rounded p-1 hover:bg-gray-100"
           type="button"
           on:click={() => editor.chain().focus().setParagraph().run()}
           class:active={editor.isActive('paragraph')}
@@ -92,6 +101,7 @@
         </button>
 
         <button
+          class="rounded p-1 hover:bg-gray-100"
           type="button"
           on:click={() => editor.chain().focus().toggleBulletList().run()}
           class:active={editor.isActive('bulletList')}
@@ -99,6 +109,7 @@
           <ListBullets />
         </button>
         <button
+          class="rounded p-1 hover:bg-gray-100"
           type="button"
           on:click={() => editor.chain().focus().toggleOrderedList().run()}
           class:active={editor.isActive('orderedList')}
@@ -109,7 +120,7 @@
     </div>
   {/if}
 
-  <div bind:this={element} data-ignoreshortcuts />
+  <div bind:this={element} class="flex-1" data-ignoreshortcuts />
 </div>
 
 <style global>
@@ -123,15 +134,12 @@
 
   .ProseMirror {
     padding: 0.5rem;
+    height: 100%;
   }
 
   .ProseMirror ul,
   .ProseMirror ol {
     padding-left: 1.5rem;
-  }
-
-  .rich-text-editor button {
-    @apply rounded p-1;
   }
 
   .rich-text-editor button.active {
