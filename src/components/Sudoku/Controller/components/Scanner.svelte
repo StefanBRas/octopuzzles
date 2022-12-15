@@ -1,9 +1,9 @@
 <script lang="ts">
   import SquareButton from '$ui/SquareButton.svelte';
-  import Play from '$icons/Play.svelte';
-  import Pause from '$icons/Pause.svelte';
+  import Play from 'phosphor-svelte/lib/Play/Play.svelte';
+  import Pause from 'phosphor-svelte/lib/Pause/Pause.svelte';
   import Step from '$icons/Step.svelte';
-  import AutoScan from '$icons/AutoScan.svelte';
+  import Atom from 'phosphor-svelte/lib/Atom/Atom.svelte';
   import { editorHistory } from '$stores/sudokuStore';
   import Label from '$ui/Label.svelte';
   import RadioGroup from '$ui/RadioGroup.svelte';
@@ -270,10 +270,10 @@
         <Step />
       </SquareButton>
       <SquareButton text="Scan" on:click={() => scanner.startScan()}>
-        <Play />
+        <Play size={64} />
       </SquareButton>
       <SquareButton text="Stop" on:click={() => scanner.stopScan()}>
-        <Pause />
+        <Pause size={64} />
       </SquareButton>
       <SquareButton
         text="Auto"
@@ -284,7 +284,7 @@
           updateSettings();
         }}
       >
-        <AutoScan />
+        <Atom size={64} />
       </SquareButton>
     </div>
   </div>
