@@ -183,19 +183,18 @@ export default trpc
   .mutation('saveSettings', {
     input: UpdateUserSettingsValidator,
     resolve: async ({ input, ctx }) => {
-      const jwtToken = getJwt(ctx);
-      if (jwtToken == null) {
+      if (ctx.token == null) {
         throw new TRPCError({ message: 'You are not logged in', code: 'UNAUTHORIZED' });
       }
       try {
         await ctx.prisma.userSettings.create({
-          data: { userId: jwtToken.id, ...input }
+          data: { userId: ctx.token.id, ...input }
         });
       } catch (e) {
         
       await ctx.prisma.userSettings.update({
-        where: { userId: jwtToken.id },
-        data: { userId: jwtToken.id, ...input}
+        where: { userId: ctx.token.id },
+        data: { userId: ctx.token.id, ...input}
       });
       }
     }
