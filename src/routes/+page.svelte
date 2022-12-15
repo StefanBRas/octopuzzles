@@ -1,11 +1,4 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
-  import {
-    highlightedCells,
-    highlightedItemIndex,
-    selectedCells,
-    selectedItemIndex
-  } from '$stores/sudokuStore';
   import SudokuList from '$components/Sudoku/SudokuList.svelte';
   import PuzzleLabel from '$ui/PuzzleLabel.svelte';
   import Filters from '$icons/Filters.svelte';
@@ -48,13 +41,6 @@
     nextCursor = sudokuData.nextCursor;
     loading = false;
   }
-
-  onMount(() => {
-    $highlightedItemIndex = -1;
-    $selectedItemIndex = -1;
-    $selectedCells = [];
-    $highlightedCells = [];
-  });
 
   let showFilters = false;
 

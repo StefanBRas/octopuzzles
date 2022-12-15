@@ -29,8 +29,7 @@ import type {
   EditorHistoryStep,
   EditorHistoryStepWithNumbers,
   GameHistoryStep,
-  InputMode,
-  Mode
+  InputMode
 } from '$types';
 
 // WRITABLES
@@ -204,17 +203,17 @@ export function createEditorHistoryStore() {
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export function createGameHistoryStore() {
+export function createGameHistoryStore(dimensions: Dimensions) {
   // Step
   const step = writable(0);
   // History
   const history = writable<GameHistoryStep[]>([
     {
-      values: defaultValues(),
-      colors: defaultGameColors(),
-      cornermarks: defaultCornermarks(),
-      centermarks: defaultCentermarks(),
-      notes: defaultNotes()
+      values: defaultValues(dimensions),
+      colors: defaultGameColors(dimensions),
+      cornermarks: defaultCornermarks(dimensions),
+      centermarks: defaultCentermarks(dimensions),
+      notes: defaultNotes(dimensions)
     }
   ]);
 
@@ -293,7 +292,7 @@ export function createGameHistoryStore() {
   const canRedo = derived([history, step], ([$history, $step]) => $step < $history.length - 1);
 
   /** Reset the game */
-  function reset(dimensions: Dimensions): void {
+  function reset(): void {
     selectedItemIndex.set(-1);
     highlightedItemIndex.set(-1);
     selectedCells.set([]);
@@ -360,43 +359,43 @@ export function createGameHistoryStore() {
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-function createInputModeStore() {
-  const { subscribe, set } = writable<InputMode | null>(null);
+export function createSudokuInteractionModeStore() {
+  /**
+   * Highlights are things that are hovered over.
+   * Selecteds are things that are in focus or active
+   */
 
-  return {
-    subscribe,
-    set: (value: InputMode | null) => {
-      selectedItemIndex.set(-1);
-      highlightedItemIndex.set(-1);
-      handleArrows.set(defaultHandleArrows);
-      handleMouseDown.set(defaultHandleMouseDown);
-      handleMouseEnter.set(defaultHandleMouseEnter);
-      set(value);
-    }
-  };
-}
+  /**
+   * e.g. The index in the list of regions that is selected
+   */
+  const selectedItemIndex = writable(-1);
+  /**
+   * e.g. The index in the list of regions that is highlighted
+   */
+  const highlightedItemIndex = writable(-1);
+  /**
+   * Cells with wrong solutions
+   */
+  const wrongCells = writable<Position[]>([]);
+  /**
+   * A list of highlighted cells.
+   */
+  const highlightedCells = writable<Position[]>([]);
+  /**
+   * A list of selected cells.
+   */
+  const selectedCells = writable<Position[]>([]);
 
-export const mode = writable<Mode>('game');
-export const inputMode = createInputModeStore();
-export const selectedItemIndex = writable(-1);
-export const highlightedItemIndex = writable(-1);
-/** Cells with wrong solutions */
-export const wrongCells = writable<Position[]>([]);
-
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-function createSelectedCellsStore() {
-  const { subscribe, set: _set, update: _update } = writable<Position[]>([]);
-
-  function set(newSelectedCells: Position[]): void {
+  function setSelectedCells(newSelectedCells: Position[]): void {
     selectedItemIndex.set(-1);
     highlightedItemIndex.set(-1);
     highlightedCells.set([]);
-    _set(newSelectedCells);
+    selectedCells.set(newSelectedCells);
   }
 
-  function addCell(cell: Position, keepIfAlreadySelected = true): void {
+  function addSelectedCell(cell: Position, keepIfAlreadySelected = true): void {
     let found = false;
-    _update((oldSelectedCells) => {
+    selectedCells.update((oldSelectedCells) => {
       const newSelectedCells = oldSelectedCells.filter((c) => {
         if (c.row === cell.row && c.column === cell.column) {
           found = true;
@@ -412,23 +411,50 @@ function createSelectedCellsStore() {
     });
   }
 
+  const inputMode = writable<InputMode | null>(null);
+
+  /**
+   * The controller components can augment the functionality and how user inputs should be handled by changing this function.
+   * This function specifies what to do when a user clicks a cell.
+   */
+  const handleMouseDown = writable<MouseDownHandler>(defaultHandleMouseDown);
+  /**
+   * The controller components can augment the functionality and how user inputs should be handled by changing this function.
+   * This function specifies what to do when a user enters a cell with their mouse and the meta button is clicked.
+   */
+  const handleMouseEnter = writable<MouseEnterHandler>(defaultHandleMouseEnter);
+  /**
+   * The controller components can augment the functionality and how user inputs should be handled by changing this function.
+   * This function specifies what to do when a user moves around the board with the arrow buttons.
+   */
+  const handleArrows = writable<ArrowHandler>(defaultHandleArrows);
+
   return {
-    subscribe,
-    set,
-    addCell
+    handleMouseDown,
+    handleMouseEnter,
+    handleArrows,
+    selectedItemIndex,
+    highlightedItemIndex,
+    wrongCells,
+    selectedCells: {
+      subscribe: selectedCells.subscribe,
+      set: setSelectedCells,
+      addCell: addSelectedCell
+    },
+    highlightedCells,
+    inputMode: {
+      subscribe: inputMode.subscribe,
+      set: (value: InputMode | null) => {
+        selectedItemIndex.set(-1);
+        highlightedItemIndex.set(-1);
+        handleArrows.set(defaultHandleArrows);
+        handleMouseDown.set(defaultHandleMouseDown);
+        handleMouseEnter.set(defaultHandleMouseEnter);
+        inputMode.set(value);
+      }
+    }
   };
 }
-
-/**
- * A list of selected cells.
- * A selected cell is one that is pressed on with e.g. the mouse
- */
-export const selectedCells = createSelectedCellsStore();
-/**
- * A list of highlighted cells.
- * A highlighted cell is e.g. a hovered cell.
- */
-export const highlightedCells = writable<Position[]>([]);
 
 /**
  * The controller components can augment the functionality and how user inputs should be handled by changing this function.

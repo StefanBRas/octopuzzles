@@ -1,8 +1,8 @@
 <script lang="ts">
   import html2canvas from 'html2canvas';
   import SudokuInfo from '$components/Sudoku/SudokuInfo.svelte';
-  import { createGameHistoryStore, wrongCells } from '$stores/sudokuStore';
-  import { onMount } from 'svelte';
+  import { createGameHistoryStore, createSudokuInteractionModeStore } from '$stores/sudokuStore';
+  import { onMount, setContext } from 'svelte';
   import { openModal } from '$stores/modalStore';
   import FinishedSudokuModal from '$components/Modals/FinishedSudokuModal.svelte';
   import { getUserSolution } from '$utils/getSolution';
@@ -22,6 +22,10 @@
     defaultRegions
   } from '$utils/defaults';
   import type { EditorHistoryStep } from '$types';
+  import {
+    SUDOKU_GAME_CONTEXT_KEY,
+    SUDOKU_INTERACTION_MODE_CONTEXT_KEY
+  } from '$utils/context/sudoku';
 
   export let data: PageData;
 
@@ -39,7 +43,12 @@
     regions: data.sudoku.regions ?? defaultRegions(data.sudoku.dimensions)
   };
 
-  const gameHistory = createGameHistoryStore();
+  const gameHistory = createGameHistoryStore(sudoku.dimensions);
+  const interactionMode = createSudokuInteractionModeStore();
+  setContext(SUDOKU_GAME_CONTEXT_KEY, gameHistory);
+  setContext(SUDOKU_INTERACTION_MODE_CONTEXT_KEY, interactionMode);
+
+  const wrongCells = interactionMode.wrongCells;
 
   $: if (data.walkthrough?.steps) {
     // Just so ts will shut up
@@ -75,10 +84,6 @@
       now = Date.now();
     }, 1000);
     document.addEventListener('visibilitychange', handleVisibilityChange);
-  });
-
-  onMount(async () => {
-    gameHistory.reset(data.sudoku.dimensions);
   });
 
   let values = gameHistory.subscribeToValue('values');

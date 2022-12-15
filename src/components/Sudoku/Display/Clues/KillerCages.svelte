@@ -1,10 +1,15 @@
 <script lang="ts">
   import { cellSize } from '$constants';
   import classNames from 'classnames';
-  import { highlightedItemIndex, inputMode, selectedItemIndex } from '$stores/sudokuStore';
   import { topLeftOfPositions } from '$utils/topLeftOfPositions';
   import { createEdges } from '$utils/createEdges';
   import type { Dimensions, Extendedcages } from '$models/Sudoku';
+  import { getSudokuInteractionModeContext } from '$utils/context/sudoku';
+
+  const highlights = getSudokuInteractionModeContext();
+  const selectedItemIndex = highlights?.selectedItemIndex;
+  const highlightedItemIndex = highlights?.highlightedItemIndex;
+  const inputMode = highlights?.inputMode;
 
   export let cages: Extendedcages;
 

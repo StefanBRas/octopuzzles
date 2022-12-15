@@ -15,7 +15,11 @@
   import CommonDescriptionsModal from '$components/Sudoku/CommonDescriptionsModal.svelte';
   import Plus from 'phosphor-svelte/lib/Plus/Plus.svelte';
   import { getUserSolution } from '$utils/getSolution';
-  import { mode, createEditorHistoryStore, createGameHistoryStore } from '$stores/sudokuStore';
+  import {
+    createEditorHistoryStore,
+    createGameHistoryStore,
+    createSudokuInteractionModeStore
+  } from '$stores/sudokuStore';
   import Label from '$ui/Label.svelte';
   import classNames from 'classnames';
   import { walkthroughStore } from '$stores/walkthroughStore';
@@ -23,19 +27,25 @@
   import trpc, { type InferMutationInput } from '$lib/client/trpc';
   import { fillWalkthroughStore } from '$utils/fillWalkthroughStore';
   import RichTextEditor from '$components/RichTextEditor.svelte';
-  import { SUDOKU_EDITOR_CONTEXT_KEY, SUDOKU_GAME_CONTEXT_KEY } from '$utils/context/sudoku';
+  import {
+    SUDOKU_EDITOR_CONTEXT_KEY,
+    SUDOKU_GAME_CONTEXT_KEY,
+    SUDOKU_INTERACTION_MODE_CONTEXT_KEY
+  } from '$utils/context/sudoku';
   import SudokuEditor from '$components/Sudoku/sudokuEditor/SudokuEditor.svelte';
   import SudokuGame from '$components/Sudoku/sudokuGame/SudokuGame.svelte';
 
   export let data: PageData;
   const editorHistory = createEditorHistoryStore();
   const gameHistory = createGameHistoryStore();
+  const highlights = createSudokuInteractionModeStore();
   setContext(SUDOKU_EDITOR_CONTEXT_KEY, editorHistory);
   setContext(SUDOKU_GAME_CONTEXT_KEY, gameHistory);
+  setContext(SUDOKU_INTERACTION_MODE_CONTEXT_KEY, highlights);
 
+  const sudokuLabels = editorHistory.labels;
   const sudokuTitle = editorHistory.title;
   const sudokuDescription = editorHistory.description;
-  const sudokuLabels = editorHistory.labels;
 
   $: if (data.walkthrough?.steps) {
     // Just so ts will shut up
@@ -123,11 +133,6 @@
 
   type Tabs = 'editor' | 'game' | 'form';
   let tab: Tabs = 'editor';
-  $: if (tab === 'editor') {
-    $mode = 'editor';
-  } else {
-    $mode = 'game';
-  }
 
   let id: number | undefined = undefined;
   let isPublic = false;

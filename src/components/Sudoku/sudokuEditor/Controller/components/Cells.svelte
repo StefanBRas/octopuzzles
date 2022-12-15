@@ -1,10 +1,12 @@
 <script lang="ts">
   import Button from '$ui/Button.svelte';
-  import { selectedCells } from '$stores/sudokuStore';
   import deepCopy from '$utils/deepCopy';
   import { isDeleteKey } from '$utils/isDeleteKey';
   import { hasOpenModals } from '$stores/modalStore';
-  import { getSudokuEditorContext } from '$utils/context/sudoku';
+  import { getSudokuEditorContext, getSudokuInteractionModeContext } from '$utils/context/sudoku';
+
+  const highlights = getSudokuInteractionModeContext();
+  const { selectedCells } = highlights as NonNullable<typeof highlights>;
 
   const editorHistory = getSudokuEditorContext();
 

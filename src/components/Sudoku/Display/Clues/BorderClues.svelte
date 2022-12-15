@@ -2,9 +2,14 @@
   import { cellSize, shapesToIcon } from '$constants';
   import classNames from 'classnames';
   import { borderCluesFontSize } from '$utils/borderCluesFontSize';
-  import { highlightedItemIndex, inputMode, selectedItemIndex } from '$stores/sudokuStore';
   import { getBorderCluesToDraw } from '$utils/prefabs';
   import type { Borderclue, Borderclues } from '$models/Sudoku';
+  import { getSudokuInteractionModeContext } from '$utils/context/sudoku';
+
+  const highlights = getSudokuInteractionModeContext();
+  const selectedItemIndex = highlights?.selectedItemIndex;
+  const highlightedItemIndex = highlights?.highlightedItemIndex;
+  const inputMode = highlights?.inputMode;
 
   export let borderClues: Borderclues;
   export let interactive = false;
@@ -97,7 +102,7 @@
               this={shapesToIcon[borderClue.shape ?? 'Circle']}
               x={(cx(borderClue) + 0.5) * cellSize - radius}
               y={(cy(borderClue) + 0.5) * cellSize - radius}
-              color={borderClue.color}
+              color={borderClue.color ?? undefined}
               border={borderClue.color ? true : false}
               size={radius * 2}
               rotation="North"

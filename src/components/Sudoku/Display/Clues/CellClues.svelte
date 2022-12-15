@@ -1,10 +1,14 @@
 <script lang="ts">
   import { cellSize, symbolsMap } from '$constants';
   import classNames from 'classnames';
-  import { inputMode, selectedItemIndex } from '$stores/sudokuStore';
   import { getCellCluesToDraw } from '$utils/prefabs';
   import { cellCluesFontSize } from '$utils/cellCluesFontSize';
   import type { CellClueLocation, Cellclues } from '$models/Sudoku';
+  import { getSudokuInteractionModeContext } from '$utils/context/sudoku';
+
+  const highlights = getSudokuInteractionModeContext();
+  const inputMode = highlights?.inputMode;
+  const selectedItemIndex = highlights?.selectedItemIndex;
 
   export let cellClues: Cellclues;
   export let interactive = false;

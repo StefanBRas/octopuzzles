@@ -13,10 +13,9 @@
   import PathsIcon from '$icons/Paths.svelte';
   import RegionsIcon from '$icons/Regions.svelte';
   import { openModal } from '$stores/modalStore';
-  import { inputMode, mode } from '$stores/sudokuStore';
   import type { InputMode } from '$types';
   import SquareButton from '$ui/SquareButton.svelte';
-  import { getSudokuEditorContext } from '$utils/context/sudoku';
+  import { getSudokuEditorContext, getSudokuInteractionModeContext } from '$utils/context/sudoku';
   import classNames from 'classnames';
   import ArrowCounterClockwise from 'phosphor-svelte/lib/ArrowCounterClockwise/ArrowCounterClockwise.svelte';
   import ArrowUUpLeft from 'phosphor-svelte/lib/ArrowUUpLeft/ArrowUUpLeft.svelte';
@@ -38,6 +37,8 @@
   import Regions from './components/Regions.svelte';
 
   const editorHistory = getSudokuEditorContext();
+  const interactionMode = getSudokuInteractionModeContext();
+  const { inputMode } = interactionMode as NonNullable<typeof interactionMode>;
 
   const controls: Record<
     string,
@@ -68,7 +69,7 @@
   });
 
   function showHelp(): void {
-    openModal(ControllerHelpModal, { mode: $mode });
+    openModal(ControllerHelpModal, { mode: 'editor' });
   }
 
   function showImportFromFPuzzlesModal(): void {

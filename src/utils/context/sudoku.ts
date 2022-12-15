@@ -1,7 +1,10 @@
 import { getContext } from 'svelte';
-import type { createEditorHistoryStore, createGameHistoryStore } from '$stores/sudokuStore';
+import type {
+  createEditorHistoryStore,
+  createGameHistoryStore,
+  createSudokuInteractionModeStore
+} from '$stores/sudokuStore';
 import type { PlayableSudoku } from '$types';
-import type { Writable } from 'svelte/store';
 
 export const SUDOKU_EDITOR_CONTEXT_KEY = 'sudokuEditor';
 /**
@@ -25,4 +28,14 @@ export const SUDOKU_BEING_PLAYED_CONTEXT_KEY = 'sudokuBeingPlayed';
  */
 export const getSudokuBeingPlayedContext = (): PlayableSudoku => {
   return getContext(SUDOKU_BEING_PLAYED_CONTEXT_KEY);
+};
+
+export const SUDOKU_INTERACTION_MODE_CONTEXT_KEY = 'sudokuInteractionMode';
+/**
+ * Gets the current highlights of the sudoku. If not inside a game or editor, this is undefined
+ */
+export const getSudokuInteractionModeContext = ():
+  | ReturnType<typeof createSudokuInteractionModeStore>
+  | undefined => {
+  return getContext(SUDOKU_INTERACTION_MODE_CONTEXT_KEY);
 };

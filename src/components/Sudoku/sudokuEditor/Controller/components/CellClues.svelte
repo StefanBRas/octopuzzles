@@ -16,14 +16,7 @@
   import CaretUp from 'phosphor-svelte/lib/CaretUp/CaretUp.svelte';
   import CaretDown from 'phosphor-svelte/lib/CaretDown/CaretDown.svelte';
   import Trash from 'phosphor-svelte/lib/Trash/Trash.svelte';
-  import {
-    handleArrows,
-    highlightedCells,
-    highlightedItemIndex,
-    selectedCells,
-    selectedItemIndex,
-    setMargins
-  } from '$stores/sudokuStore';
+  import { handleArrows, setMargins } from '$stores/sudokuStore';
   import deepCopy from '$utils/deepCopy';
   import isArrowKey from '$utils/isArrowKey';
   import moveArrayElement from '$utils/moveArrayElement';
@@ -42,7 +35,11 @@
     SymbolType
   } from '$models/Sudoku';
   import { hasOpenModals } from '$stores/modalStore';
-  import { getSudokuEditorContext } from '$utils/context/sudoku';
+  import { getSudokuEditorContext, getSudokuInteractionModeContext } from '$utils/context/sudoku';
+
+  const highlights = getSudokuInteractionModeContext();
+  const { selectedItemIndex, highlightedItemIndex, selectedCells, highlightedCells } =
+    highlights as NonNullable<typeof highlights>;
 
   const editorHistory = getSudokuEditorContext();
 

@@ -1,14 +1,20 @@
 <script lang="ts">
   import { cellSize } from '$constants';
   import Controller from './Controller/index.svelte';
-  import { highlightedCells, selectedCells, wrongCells, mode } from '$stores/sudokuStore';
   import type { EditorHistoryStep, GameHistoryStep } from '$types';
   import SudokuDisplay from '../Display/SudokuDisplay.svelte';
   import Interface from '../Display/Clues/Interface.svelte';
   import { setContext } from 'svelte';
-  import { SUDOKU_BEING_PLAYED_CONTEXT_KEY } from '$utils/context/sudoku';
+  import {
+    getSudokuInteractionModeContext,
+    SUDOKU_BEING_PLAYED_CONTEXT_KEY
+  } from '$utils/context/sudoku';
 
   export let sudoku: EditorHistoryStep;
+  const interactionMode = getSudokuInteractionModeContext();
+  const { selectedCells, highlightedCells, wrongCells } = interactionMode as NonNullable<
+    typeof interactionMode
+  >;
 
   setContext(SUDOKU_BEING_PLAYED_CONTEXT_KEY, sudoku);
 
@@ -32,25 +38,16 @@
 
 <div class="flex flex-wrap w-full justify-around">
   <div class="p-2 mb-2" style="height: {sudokuSize}px; width: {sudokuSize}px" id="sudoku-display">
-    <SudokuDisplay
-      {sudoku}
-      {notes}
-      cornermarks={$mode === 'editor' ? undefined : cornermarks}
-      centermarks={$mode === 'editor' ? undefined : centermarks}
-      values={$mode === 'editor' ? undefined : values}
-      gameColors={$mode === 'editor' ? undefined : gameColors}
-    >
+    <SudokuDisplay {sudoku} {notes} {cornermarks} {centermarks} {values} {gameColors}>
       <g slot="highlights">
-        {#if $mode === 'game' && $wrongCells}
-          {#each $wrongCells as cell}
-            <rect
-              class="fill-current w-cell h-cell text-red-200"
-              x={cellSize * cell.column}
-              y={cellSize * cell.row}
-              vector-effect="non-scaling-size"
-            />
-          {/each}
-        {/if}
+        {#each $wrongCells as cell}
+          <rect
+            class="fill-current w-cell h-cell text-red-200"
+            x={cellSize * cell.column}
+            y={cellSize * cell.row}
+            vector-effect="non-scaling-size"
+          />
+        {/each}
         {#if $selectedCells}
           {#each $selectedCells as cell}
             <rect

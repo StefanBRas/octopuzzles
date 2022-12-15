@@ -1,7 +1,11 @@
 <script lang="ts">
   import { cellSize } from '$constants';
   import type { Notes } from '$models/Walkthrough';
-  import { inputMode, selectedCells } from '$stores/sudokuStore';
+  import { getSudokuInteractionModeContext } from '$utils/context/sudoku';
+
+  const highlights = getSudokuInteractionModeContext();
+  const selectedCells = highlights?.selectedCells;
+  const inputMode = highlights?.inputMode;
 
   export let notes: Notes | null;
 

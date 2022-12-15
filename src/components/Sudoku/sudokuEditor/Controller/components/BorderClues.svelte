@@ -9,13 +9,7 @@
   import CaretUp from 'phosphor-svelte/lib/CaretUp/CaretUp.svelte';
   import CaretDown from 'phosphor-svelte/lib/CaretDown/CaretDown.svelte';
   import Trash from 'phosphor-svelte/lib/Trash/Trash.svelte';
-  import {
-    handleArrows,
-    highlightedCells,
-    highlightedItemIndex,
-    selectedCells,
-    selectedItemIndex
-  } from '$stores/sudokuStore';
+  import { handleArrows } from '$stores/sudokuStore';
   import deepCopy from '$utils/deepCopy';
   import isArrowKey from '$utils/isArrowKey';
   import moveArrayElement from '$utils/moveArrayElement';
@@ -30,11 +24,15 @@
   import Line from '$icons/shapes/Line.svelte';
   import type { Borderclue, BorderClueType, Position } from '$models/Sudoku';
   import { hasOpenModals } from '$stores/modalStore';
-  import { getSudokuEditorContext } from '$utils/context/sudoku';
+  import { getSudokuEditorContext, getSudokuInteractionModeContext } from '$utils/context/sudoku';
 
   const editorHistory = getSudokuEditorContext();
   let borderClues = editorHistory.subscribeToClue('borderclues');
   const labels = editorHistory.labels;
+
+  const highlights = getSudokuInteractionModeContext();
+  const { selectedItemIndex, highlightedItemIndex, selectedCells, highlightedCells } =
+    highlights as NonNullable<typeof highlights>;
 
   let type: BorderClueType | 'CUSTOM' = $borderClues[0]?.type ?? 'CUSTOM';
   let defaultSettings = borderClueDefaults(type);

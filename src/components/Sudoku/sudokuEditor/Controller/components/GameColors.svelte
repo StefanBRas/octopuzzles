@@ -1,6 +1,5 @@
 <script lang="ts">
   import Backspace from 'phosphor-svelte/lib/Backspace/Backspace.svelte';
-  import { gameHistory, selectedCells } from '$stores/sudokuStore';
   import deepCopy from '$utils/deepCopy';
   import SquareButton from '$ui/SquareButton.svelte';
   import { get } from 'svelte/store';
@@ -8,6 +7,11 @@
   import { isDeleteKey } from '$utils/isDeleteKey';
   import type { Color } from '$models/Sudoku';
   import { hasOpenModals } from '$stores/modalStore';
+  import { getSudokuGameContext, getSudokuInteractionModeContext } from '$utils/context/sudoku';
+
+  const highlights = getSudokuInteractionModeContext();
+  const { selectedCells } = highlights as NonNullable<typeof highlights>;
+  const gameHistory = getSudokuGameContext();
 
   function handleKeyDown(k: KeyboardEvent): void {
     //do not accept keyboard input when any modal controls are open

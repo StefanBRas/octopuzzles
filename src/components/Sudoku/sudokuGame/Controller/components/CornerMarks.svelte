@@ -1,16 +1,22 @@
 <script lang="ts">
   import Backspace from 'phosphor-svelte/lib/Backspace/Backspace.svelte';
-  import { selectedCells } from '$stores/sudokuStore';
   import { get } from 'svelte/store';
   import deepCopy from '$utils/deepCopy';
   import SquareButton from '$ui/SquareButton.svelte';
   import classNames from 'classnames';
   import { isDeleteKey } from '$utils/isDeleteKey';
   import { hasOpenModals } from '$stores/modalStore';
-  import { getSudokuBeingPlayedContext, getSudokuGameContext } from '$utils/context/sudoku';
+  import {
+    getSudokuBeingPlayedContext,
+    getSudokuGameContext,
+    getSudokuInteractionModeContext
+  } from '$utils/context/sudoku';
 
   const gameHistory = getSudokuGameContext();
   const sudoku = getSudokuBeingPlayedContext();
+  const interactionMode = getSudokuInteractionModeContext();
+  const { selectedCells } = interactionMode as NonNullable<typeof interactionMode>;
+
   function handleClick(newCornermark: string): void {
     let currentCornermarks = gameHistory.getValue('cornermarks');
     let newCornermarks = deepCopy(currentCornermarks);

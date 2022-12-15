@@ -1,10 +1,15 @@
 <script lang="ts">
   import { cellSize } from '$constants';
   import Controller from './Controller/index.svelte';
-  import { highlightedCells, selectedCells, wrongCells, mode } from '$stores/sudokuStore';
   import type { EditorHistoryStep } from '$types';
   import SudokuDisplay from '../Display/SudokuDisplay.svelte';
   import Interface from '../Display/Clues/Interface.svelte';
+  import { getSudokuInteractionModeContext } from '$utils/context/sudoku';
+
+  const interactionMode = getSudokuInteractionModeContext();
+  const { highlightedCells, selectedCells, wrongCells } = interactionMode as NonNullable<
+    typeof interactionMode
+  >;
 
   // SIZING
   let windowHeight: number;
@@ -24,16 +29,6 @@
   <div class="p-2 mb-2" style="height: {sudokuSize}px; width: {sudokuSize}px" id="sudoku-display">
     <SudokuDisplay {sudoku}>
       <g slot="highlights">
-        {#if $mode === 'game' && $wrongCells}
-          {#each $wrongCells as cell}
-            <rect
-              class="fill-current w-cell h-cell text-red-200"
-              x={cellSize * cell.column}
-              y={cellSize * cell.row}
-              vector-effect="non-scaling-size"
-            />
-          {/each}
-        {/if}
         {#if $selectedCells}
           {#each $selectedCells as cell}
             <rect

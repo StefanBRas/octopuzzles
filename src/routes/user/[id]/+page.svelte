@@ -1,13 +1,6 @@
 <script lang="ts">
   import { openModal } from '$stores/modalStore';
   import DangerActionModal from '$components/Modals/DangerActionModal.svelte';
-  import { onMount } from 'svelte';
-  import {
-    highlightedCells,
-    highlightedItemIndex,
-    selectedCells,
-    selectedItemIndex
-  } from '$stores/sudokuStore';
   import SudokuList from '$components/Sudoku/SudokuList.svelte';
   import trpc from '$lib/client/trpc';
   import type { PageData } from './$types';
@@ -39,13 +32,6 @@
       }
     });
   }
-
-  onMount(() => {
-    $highlightedItemIndex = -1;
-    $selectedItemIndex = -1;
-    $selectedCells = [];
-    $highlightedCells = [];
-  });
 </script>
 
 <svelte:head>

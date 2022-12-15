@@ -9,11 +9,14 @@
   import NotesIcon from '$icons/Notes.svelte';
   import NumbersIcon from '$icons/Numbers.svelte';
   import { openModal } from '$stores/modalStore';
-  import { inputMode } from '$stores/sudokuStore';
   import { walkthroughStore } from '$stores/walkthroughStore';
   import type { InputMode } from '$types';
   import SquareButton from '$ui/SquareButton.svelte';
-  import { getSudokuBeingPlayedContext, getSudokuGameContext } from '$utils/context/sudoku';
+  import {
+    getSudokuBeingPlayedContext,
+    getSudokuGameContext,
+    getSudokuInteractionModeContext
+  } from '$utils/context/sudoku';
   import { isCommandKey } from '$utils/isCommandKey';
   import classNames from 'classnames';
   import ArrowCounterClockwise from 'phosphor-svelte/lib/ArrowCounterClockwise/ArrowCounterClockwise.svelte';
@@ -31,6 +34,8 @@
 
   const gameHistory = getSudokuGameContext();
   const sudoku = getSudokuBeingPlayedContext();
+  const interactionMode = getSudokuInteractionModeContext();
+  const { inputMode } = interactionMode as NonNullable<typeof interactionMode>;
 
   const controls: Record<
     string,
@@ -181,7 +186,7 @@
     <SquareButton
       text="Restart"
       on:click={() => {
-        gameHistory.reset(sudoku.dimensions);
+        gameHistory.reset();
       }}
     >
       <ArrowCounterClockwise size={32} />

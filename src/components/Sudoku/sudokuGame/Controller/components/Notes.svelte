@@ -1,13 +1,15 @@
 <script lang="ts">
   import type { Position } from '$models/Sudoku';
-  import { selectedCells } from '$stores/sudokuStore';
   import Button from '$ui/Button.svelte';
   import Input from '$ui/Input.svelte';
-  import { getSudokuGameContext } from '$utils/context/sudoku';
+  import { getSudokuGameContext, getSudokuInteractionModeContext } from '$utils/context/sudoku';
   import deepCopy from '$utils/deepCopy';
 
   const gameHistory = getSudokuGameContext();
   let notes = gameHistory.subscribeToValue('notes');
+  const interactionMode = getSudokuInteractionModeContext();
+  const { selectedCells } = interactionMode as NonNullable<typeof interactionMode>;
+
   let input: Input;
   $: firstSelectedCell = $selectedCells.length === 1 ? $selectedCells[0] : undefined;
 
