@@ -13,7 +13,7 @@
   import CenterMarksIcon from '$icons/CenterMarks.svelte';
   import CellsIcon from '$icons/Cells.svelte';
   import NotesIcon from '$icons/Notes.svelte';
-  import Crosshair from 'phosphor-svelte/lib/Crosshair/Crosshair.svelte';
+  import ScannerIcon from '$icons/Scanner.svelte';
   import Numbers from './components/Numbers.svelte';
   import Regions from './components/Regions.svelte';
   import ArrowUUpLeft from 'phosphor-svelte/lib/ArrowUUpLeft/ArrowUUpLeft.svelte';
@@ -92,7 +92,7 @@
     centermarks: { icon: CenterMarksIcon, controller: CenterMarks, label: 'Center marks' },
     colors: { icon: ColorPicker, controller: GameColors, label: 'Colors' },
     notes: { icon: NotesIcon, controller: Notes, label: 'Notes' },
-    scanner: { icon: Crosshair, controller: Scanner, label: 'Scanner' }
+    scanner: { icon: ScannerIcon, controller: Scanner, label: 'Scanner' }
   } as Record<
     keyof GameHistoryStep,
     { icon: typeof NumbersIcon; controller: typeof Numbers; label: string }
@@ -251,7 +251,7 @@
           setInputMode(im);
         }}
       >
-        <svelte:component this={info.icon} size={64} />
+        <svelte:component this={info.icon} />
       </SquareButton>
     {/each}
   </div>
