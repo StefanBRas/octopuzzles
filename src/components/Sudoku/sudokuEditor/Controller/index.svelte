@@ -25,6 +25,7 @@
   import FileArrowUp from 'phosphor-svelte/lib/FileArrowUp/FileArrowUp.svelte';
   import Question from 'phosphor-svelte/lib/Question/Question.svelte';
   import { onMount } from 'svelte';
+  import { get } from 'svelte/store';
   import BorderClues from './components/BorderClues.svelte';
   import CellClues from './components/CellClues.svelte';
   import Cells from './components/Cells.svelte';
@@ -75,7 +76,11 @@
   }
 
   function showExportToFPuzzlesModal(): void {
-    openModal(ExportToFPuzzlesModal, { sudoku: editorHistory.getClues() });
+    openModal(ExportToFPuzzlesModal, {
+      sudoku: editorHistory.getClues(),
+      title: get(editorHistory.title),
+      description: get(editorHistory.description)
+    });
   }
 </script>
 

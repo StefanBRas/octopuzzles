@@ -14,7 +14,6 @@
   import Logic from './Clues/Logic.svelte';
   import Regions from './Clues/Regions.svelte';
 
-  // EDITOR STATE
   export let sudoku: EditorHistoryStep;
   export let interactive = false;
 

@@ -22,8 +22,7 @@
     highlightedItemIndex,
     selectedCells,
     selectedItemIndex,
-    setMargins,
-    labels
+    setMargins
   } from '$stores/sudokuStore';
   import deepCopy from '$utils/deepCopy';
   import isArrowKey from '$utils/isArrowKey';
@@ -49,6 +48,7 @@
 
   let cellClues = editorHistory.subscribeToClue('cellclues');
   let dimensions = editorHistory.subscribeToClue('dimensions');
+  const labels = editorHistory.labels;
   const margins = $dimensions.margins;
 
   let type: CellClueType | 'CUSTOM' = $cellClues[0]?.type ?? 'CUSTOM';

@@ -49,6 +49,7 @@
           <div class="h-96 w-full p-4 justify-center">
             <SudokuDisplay
               sudoku={{
+                ...sudoku,
                 borderclues: sudoku.borderclues ?? defaultBorderclues(),
                 cellclues: sudoku.cellclues ?? defaultCellclues(),
                 cells: sudoku.cells ?? defaultCells(sudoku.dimensions),

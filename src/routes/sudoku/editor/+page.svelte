@@ -15,14 +15,7 @@
   import CommonDescriptionsModal from '$components/Sudoku/CommonDescriptionsModal.svelte';
   import Plus from 'phosphor-svelte/lib/Plus/Plus.svelte';
   import { getUserSolution } from '$utils/getSolution';
-  import {
-    description,
-    sudokuTitle,
-    labels,
-    mode,
-    createEditorHistoryStore,
-    createGameHistoryStore
-  } from '$stores/sudokuStore';
+  import { mode, createEditorHistoryStore, createGameHistoryStore } from '$stores/sudokuStore';
   import Label from '$ui/Label.svelte';
   import classNames from 'classnames';
   import { walkthroughStore } from '$stores/walkthroughStore';
@@ -39,6 +32,10 @@
   const gameHistory = createGameHistoryStore();
   setContext(SUDOKU_EDITOR_CONTEXT_KEY, editorHistory);
   setContext(SUDOKU_GAME_CONTEXT_KEY, gameHistory);
+
+  const sudokuTitle = editorHistory.title;
+  const sudokuDescription = editorHistory.description;
+  const sudokuLabels = editorHistory.labels;
 
   $: if (data.walkthrough?.steps) {
     // Just so ts will shut up
@@ -81,7 +78,7 @@
     let sud = data.sudoku;
 
     gameHistory.reset(editorHistory.getClue('dimensions'));
-    $labels =
+    $sudokuLabels =
       data.labels.map((l) => ({
         label: l,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -89,7 +86,7 @@
       })) ?? [];
     if (sud != null) {
       $sudokuTitle = sud.title;
-      $description = sud.description;
+      $sudokuDescription = sud.description;
       id = sud.id;
       provideSolution = sud.solution != null;
       isPublic = sud.publicSince != null;
@@ -118,7 +115,7 @@
       }
     } else {
       $sudokuTitle = '';
-      $description = '';
+      $sudokuDescription = '';
 
       editorHistory.reset();
     }
@@ -162,7 +159,7 @@
       const createdSudoku = await trpc().mutation('sudokus:create', {
         sudoku: {
           title: $sudokuTitle,
-          description: $description,
+          description: $sudokuDescription,
           dimensions: $dimensions,
           borderclues: $borderclues,
           cellclues: $cellclues,
@@ -174,7 +171,7 @@
           paths: $paths,
           logic: $logic
         },
-        labels: $labels.filter((l) => l.selected).map((l) => l.label.id)
+        labels: $sudokuLabels.filter((l) => l.selected).map((l) => l.label.id)
       });
 
       if (createdSudoku != null) {
@@ -209,7 +206,7 @@
         id,
         sudokuUpdates: {
           title: $sudokuTitle,
-          description: $description,
+          description: $sudokuDescription,
           dimensions: $dimensions,
           borderclues: $borderclues,
           cellclues: $cellclues,
@@ -221,7 +218,7 @@
           paths: $paths,
           logic: $logic
         },
-        labels: $labels.filter((l) => l.selected).map((l) => l.label.id)
+        labels: $sudokuLabels.filter((l) => l.selected).map((l) => l.label.id)
       });
 
       if (updatedSudoku != null) {
@@ -249,12 +246,12 @@
   function openAddDescriptionModal(): void {
     openModal(CommonDescriptionsModal, {
       addLabel: (l) => {
-        if ($description.length === 0) {
-          $description = `${l.name}: ${l.description}`;
+        if ($sudokuDescription.length === 0) {
+          $sudokuDescription = `${l.name}: ${l.description}`;
         } else {
-          $description = `${$description}\n\n${l.name}: ${l.description}`;
+          $sudokuDescription = `${$sudokuDescription}\n\n${l.name}: ${l.description}`;
         }
-        let newLabels = $labels;
+        let newLabels = $sudokuLabels;
         newLabels.map((label) => {
           if (l.id === label.label.id) {
             label.selected = true;
@@ -263,10 +260,10 @@
             return label;
           }
         });
-        $labels = newLabels;
-        return $description;
+        $sudokuLabels = newLabels;
+        return $sudokuDescription;
       },
-      currentDescription: $description
+      currentDescription: $sudokuDescription
     });
   }
 
@@ -374,7 +371,10 @@
           on:click={openAddDescriptionModal}><Plus size={24} /></button
         >
         <div class="rounded-lg border mt-2 p-1">
-          <RichTextEditor bind:content={$description} placeholder="Normal sudoku rules apply..." />
+          <RichTextEditor
+            bind:content={$sudokuDescription}
+            placeholder="Normal sudoku rules apply..."
+          />
           {#if errors.description}
             <p class="text-red-500">
               {errors.description}
@@ -399,7 +399,7 @@
       <h1 class="font-semibold mt-8">Labels</h1>
       <p class="mb-2">Pick the labels that match your puzzle</p>
       <div class="flex flex-wrap gap-2">
-        {#each $labels as label}
+        {#each $sudokuLabels as label}
           <Label
             class={classNames('cursor-pointer p-2 rounded-md shadow w-52', {
               'ring-blue-500 ring-2': label.selected,

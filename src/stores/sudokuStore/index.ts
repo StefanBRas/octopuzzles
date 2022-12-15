@@ -53,6 +53,9 @@ export function createEditorHistoryStore() {
       logic: defaultLogic()
     }
   ]);
+  const title = writable('');
+  const description = writable('');
+  const labels = writable<{ label: Label; selected: boolean }[]>([]);
 
   /**
    * Increase the editor step by one, and specify what changes have been made to the editor since last step. Will keep the state of the non-changed items
@@ -193,7 +196,10 @@ export function createEditorHistoryStore() {
     set,
     subscribeToClue,
     getClue,
-    getClues
+    getClues,
+    title,
+    description,
+    labels
   };
 }
 
@@ -352,10 +358,6 @@ export function createGameHistoryStore() {
     getValues
   };
 }
-
-export const sudokuTitle = writable('');
-export const description = writable('');
-export const labels = writable<{ label: Label; selected: boolean }[]>([]);
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function createInputModeStore() {

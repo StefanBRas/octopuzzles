@@ -1,25 +1,19 @@
-import type { Sudoku } from '$models/Sudoku';
+import type { Solution, Sudoku, SudokuClues } from '$models/Sudoku';
 import type { SolutionStep } from '$models/Walkthrough';
 
 export type Mode = 'editor' | 'game';
 
 type NoUndefinedField<T> = { [P in keyof T]-?: NonNullable<T[P]> };
 
-export type EditorHistoryStep = NoUndefinedField<
-  Omit<
-    Sudoku,
-    | 'id'
-    | 'userId'
-    | 'publicSince'
-    | 'title'
-    | 'description'
-    | 'points'
-    | 'rank'
-    | 'createdAt'
-    | 'updatedAt'
-    | 'solution'
-  >
->;
+export type PlayableSudoku = NoUndefinedField<
+  Omit<Sudoku, 'userId' | 'publicSince' | 'solution'>
+> & {
+  userId: number | null;
+  publicSince: Date | null;
+  solution: Solution | null;
+};
+
+export type EditorHistoryStep = NoUndefinedField<SudokuClues>;
 
 export type GameHistoryStep = SolutionStep;
 

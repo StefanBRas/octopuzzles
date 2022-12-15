@@ -1,12 +1,7 @@
 <script lang="ts">
   import html2canvas from 'html2canvas';
   import SudokuInfo from '$components/Sudoku/SudokuInfo.svelte';
-  import {
-    createGameHistoryStore,
-    description,
-    sudokuTitle,
-    wrongCells
-  } from '$stores/sudokuStore';
+  import { createGameHistoryStore, wrongCells } from '$stores/sudokuStore';
   import { onMount } from 'svelte';
   import { openModal } from '$stores/modalStore';
   import FinishedSudokuModal from '$components/Modals/FinishedSudokuModal.svelte';
@@ -31,6 +26,7 @@
   export let data: PageData;
 
   const sudoku: EditorHistoryStep = {
+    ...data.sudoku,
     borderclues: data.sudoku.borderclues ?? defaultBorderclues(),
     cellclues: data.sudoku.cellclues ?? defaultCellclues(),
     cells: data.sudoku.cells ?? defaultCells(data.sudoku.dimensions),
@@ -82,9 +78,6 @@
   });
 
   onMount(async () => {
-    $sudokuTitle = data.sudoku.title;
-    $description = data.sudoku.description;
-
     gameHistory.reset(data.sudoku.dimensions);
   });
 

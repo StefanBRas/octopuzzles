@@ -1,6 +1,5 @@
-import { description, sudokuTitle } from '$stores/sudokuStore';
 import type { FPuzzlesJson, HexColor, PositionString } from './compressor';
-import { get } from 'svelte/store';
+
 import deepCopy from './deepCopy';
 import { defaultRegions } from './defaults';
 import { topLeftOfPositions } from './topLeftOfPositions';
@@ -15,7 +14,9 @@ import type { GameHistoryStep, EditorHistoryStep } from '$types';
 
 export function exportAsFPuzzlesJson(
   sudoku: EditorHistoryStep,
-  solution: GameHistoryStep
+  solution: GameHistoryStep,
+  title: string,
+  description: string
 ): FPuzzlesJson {
   const getPositionString = (position: Position): PositionString => {
     return `R${position.row + 1 - (sudoku.dimensions.margins?.top ?? 0)}C${
@@ -72,10 +73,10 @@ export function exportAsFPuzzlesJson(
     nonconsecutive: sudoku.logic.flags?.some((f) => f === 'Nonconsecutive' || f === 'NegativeWhite')
       ? true
       : undefined,
-    ruleset: get(description),
+    ruleset: description,
     size,
     'sumdot(intersection)': [],
-    title: get(sudokuTitle)
+    title
   };
 
   for (

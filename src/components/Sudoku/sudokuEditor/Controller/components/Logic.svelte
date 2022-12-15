@@ -1,13 +1,13 @@
 <script lang="ts">
   import Input from '$ui/Input.svelte';
   import Checkbox from '$ui/Checkbox.svelte';
-  import { labels } from '$stores/sudokuStore';
   import Label from '$ui/Label.svelte';
   import { logicFlagNames, logicFlagsToLabel } from '$constants';
   import type { Logic, LogicFlag } from '$models/Sudoku';
   import { getSudokuEditorContext } from '$utils/context/sudoku';
 
   const editorHistory = getSudokuEditorContext();
+  const labels = editorHistory.labels;
   let logic = editorHistory.subscribeToClue('logic');
 
   let digits = $logic.digits ?? '1-9';

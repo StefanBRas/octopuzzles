@@ -10,8 +10,7 @@
     highlightedCells,
     highlightedItemIndex,
     selectedCells,
-    selectedItemIndex,
-    labels
+    selectedItemIndex
   } from '$stores/sudokuStore';
   import type {
     ArrowHandler,
@@ -37,6 +36,7 @@
 
   const editorHistory = getSudokuEditorContext();
   const regions = editorHistory.subscribeToClue('regions');
+  const labels = editorHistory.labels;
 
   let type: RegionType | 'CUSTOM' = 'Normal';
   let defaultSettings = regionDefaults(type);

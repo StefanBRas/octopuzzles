@@ -9,8 +9,7 @@
     highlightedCells,
     highlightedItemIndex,
     selectedCells,
-    selectedItemIndex,
-    labels
+    selectedItemIndex
   } from '$stores/sudokuStore';
   import type {
     MouseDownHandler,
@@ -42,6 +41,7 @@
   import { getSudokuEditorContext } from '$utils/context/sudoku';
 
   const editorHistory = getSudokuEditorContext();
+  const labels = editorHistory.labels;
   const paths = editorHistory.subscribeToClue('paths');
 
   let type: PathType | 'CUSTOM' = $paths[0]?.type ?? 'CUSTOM';

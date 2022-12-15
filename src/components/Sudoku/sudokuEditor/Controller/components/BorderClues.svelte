@@ -14,8 +14,7 @@
     highlightedCells,
     highlightedItemIndex,
     selectedCells,
-    selectedItemIndex,
-    labels
+    selectedItemIndex
   } from '$stores/sudokuStore';
   import deepCopy from '$utils/deepCopy';
   import isArrowKey from '$utils/isArrowKey';
@@ -35,6 +34,7 @@
 
   const editorHistory = getSudokuEditorContext();
   let borderClues = editorHistory.subscribeToClue('borderclues');
+  const labels = editorHistory.labels;
 
   let type: BorderClueType | 'CUSTOM' = $borderClues[0]?.type ?? 'CUSTOM';
   let defaultSettings = borderClueDefaults(type);

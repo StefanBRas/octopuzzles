@@ -30,10 +30,13 @@
       return;
     }
 
-    const { newGameHistory, newEditorHistory } = importFPuzzleIntoEditorHistory(jsonString);
+    const { newGameHistory, newEditorHistory, newTitle, newDescription } =
+      importFPuzzleIntoEditorHistory(jsonString);
 
     gameHistory.set(newGameHistory);
     editorHistory.set(newEditorHistory);
+    editorHistory.title.set(newTitle);
+    editorHistory.description.set(newDescription);
 
     closeModal();
   }

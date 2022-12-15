@@ -1,4 +1,3 @@
-import { description, sudokuTitle } from '$stores/sudokuStore';
 import { closestColor } from './closestColor';
 import type { FPuzzlesJson, PositionString } from './compressor';
 import deepCopy from './deepCopy';
@@ -139,6 +138,8 @@ function regionsForFPuzzle(dimensions: Dimensions, grid: FPuzzlesJson['grid']): 
 export function importFPuzzleIntoEditorHistory(fpuzzle: FPuzzlesJson): {
   newGameHistory: GameHistoryStep;
   newEditorHistory: EditorHistoryStep;
+  newTitle: string;
+  newDescription: string;
 } {
   const dim = getDimensions(fpuzzle);
   const offsets = dim.margins ?? { left: 0, right: 0, top: 0, bottom: 0 };
@@ -174,6 +175,9 @@ export function importFPuzzleIntoEditorHistory(fpuzzle: FPuzzlesJson): {
     notes: defaultNotes(dim)
   };
 
+  let newTitle = '';
+  let newDescription = '';
+
   /* eslint-disable @typescript-eslint/no-empty-function */
   /* eslint-disable @typescript-eslint/no-unused-vars */
   const handlers: Handlers<FPuzzlesJson> = {
@@ -208,10 +212,10 @@ export function importFPuzzleIntoEditorHistory(fpuzzle: FPuzzlesJson): {
       newEditorHistory.logic = { ...deepCopy(newEditorHistory.logic), flags: newFlags };
     },
     title: (title) => {
-      sudokuTitle.set(title);
+      newTitle = title;
     },
     ruleset: (newRuleset) => {
-      description.set(newRuleset);
+      newDescription = newRuleset;
     },
     killercage: (fpuzzlesKillerCages) => {
       const newCages = deepCopy(newEditorHistory.extendedcages);
@@ -770,5 +774,5 @@ export function importFPuzzleIntoEditorHistory(fpuzzle: FPuzzlesJson): {
     handler?.(value);
   }
 
-  return { newGameHistory, newEditorHistory };
+  return { newGameHistory, newEditorHistory, newTitle, newDescription };
 }

@@ -1,6 +1,7 @@
 import { getContext } from 'svelte';
 import type { createEditorHistoryStore, createGameHistoryStore } from '$stores/sudokuStore';
-import type { EditorHistoryStep } from '$types';
+import type { PlayableSudoku } from '$types';
+import type { Writable } from 'svelte/store';
 
 export const SUDOKU_EDITOR_CONTEXT_KEY = 'sudokuEditor';
 /**
@@ -22,6 +23,6 @@ export const SUDOKU_BEING_PLAYED_CONTEXT_KEY = 'sudokuBeingPlayed';
 /**
  * Gets the current sudoku that is being solved/played
  */
-export const getSudokuBeingPlayedContext = (): EditorHistoryStep => {
+export const getSudokuBeingPlayedContext = (): PlayableSudoku => {
   return getContext(SUDOKU_BEING_PLAYED_CONTEXT_KEY);
 };

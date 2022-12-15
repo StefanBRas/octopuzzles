@@ -114,7 +114,11 @@
   }
 
   function showExportToFPuzzlesModal(): void {
-    openModal(ExportToFPuzzlesModal, { sudoku });
+    openModal(ExportToFPuzzlesModal, {
+      sudoku,
+      title: sudoku.title,
+      description: sudoku.description
+    });
   }
 
   function showWalkthroughEditorModal(): void {

@@ -15,8 +15,7 @@
     highlightedCells,
     highlightedItemIndex,
     selectedCells,
-    selectedItemIndex,
-    labels
+    selectedItemIndex
   } from '$stores/sudokuStore';
   import type {
     ArrowHandler,
@@ -38,6 +37,7 @@
 
   const editorHistory = getSudokuEditorContext();
 
+  const labels = editorHistory.labels;
   const extendedcages = editorHistory.subscribeToClue('extendedcages');
 
   let type: CageType | 'CUSTOM' = 'Killer';

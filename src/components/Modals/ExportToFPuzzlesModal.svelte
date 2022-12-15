@@ -10,9 +10,14 @@
 
   export let isOpen: boolean;
   export let sudoku: EditorHistoryStep;
+  export let title: string;
+  export let description: string;
+
   const gameHistory = getSudokuGameContext();
 
-  let puzzleData = compressToBase64(exportAsFPuzzlesJson(sudoku, gameHistory.getValues()));
+  let puzzleData = compressToBase64(
+    exportAsFPuzzlesJson(sudoku, gameHistory.getValues(), title, description)
+  );
 </script>
 
 {#if isOpen}
