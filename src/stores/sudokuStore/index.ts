@@ -356,11 +356,12 @@ function createSelectedCellsStore() {
       });
       if (!found) {
         newSelectedCells =  [...newSelectedCells, cell];
-
-        if (get(mode) === 'game') {
-          highlightedCells.set(scanner.getHighlightedCells(newSelectedCells));
-        }
       }
+
+      if (get(mode) === 'game') {
+        highlightedCells.set(scanner.getHighlightedCells(newSelectedCells));
+      }
+      
       return newSelectedCells;
     });
   }
