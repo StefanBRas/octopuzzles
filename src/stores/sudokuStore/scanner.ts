@@ -63,7 +63,7 @@ function createScannerStore() {
 
   function isScanning() { return get(scanning); }
 
-  function initScan() {
+  function initScan(seed?:Position) {
     const dimensions = get(editorHistory.getClue('dimensions'));
     const givens = get(editorHistory.getClue('givens'));
     const logic = get(editorHistory.getClue('logic'));
@@ -106,6 +106,35 @@ function createScannerStore() {
     }
 
     scannerContext.set({ candidates, queue, highlightedCells:[] });
+
+    if (seed) {
+      sortQueue(seed);
+    }
+  }
+
+  function sortQueue(cell:Position) : void {
+    const context = get(scannerContext);
+    const seenCells = getSeenCells(cell);
+
+    context.queue.sort((a,b) => {
+      const indexA = seenCells.findIndex(c => c.row === a.row && c.column === a.column);
+      const indexB = seenCells.findIndex(c => c.row === b.row && c.column === b.column);
+
+      if (indexA !== -1) {
+        if (indexB !== -1) {
+          if (indexA < indexB) {
+            return -1;
+          } else if (indexB < indexA) {
+            return 1;
+          }
+        } else {
+          return -1;
+        }
+      } else if (indexB !== -1) {
+        return 1;
+      }
+       return 0;
+    });
   }
 
   function getSeenCells(cell: Position): { row: number; column: number; context: string }[] {
@@ -605,9 +634,9 @@ function createScannerStore() {
     return true;
   }
 
-  function step(): boolean {
+  function step(seed?:Position): boolean {
     if (!isScanning()) {
-      initScan();
+      initScan(seed);
     }
 
     const context = get(scannerContext);
@@ -695,6 +724,8 @@ function createScannerStore() {
           highlightedCells.set(context.highlightedCells);
         }
 
+        sortQueue(cell);
+
         return true;
       }
     }
@@ -702,9 +733,9 @@ function createScannerStore() {
     return false;
   }
 
-  function startScan(): void {
+  function startScan(seed?:Position): void {
     if (!isScanning()) {
-      if (step()) {
+      if (step(seed)) {
         scanning.set(true);
         nextStep();
       } else {
@@ -748,31 +779,38 @@ function createScannerStore() {
     if (highlightMode == 'None') return [];
 
     let cellsToHighlight: Position[] = [];
-    if (selectedCells) {
-      selectedCells.forEach((c) => {
-        if (highlightMode == 'Seen') {
-          const cellsToAdd = getSeenCells(c)
-            .filter(
-              (p) =>
-                !selectedCells.some((q) => q.row === p.row && q.column === p.column) &&
-                !cellsToHighlight.some((q) => q.row === p.row && q.column === p.column)
-            );
-          if (cellsToAdd.length) {
-            cellsToHighlight = [...cellsToHighlight, ...cellsToAdd];
-          }
-        } else if (highlightMode == 'Tuples' && get(gameHistory.getValue('centermarks'))[c.row][c.column] !== '') {
-          getTuples(c, false).forEach((t) => {
-            const cellsToAdd = t.cells.filter(
-              (p) =>
-                !selectedCells.some((q) => q.row === p.row && q.column === p.column) &&
-                !cellsToHighlight.some((q) => q.row === p.row && q.column === p.column)
-            );
-            if (cellsToAdd.length) {
-              cellsToHighlight = [...cellsToHighlight, ...cellsToAdd];
-            }
-          });
+    
+    if (highlightMode == 'Seen') {
+      selectedCells.forEach((c, i) => {
+        const seenCells = getSeenCells(c);
+        if (i === 0) {
+          seenCells.forEach(p => {if (!cellsToHighlight.some((q) => q.row === p.row && q.column === p.column)){
+            cellsToHighlight.push(p);
+          }});
+        }
+        else {
+          cellsToHighlight = cellsToHighlight.filter((p) =>
+            seenCells.some((q) => q.row === p.row && q.column === p.column))
         }
       });
+    } else if (highlightMode == 'Tuples') {
+      const centermarks = get(gameHistory.getValue('centermarks'));
+      if (!selectedCells.some(c => centermarks[c.row][c.column] === '')) {
+        let tuples = getTuples(selectedCells[0], false);
+        if (selectedCells.length > 1) {
+          tuples = tuples.filter(t => selectedCells.every(c => t.cells.some(p => p.row === c.row && p.column === c.column)))
+        }
+        tuples.forEach(t => {
+          const cellsToAdd = t.cells.filter(
+            (p) =>
+            !selectedCells.some((q) => q.row === p.row && q.column === p.column) &&
+            !cellsToHighlight.some((q) => q.row === p.row && q.column === p.column)
+          );
+          if (cellsToAdd.length) {
+            cellsToHighlight = [...cellsToHighlight, ...cellsToAdd];
+          };
+        });
+      }
     }
 
     return cellsToHighlight;

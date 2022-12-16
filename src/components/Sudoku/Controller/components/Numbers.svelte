@@ -61,7 +61,7 @@
         gameHistory.set({ values: newValues });
 
         if (runScan) {
-          scanner.startScan();
+          scanner.startScan(positions[0]);
         }
       }
     }
