@@ -30,6 +30,7 @@
         <li>x for cornermarks</li>
         <li>c for centermarks</li>
         <li>v for colors</li>
+        <li>b for notes</li>
       </ul>
     </section>
 
@@ -67,6 +68,73 @@
           You add colors like you add numbers. The numbers 0-9 match the colors on the right, if you
           want to use your keyboard instead. Press the backspace button to remove the color
         </p>
+      </section>
+
+      <section class="mb-2">
+        <h2 class="text-lg font-semibold">Notes (b)</h2>
+        <p>
+          You can add notes as annotations to any cell to record information that cannot be
+          communicated using the standard pencil mark tools. Cells with with notes will display a
+          marker in the top right corner. Hovering over the marker will show the saved text. Press
+          the backspace button to remove the note
+        </p>
+      </section>
+
+      <section class="mb-2">
+        <h2 class="text-lg font-semibold">Scanner</h2>
+        <p>
+          The scanning tool can be used to help solve the puzzle by checking whether any cells are
+          restricted to a single digit due to the puzzle rules, or to quickly clean up pencil marks
+          after placing a digit. With Auto-scanning enabled, the scanner will run immediately every
+          time a digit is entered - editing pencil marks will not trigger a scan.
+        </p>
+        <br />
+        <p>
+          Press (s) to start or stop the scanner.<br />
+          Press (a) to make a single step.<br />
+          Press (h) to toggle highlighting on or off.<br />
+          Press (t) to toggle Tuple highlighting on or off
+        </p>
+        <br />
+        <ul>
+          <li>
+            <h2 class="text-lg font-semibold"><i>Highlighting Mode</i></h2>
+            <p>
+              <i>None</i>: No additional cells are highlighted when the selected cells in the grid
+              are changed.<br />
+              <i>Seen</i>: Highlight any cells which are seen by the currently selected cell. If
+              multiple cells are selected, only those cells seen by every cell in the selection are
+              highlighted.<br />
+              <i>Tuples</i>: Highlight any cells which form a Tuple with the currently selected
+              cell.
+            </p>
+            <br />
+          </li>
+          <li>
+            <h2 class="text-lg font-semibold"><i>Scanning Mode</i></h2>
+            <p>
+              <i>Basic</i>: The scanner will only use the basic rules of Sudoku when checking
+              available digits.<br />
+              <i>Advanced</i>: The scanner can use the puzzle clues when checking available digits.<br
+              />
+              <i>Extreme</i>: The scanner can use global negative constraints when checking
+              available digits.
+            </p>
+            <br />
+          </li>
+          <li>
+            <h2 class="text-lg font-semibold"><i>Options</i></h2>
+            <p>
+              Depending on the scanning mode and the puzzle constraints, you can choose which types
+              of clues can be used by the scanning algorithm.
+            </p>
+            <br />
+          </li>
+          <li>
+            <h2 class="text-lg font-semibold"><i>Scanning Speed</i></h2>
+            <p>Control how fast the scanner runs.</p>
+          </li>
+        </ul>
       </section>
     {/if}
 
