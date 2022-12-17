@@ -112,8 +112,6 @@
       $inputMode = 'givens';
     } else {
       $inputMode = 'values';
-
-      scanner.configure(me.getSettings().scanner);
     }
   });
 
