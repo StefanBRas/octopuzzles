@@ -13,6 +13,7 @@
 
   import { me } from '$stores/meStore';
   import { scanner } from '$stores/sudokuStore/scanner';
+  import { hasOpenModals } from '$stores/modalStore';
 
   let scannerSettings: ScannerSettings = me.getSettings().scanner ?? {};
   let highlightMode = scannerSettings.highlightMode ?? 'None';
@@ -44,7 +45,7 @@
   let antiking = flags.indexOf('Antiking') !== -1;
   let disjointsets = flags.indexOf('DisjointSets') !== -1;
   let nonconsecutive = flags.indexOf('Nonconsecutive') !== -1;
-  let entropy = flags.indexOf('Entropy') !== -1;
+  //let entropy = flags.indexOf('Entropy') !== -1;
   let negativeX = flags.indexOf('NegativeX') !== -1;
   let negativeV = flags.indexOf('NegativeV') !== -1;
   let negativeBlack = flags.indexOf('NegativeBlack') !== -1;
@@ -73,7 +74,33 @@
 
     scanner.configure(scannerSettings);
   }
+
+  function handleKeyboardShortcuts(k: KeyboardEvent): void {
+    if (hasOpenModals()) return;
+
+    //ensure settings controls are in sync with the scanner configuration
+    switch (k.key) {
+      case 'h': {
+        if (highlightMode !== 'Seen') {
+          highlightMode = 'Seen';
+        } else {
+          highlightMode = 'None';
+        }
+        break;
+      }
+      case 't': {
+        if (highlightMode !== 'Tuples') {
+          highlightMode = 'Tuples';
+        } else {
+          highlightMode = 'None';
+        }
+        break;
+      }
+    }
+  }
 </script>
+
+<svelte:window on:keydown={handleKeyboardShortcuts} />
 
 <div class="grid grid-cols-1 w-full h-full p-2">
   <div class="px-2 flex flex-col overflow-hidden justify-between">

@@ -59,7 +59,6 @@
   import type { EditorHistoryStep, GameHistoryStep, InputMode } from '$types';
   import Scanner from './components/Scanner.svelte';
   import { scanner } from '$stores/sudokuStore/scanner';
-  import { me } from '$stores/meStore';
 
   $: canUndo = $mode === 'editor' ? editorHistory.canUndo : gameHistory.canUndo;
   $: canRedo = $mode === 'editor' ? editorHistory.canRedo : gameHistory.canRedo;
