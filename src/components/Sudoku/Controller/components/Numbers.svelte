@@ -15,6 +15,8 @@
 
     const currentValues = get(gameHistory.getValue('values'));
     const newValues = deepCopy(currentValues);
+    const newCentermarks = deepCopy(get(gameHistory.getValue('centermarks')));
+    const newCornermarks = deepCopy(get(gameHistory.getValue('cornermarks')));
     const givens = get(editorHistory.getClue('givens'));
 
     // Check if we should clear all game cells
@@ -50,6 +52,8 @@
           } else {
             // Insert the number
             newValues[position.row][position.column] = newValue;
+            newCentermarks[position.row][position.column] = '';
+            newCornermarks[position.row][position.column] = '';
             anyChanges = true;
             runScan = me.getSettings().scanner?.autoScan ?? false;
           }
