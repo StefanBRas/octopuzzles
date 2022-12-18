@@ -16,37 +16,43 @@
     positions = positions.filter((p) => givens[p.row][p.column] === '');
     if (positions.length === 0) return;
 
-    const clearAllGameCells =
-      newCentermark === '' && positions.every((p) => currentCentermarks[p.row][p.column] === '');
-    if (clearAllGameCells) {
-      // clear all the cells in the game
-      gameHistory.clearCells(positions);
-      return;
-    }
+    if (newCentermark === '') {
+      const clearAllGameCells = positions.every((p) => currentCentermarks[p.row][p.column] === '');
+      if (clearAllGameCells) {
+        // completely clear the selected cells
+        gameHistory.clearCells(positions);
+        return;
+      } else {
+        // Remove the center marks from all selected cells
+        positions.forEach((p) => {
+          newCentermarks[p.row][p.column] = '';
+        });
+      }
+    } else {
+      let allCellsHasCenterMark = positions.every((p) =>
+        currentCentermarks[p.row][p.column].includes(newCentermark)
+      );
 
-    let allCellsHasCenterMark = positions.every((p) =>
-      currentCentermarks[p.row][p.column].includes(newCentermark)
-    );
-
-    if (!allCellsHasCenterMark) {
-      // Add it to the cells that does not have it
-      positions.forEach((p) => {
-        if (!currentCentermarks[p.row][p.column].includes(newCentermark)) {
-          newCentermarks[p.row][p.column] = (currentCentermarks[p.row][p.column] + newCentermark)
+      if (!allCellsHasCenterMark) {
+        // Add it to the cells that does not have it
+        positions.forEach((p) => {
+          if (!currentCentermarks[p.row][p.column].includes(newCentermark)) {
+            newCentermarks[p.row][p.column] = (currentCentermarks[p.row][p.column] + newCentermark)
+              .split('')
+              .sort()
+              .join('');
+          }
+        });
+      } else {
+        // Remove it from all cells
+        positions.forEach((p) => {
+          newCentermarks[p.row][p.column] = currentCentermarks[p.row][p.column]
             .split('')
+            .filter((s) => s !== newCentermark)
             .sort()
             .join('');
-        }
-      });
-    } else {
-      // Remove it from all cells
-      positions.forEach((p) => {
-        newCentermarks[p.row][p.column] = currentCentermarks[p.row][p.column]
-          .split('')
-          .filter((s) => s !== newCentermark)
-          .sort()
-          .join('');
-      });
+        });
+      }
     }
 
     gameHistory.set({ centermarks: newCentermarks });

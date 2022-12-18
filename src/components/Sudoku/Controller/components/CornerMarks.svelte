@@ -17,37 +17,43 @@
     positions = positions.filter((p) => givens[p.row][p.column] === '');
     if (positions.length === 0) return;
 
-    const clearAllGameCells =
-      newCornermark === '' && positions.every((p) => currentCornermarks[p.row][p.column] === '');
-    if (clearAllGameCells) {
-      // clear all the cells in the game
-      gameHistory.clearCells(positions);
-      return;
-    }
+    if (newCornermark === '') {
+      const clearAllGameCells = positions.every((p) => currentCornermarks[p.row][p.column] === '');
+      if (clearAllGameCells) {
+        // completely clear the selected cells
+        gameHistory.clearCells(positions);
+        return;
+      } else {
+        // Remove the center marks from all selected cells
+        positions.forEach((p) => {
+          newCornermarks[p.row][p.column] = '';
+        });
+      }
+    } else {
+      let allCellsHasCornerMark = positions.every((p) =>
+        currentCornermarks[p.row][p.column].includes(newCornermark)
+      );
 
-    let allCellsHasCornerMark = positions.every((p) =>
-      currentCornermarks[p.row][p.column].includes(newCornermark)
-    );
-
-    if (!allCellsHasCornerMark) {
-      // Add it to the cells that does not have it
-      positions.forEach((p) => {
-        if (!currentCornermarks[p.row][p.column].includes(newCornermark)) {
-          newCornermarks[p.row][p.column] = (currentCornermarks[p.row][p.column] + newCornermark)
+      if (!allCellsHasCornerMark) {
+        // Add it to the cells that does not have it
+        positions.forEach((p) => {
+          if (!currentCornermarks[p.row][p.column].includes(newCornermark)) {
+            newCornermarks[p.row][p.column] = (currentCornermarks[p.row][p.column] + newCornermark)
+              .split('')
+              .sort()
+              .join('');
+          }
+        });
+      } else {
+        // Remove it from all cells
+        positions.forEach((p) => {
+          newCornermarks[p.row][p.column] = currentCornermarks[p.row][p.column]
             .split('')
+            .filter((s) => s !== newCornermark)
             .sort()
             .join('');
-        }
-      });
-    } else {
-      // Remove it from all cells
-      positions.forEach((p) => {
-        newCornermarks[p.row][p.column] = currentCornermarks[p.row][p.column]
-          .split('')
-          .filter((s) => s !== newCornermark)
-          .sort()
-          .join('');
-      });
+        });
+      }
     }
 
     gameHistory.set({ cornermarks: newCornermarks });
