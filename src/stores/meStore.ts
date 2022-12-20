@@ -8,28 +8,29 @@ function createMeStore() {
   const user = writable<Pick<User, 'id' | 'email' | 'role' | 'username'> | null>(null);
   const settings = writable<Partial<UserSettings>>({});
 
-  function set(newUser: Pick<User, 'id' | 'email' | 'role' | 'username'> | null, newSettings: UserSettings | null = null) {
+  function set(
+    newUser: Pick<User, 'id' | 'email' | 'role' | 'username'> | null,
+    newSettings: UserSettings | null = null
+  ) {
     user.set(newUser);
     settings.set(newSettings ?? {});
 
     scanner.configure(newSettings?.scanner);
   }
 
-  function getSettings() : Partial<UserSettings> {
+  function getSettings(): Partial<UserSettings> {
     return get(settings);
   }
 
-  async function saveSettings(newSettings:Partial<UserSettings>) {
+  async function saveSettings(newSettings: Partial<UserSettings>) {
     const oldSettings = get(settings) ?? {};
-    settings.set({...oldSettings, ...newSettings});
+    settings.set({ ...oldSettings, ...newSettings });
 
     const userData = get(user);
     if (userData?.id) {
       await trpc().mutation('users:saveSettings', newSettings);
     }
-
   }
-    
 
   return {
     subscribe: user.subscribe,

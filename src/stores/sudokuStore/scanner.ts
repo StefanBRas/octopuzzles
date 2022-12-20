@@ -29,7 +29,11 @@ function createScannerStore() {
     scanNonConsecutive: true
   });
 
-  const scannerContext = writable<{ candidates: string[][][]; queue: Position[], highlightedCells: Position[] }>({
+  const scannerContext = writable<{
+    candidates: string[][][];
+    queue: Position[];
+    highlightedCells: Position[];
+  }>({
     candidates: [],
     queue: [],
     highlightedCells: []
@@ -55,15 +59,16 @@ function createScannerStore() {
       scanNonConsecutive: settings?.scanNonConsecutive ?? true
     });
 
-    if (get(mode) === 'game')
-      highlightedCells.set(getHighlightedCells(get(selectedCells)));
+    if (get(mode) === 'game') highlightedCells.set(getHighlightedCells(get(selectedCells)));
   }
 
   const scanning = writable(false);
 
-  function isScanning() { return get(scanning); }
+  function isScanning() {
+    return get(scanning);
+  }
 
-  function initScan(seed?:Position) {
+  function initScan(seed?: Position) {
     const dimensions = get(editorHistory.getClue('dimensions'));
     const givens = get(editorHistory.getClue('givens'));
     const logic = get(editorHistory.getClue('logic'));
@@ -105,20 +110,20 @@ function createScannerStore() {
       }
     }
 
-    scannerContext.set({ candidates, queue, highlightedCells:[] });
+    scannerContext.set({ candidates, queue, highlightedCells: [] });
 
     if (seed) {
       sortQueue(seed);
     }
   }
 
-  function sortQueue(cell:Position) : void {
+  function sortQueue(cell: Position): void {
     const context = get(scannerContext);
     const seenCells = getSeenCells(cell);
 
-    context.queue.sort((a,b) => {
-      const indexA = seenCells.findIndex(c => c.row === a.row && c.column === a.column);
-      const indexB = seenCells.findIndex(c => c.row === b.row && c.column === b.column);
+    context.queue.sort((a, b) => {
+      const indexA = seenCells.findIndex((c) => c.row === a.row && c.column === a.column);
+      const indexB = seenCells.findIndex((c) => c.row === b.row && c.column === b.column);
 
       if (indexA !== -1) {
         if (indexB !== -1) {
@@ -133,7 +138,7 @@ function createScannerStore() {
       } else if (indexB !== -1) {
         return 1;
       }
-       return 0;
+      return 0;
     });
   }
 
@@ -321,7 +326,10 @@ function createScannerStore() {
     return seen;
   }
 
-  function getTuples(cell: Position, seen = true) : { tuple: string; context: string; cells: Position[] }[] {
+  function getTuples(
+    cell: Position,
+    seen = true
+  ): { tuple: string; context: string; cells: Position[] }[] {
     const centermarks = get(gameHistory.getValue('centermarks'));
     if (!seen && centermarks[cell.row][cell.column] === '') return [];
 
@@ -439,40 +447,48 @@ function createScannerStore() {
     return sets;
   }
 
-  function getNbrCells(cell:Position) : Position[] {
+  function getNbrCells(cell: Position): Position[] {
     const dimensions = get(editorHistory.getClue('dimensions'));
     const rowOffset = dimensions.margins?.top ?? 0;
     const columnOffset = dimensions.margins?.left ?? 0;
     const rows = dimensions.rows - rowOffset - (dimensions.margins?.bottom ?? 0);
     const columns = dimensions.columns - columnOffset - (dimensions.margins?.right ?? 0);
 
-    const nbrCells:Position[] = [];
-    
+    const nbrCells: Position[] = [];
+
     const i = cell.row - columnOffset;
     const j = cell.column - columnOffset;
 
-    if (i - 1 >= 0 ) {nbrCells.push({
-      row: i - 1 + rowOffset,
-      column: cell.column
-    });}
-    if (j - 1 >= 0) {nbrCells.push({
-      row: cell.row,
-      column: j - 1 + columnOffset
-    });}
+    if (i - 1 >= 0) {
+      nbrCells.push({
+        row: i - 1 + rowOffset,
+        column: cell.column
+      });
+    }
+    if (j - 1 >= 0) {
+      nbrCells.push({
+        row: cell.row,
+        column: j - 1 + columnOffset
+      });
+    }
 
-    if (i + 1 < rows) {nbrCells.push({
-      row: i + 1 + rowOffset,
-      column: cell.column
-    });}
-    if (j + 1 <  columns) {nbrCells.push({
-      row: cell.row,
-      column: j + 1
-    });}
+    if (i + 1 < rows) {
+      nbrCells.push({
+        row: i + 1 + rowOffset,
+        column: cell.column
+      });
+    }
+    if (j + 1 < columns) {
+      nbrCells.push({
+        row: cell.row,
+        column: j + 1
+      });
+    }
 
     return nbrCells;
   }
 
-  function updateCandidateValues(cell:Position) : boolean {
+  function updateCandidateValues(cell: Position): boolean {
     const context = get(scannerContext);
     const settings = get(scannerSettings);
     const flags = get(editorHistory.getClue('logic')).flags ?? [];
@@ -482,7 +498,7 @@ function createScannerStore() {
     const candidateValues = context.candidates[cell.row][cell.column];
     if (candidateValues.length <= 1) return true;
 
-    const highlightedCells:Position[] = [];
+    const highlightedCells: Position[] = [];
 
     //eliminate any given or filled values that are seen by this cell
     let newCandidateValues = candidateValues.filter((v) => {
@@ -534,94 +550,142 @@ function createScannerStore() {
       //check negative constraints and eliminate any values that would be invalid
       const borderclues = get(editorHistory.getClue('borderclues'));
       const nbrCells = getNbrCells(cell);
-      
-      if ((flags.indexOf('Nonconsecutive') !== -1 && settings.scanNonConsecutive) || (flags.indexOf('NegativeWhite') !== -1 && settings.scanNegativeKropki)) {
-        newCandidateValues = newCandidateValues.filter((v) => 
-          !nbrCells.some(n => {
-            if (flags.indexOf('NegativeWhite') !== -1 && settings.scanNegativeKropki && borderclues.some(c => c.type === 'KropkiWhite' && c.positions.every(p => (p.row === cell.row && p.column === cell.column) || (p.row === n.row && p.column === n.column))))
-              return false;
 
-            let value = givens[n.row][n.column];
-            if (value === '') {
-              value = values[n.row][n.column];
-            }
-            if (value !== '') {
-              if (Math.abs(parseInt(value) - parseInt(v)) === 1) {
-                highlightedCells.push(n);
+      if (
+        (flags.indexOf('Nonconsecutive') !== -1 && settings.scanNonConsecutive) ||
+        (flags.indexOf('NegativeWhite') !== -1 && settings.scanNegativeKropki)
+      ) {
+        newCandidateValues = newCandidateValues.filter(
+          (v) =>
+            !nbrCells.some((n) => {
+              if (
+                flags.indexOf('NegativeWhite') !== -1 &&
+                settings.scanNegativeKropki &&
+                borderclues.some(
+                  (c) =>
+                    c.type === 'KropkiWhite' &&
+                    c.positions.every(
+                      (p) =>
+                        (p.row === cell.row && p.column === cell.column) ||
+                        (p.row === n.row && p.column === n.column)
+                    )
+                )
+              )
+                return false;
 
-                return true;
+              let value = givens[n.row][n.column];
+              if (value === '') {
+                value = values[n.row][n.column];
               }
-            }
+              if (value !== '') {
+                if (Math.abs(parseInt(value) - parseInt(v)) === 1) {
+                  highlightedCells.push(n);
 
-            return false;
-          })
+                  return true;
+                }
+              }
+
+              return false;
+            })
         );
       }
       if (flags.indexOf('NegativeBlack') !== -1 && settings.scanNegativeKropki) {
-        newCandidateValues = newCandidateValues.filter((v) => 
-          !nbrCells.some(n => {
-            if (borderclues.some(c => c.type === 'KropkiBlack' && c.positions.every(p => (p.row === cell.row && p.column === cell.column) || (p.row === n.row && p.column === n.column))))
-              return false;
+        newCandidateValues = newCandidateValues.filter(
+          (v) =>
+            !nbrCells.some((n) => {
+              if (
+                borderclues.some(
+                  (c) =>
+                    c.type === 'KropkiBlack' &&
+                    c.positions.every(
+                      (p) =>
+                        (p.row === cell.row && p.column === cell.column) ||
+                        (p.row === n.row && p.column === n.column)
+                    )
+                )
+              )
+                return false;
 
-            let value = givens[n.row][n.column];
-            if (value === '') {
-              value = values[n.row][n.column];
-            }
-            if (value !== '') {
-              if (parseInt(value) === 2 * parseInt(v) || 2 * parseInt(value) === parseInt(v)) {
-                highlightedCells.push(n);
-
-                return true;
+              let value = givens[n.row][n.column];
+              if (value === '') {
+                value = values[n.row][n.column];
               }
-            }
+              if (value !== '') {
+                if (parseInt(value) === 2 * parseInt(v) || 2 * parseInt(value) === parseInt(v)) {
+                  highlightedCells.push(n);
 
-            return false;
-          })
+                  return true;
+                }
+              }
+
+              return false;
+            })
         );
-        
       }
       if (flags.indexOf('NegativeX') !== -1 && settings.scanNegativeXV) {
-        newCandidateValues = newCandidateValues.filter((v) => 
-          !nbrCells.some(n => {
-            if (borderclues.some(c => c.type === 'XvX' && c.positions.every(p => (p.row === cell.row && p.column === cell.column) || (p.row === n.row && p.column === n.column))))
-              return false;
+        newCandidateValues = newCandidateValues.filter(
+          (v) =>
+            !nbrCells.some((n) => {
+              if (
+                borderclues.some(
+                  (c) =>
+                    c.type === 'XvX' &&
+                    c.positions.every(
+                      (p) =>
+                        (p.row === cell.row && p.column === cell.column) ||
+                        (p.row === n.row && p.column === n.column)
+                    )
+                )
+              )
+                return false;
 
-            let value = givens[n.row][n.column];
-            if (value === '') {
-              value = values[n.row][n.column];
-            }
-            if (value !== '') {
-              if (parseInt(value) + parseInt(v) === 10) {
-                highlightedCells.push(n);
-
-                return true;
+              let value = givens[n.row][n.column];
+              if (value === '') {
+                value = values[n.row][n.column];
               }
-            }
+              if (value !== '') {
+                if (parseInt(value) + parseInt(v) === 10) {
+                  highlightedCells.push(n);
 
-            return false;
-          })
+                  return true;
+                }
+              }
+
+              return false;
+            })
         );
       }
       if (flags.indexOf('NegativeV') !== -1 && settings.scanNegativeXV) {
-        newCandidateValues = newCandidateValues.filter((v) => 
-          !nbrCells.some(n => {
-            if (borderclues.some(c => c.type === 'XvV' && c.positions.every(p => (p.row === cell.row && p.column === cell.column) || (p.row === n.row && p.column === n.column))))
-              return false;
+        newCandidateValues = newCandidateValues.filter(
+          (v) =>
+            !nbrCells.some((n) => {
+              if (
+                borderclues.some(
+                  (c) =>
+                    c.type === 'XvV' &&
+                    c.positions.every(
+                      (p) =>
+                        (p.row === cell.row && p.column === cell.column) ||
+                        (p.row === n.row && p.column === n.column)
+                    )
+                )
+              )
+                return false;
 
-            let value = givens[n.row][n.column];
-            if (value === '') {
-              value = values[n.row][n.column];
-            }
-            if (value !== '') {
-              if (parseInt(value) + parseInt(v) === 5) {
-                highlightedCells.push(n);
-
-                return true;
+              let value = givens[n.row][n.column];
+              if (value === '') {
+                value = values[n.row][n.column];
               }
-            }
+              if (value !== '') {
+                if (parseInt(value) + parseInt(v) === 5) {
+                  highlightedCells.push(n);
 
-            return false;
-          })
+                  return true;
+                }
+              }
+
+              return false;
+            })
         );
       }
     }
@@ -634,7 +698,7 @@ function createScannerStore() {
     return true;
   }
 
-  function step(seed?:Position): boolean {
+  function step(seed?: Position): boolean {
     if (!isScanning()) {
       initScan(seed);
     }
@@ -691,7 +755,7 @@ function createScannerStore() {
         newCornermarks[cell.row][cell.column] = corner;
 
         if (corner !== cornermarks[cell.row][cell.column]) {
-          //find the set of cornermarks that this cell is part of 
+          //find the set of cornermarks that this cell is part of
           getCornerSets(cell, false).forEach((s) => {
             if (s.digit === value) {
               //remove all cornermarks that match the placed digit
@@ -733,7 +797,7 @@ function createScannerStore() {
     return false;
   }
 
-  function startScan(seed?:Position): void {
+  function startScan(seed?: Position): void {
     if (!isScanning()) {
       if (step(seed)) {
         scanning.set(true);
@@ -744,7 +808,7 @@ function createScannerStore() {
     }
   }
 
-  function stopScan() : void {
+  function stopScan(): void {
     if (isScanning()) {
       scanning.set(false);
     }
@@ -774,41 +838,47 @@ function createScannerStore() {
     }, delay);
   }
 
-  function getHighlightedCells(selectedCells:Position[]): Position[] {
+  function getHighlightedCells(selectedCells: Position[]): Position[] {
     const highlightMode = get(scannerSettings).highlightMode;
     if (highlightMode == 'None') return [];
 
     let cellsToHighlight: Position[] = [];
-    
+
     if (highlightMode == 'Seen') {
       selectedCells.forEach((c, i) => {
         const seenCells = getSeenCells(c);
         if (i === 0) {
-          seenCells.forEach(p => {if (!cellsToHighlight.some((q) => q.row === p.row && q.column === p.column)){
-            cellsToHighlight.push(p);
-          }});
-        }
-        else {
+          seenCells.forEach((p) => {
+            if (!cellsToHighlight.some((q) => q.row === p.row && q.column === p.column)) {
+              cellsToHighlight.push(p);
+            }
+          });
+        } else {
           cellsToHighlight = cellsToHighlight.filter((p) =>
-            seenCells.some((q) => q.row === p.row && q.column === p.column))
+            seenCells.some((q) => q.row === p.row && q.column === p.column)
+          );
         }
       });
     } else if (highlightMode == 'Tuples') {
       const centermarks = get(gameHistory.getValue('centermarks'));
-      if (!selectedCells.some(c => centermarks[c.row][c.column] === '')) {
+      if (!selectedCells.some((c) => centermarks[c.row][c.column] === '')) {
         let tuples = getTuples(selectedCells[0], false);
         if (selectedCells.length > 1) {
-          tuples = tuples.filter(t => selectedCells.every(c => t.cells.some(p => p.row === c.row && p.column === c.column)))
+          tuples = tuples.filter((t) =>
+            selectedCells.every((c) =>
+              t.cells.some((p) => p.row === c.row && p.column === c.column)
+            )
+          );
         }
-        tuples.forEach(t => {
+        tuples.forEach((t) => {
           const cellsToAdd = t.cells.filter(
             (p) =>
-            !selectedCells.some((q) => q.row === p.row && q.column === p.column) &&
-            !cellsToHighlight.some((q) => q.row === p.row && q.column === p.column)
+              !selectedCells.some((q) => q.row === p.row && q.column === p.column) &&
+              !cellsToHighlight.some((q) => q.row === p.row && q.column === p.column)
           );
           if (cellsToAdd.length) {
             cellsToHighlight = [...cellsToHighlight, ...cellsToAdd];
-          };
+          }
         });
       }
     }
@@ -819,19 +889,19 @@ function createScannerStore() {
   function toggleSeen() {
     const settings = get(scannerSettings);
     if (settings.highlightMode !== 'Seen') {
-      settings.highlightMode = 'Seen'
+      settings.highlightMode = 'Seen';
     } else {
-      settings.highlightMode = 'None'
+      settings.highlightMode = 'None';
     }
   }
 
   function toggleTuples() {
     const settings = get(scannerSettings);
     if (settings.highlightMode !== 'Tuples') {
-      settings.highlightMode = 'Tuples'
+      settings.highlightMode = 'Tuples';
     } else {
-      settings.highlightMode = 'None'
-    }    
+      settings.highlightMode = 'None';
+    }
   }
 
   return {

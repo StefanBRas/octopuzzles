@@ -165,13 +165,15 @@ export default trpc
     resolve: async ({ ctx }) => {
       const jwtToken = getJwt(ctx);
       if (jwtToken != null) {
-        const settingsRaw = await ctx.prisma.userSettings.findUnique({ where: { userId: jwtToken.id } });
+        const settingsRaw = await ctx.prisma.userSettings.findUnique({
+          where: { userId: jwtToken.id }
+        });
         if (settingsRaw != null) {
           const settings = UserSettingsValidator.parse(settingsRaw);
           if (settings != null) {
             return settings;
           }
-        }     
+        }
       }
 
       return null;
@@ -188,11 +190,10 @@ export default trpc
           data: { userId: ctx.token.id, ...input }
         });
       } catch (e) {
-        
-      await ctx.prisma.userSettings.update({
-        where: { userId: ctx.token.id },
-        data: { userId: ctx.token.id, ...input}
-      });
+        await ctx.prisma.userSettings.update({
+          where: { userId: ctx.token.id },
+          data: { userId: ctx.token.id, ...input }
+        });
       }
     }
   });

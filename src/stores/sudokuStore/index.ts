@@ -336,8 +336,7 @@ function createSelectedCellsStore() {
     highlightedItemIndex.set(-1);
     if (get(mode) === 'game') {
       highlightedCells.set(scanner.getHighlightedCells(newSelectedCells));
-    }
-    else {
+    } else {
       highlightedCells.set([]);
     }
     _set(newSelectedCells);
@@ -355,13 +354,13 @@ function createSelectedCellsStore() {
         }
       });
       if (!found) {
-        newSelectedCells =  [...newSelectedCells, cell];
+        newSelectedCells = [...newSelectedCells, cell];
       }
 
       if (get(mode) === 'game') {
         highlightedCells.set(scanner.getHighlightedCells(newSelectedCells));
       }
-      
+
       return newSelectedCells;
     });
   }

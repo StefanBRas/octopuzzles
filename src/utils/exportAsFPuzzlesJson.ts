@@ -68,13 +68,10 @@ export function exportAsFPuzzlesJson(): FPuzzlesJson {
     'diagonal-': flags.indexOf('DiagonalNeg') !== -1 ? true : undefined,
     disjointgroups: flags.indexOf('DisjointSets') !== -1 ? true : undefined,
     grid,
-    negative: flags.some(
-      (f) => f === 'NegativeBlack' || f === 'NegativeX' || f === 'NegativeV'
-    )
+    negative: flags.some((f) => f === 'NegativeBlack' || f === 'NegativeX' || f === 'NegativeV')
       ? [
           ...(flags.some((f) => f === 'NegativeBlack') ? ['ratio'] : []),
-          ...(flags.some((f) => f === 'NegativeX') &&
-          flags.some((f) => f === 'NegativeV')
+          ...(flags.some((f) => f === 'NegativeX') && flags.some((f) => f === 'NegativeV')
             ? ['xv']
             : [])
         ]
