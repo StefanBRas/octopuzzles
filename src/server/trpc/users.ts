@@ -163,10 +163,9 @@ export default trpc
   })
   .query('getSettings', {
     resolve: async ({ ctx }) => {
-      const jwtToken = getJwt(ctx);
-      if (jwtToken != null) {
+      if (ctx.token != null) {
         const settingsRaw = await ctx.prisma.userSettings.findUnique({
-          where: { userId: jwtToken.id }
+          where: { userId: ctx.token.id }
         });
         if (settingsRaw != null) {
           const settings = UserSettingsValidator.parse(settingsRaw);
