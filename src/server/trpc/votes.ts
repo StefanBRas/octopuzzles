@@ -4,17 +4,15 @@ import type { TRPCContext } from '.';
 import { intervalToDuration } from 'date-fns';
 import { rankingAlgorithm } from '$utils/rankingAlgorithm';
 import { VoteValidator, type Vote } from '$models/Vote';
-import { getJwt } from '$utils/jwt/getJwt';
 
 export default trpc.router<TRPCContext>().mutation('vote', {
   input: VoteValidator.pick({ sudokuId: true, value: true }),
   resolve: async ({ input, ctx }): Promise<Vote | null> => {
     // This resolver can, and should, be massively simplified, but maybe the vote architecture should be re-throught anyways
-    const jwtToken = getJwt(ctx);
-    if (jwtToken == null) {
+    if (ctx.token == null) {
       throw new TRPCError({ message: 'You are not logged in', code: 'UNAUTHORIZED' });
     }
-    const userId = jwtToken.id;
+    const userId = ctx.token.id;
 
     const [sudoku, oldVote] = await Promise.all([
       ctx.prisma.sudoku.findUnique({ where: { id: input.sudokuId } }),

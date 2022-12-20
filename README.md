@@ -6,6 +6,12 @@ Welcome to the open source octopuzzles repo.
 
 First of all, you should copy the `.env.example` file to a `.env` file. The default values should be fine for getting up and running.
 
+Next install dependencies with
+
+```
+npm i
+```
+
 We use postgres as database. To start a local database, you can use the docker compose. Just run
 
 ```
@@ -14,11 +20,21 @@ docker compose up -d
 
 This might take a while to start.
 
+Next to setup the database client run
+
+```
+npx prisma migrate dev
+# and then
+npx prisma generate
+```
+
 After that is done, you can now start the website locally by running
 
 ```
 npm run dev
 ```
+
+This should get everything up and running.
 
 ## Architecture
 

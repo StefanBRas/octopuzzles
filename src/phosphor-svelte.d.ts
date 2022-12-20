@@ -21,8 +21,16 @@ declare module 'phosphor-svelte/lib/ArrowUUpRight/ArrowUUpRight.svelte';
 declare module 'phosphor-svelte/lib/ArrowUUpLeft/ArrowUUpLeft.svelte';
 declare module 'phosphor-svelte/lib/Swap/Swap.svelte';
 declare module 'phosphor-svelte/lib/ArrowsOutLineVertical/ArrowsOutLineVertical.svelte';
+declare module 'phosphor-svelte/lib/TextHOne/TextHOne.svelte';
+declare module 'phosphor-svelte/lib/TextHTwo/TextHTwo.svelte';
+declare module 'phosphor-svelte/lib/TextT/TextT.svelte';
+declare module 'phosphor-svelte/lib/TextBolder/TextBolder.svelte';
+declare module 'phosphor-svelte/lib/TextItalic/TextItalic.svelte';
+declare module 'phosphor-svelte/lib/ListBullets/ListBullets.svelte';
+declare module 'phosphor-svelte/lib/ListNumbers/ListNumbers.svelte';
+declare module 'phosphor-svelte/lib/TextStrikethrough/TextStrikethrough.svelte';
+declare module 'phosphor-svelte/lib/AppWindow/AppWindow.svelte';
 declare module 'phosphor-svelte/lib/Play/Play.svelte';
 declare module 'phosphor-svelte/lib/Pause/Pause.svelte';
 declare module 'phosphor-svelte/lib/Atom/Atom.svelte';
 declare module 'phosphor-svelte/lib/Crosshair/Crosshair.svelte';
-

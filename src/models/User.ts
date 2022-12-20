@@ -26,6 +26,16 @@ export const UserValidator = z.object({
   /** The last time the user was updated */
   updatedAt: z.date()
 });
+
+/** A frontend that is send to the frontend */
+export const FrontendUserValidator = z.object({
+  id: z.number().int(),
+  /** Username of the user */
+  username: z.string(),
+  /** The users permission role */
+  role: RoleValidator
+});
+
 export type User = z.infer<typeof UserValidator>;
 
 export const ScannerHighlightModeValidator = z.enum(['None', 'Seen', 'Tuples']);

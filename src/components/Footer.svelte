@@ -2,7 +2,7 @@
   import Logo from '$icons/Logo.svelte';
 </script>
 
-<footer class="flex items-center justify-between bg-gray-100 border-t p-20">
+<footer class="flex items-center justify-between bg-gray-100 border-t py-20 px-4 md:px-20">
   <a href="/">
     <Logo size={200} />
   </a>

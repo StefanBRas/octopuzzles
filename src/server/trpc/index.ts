@@ -7,10 +7,13 @@ import sudokus from './sudokus';
 import users from './users';
 import walkthroughs from './walkthroughs';
 import votes from './votes';
+import comments from './comments';
 import prisma from '$utils/prisma';
+import { getJwt } from '$utils/jwt/getJwt';
 
 export const createContext = async (event: RequestEvent) => {
-  return { event, prisma };
+  const jwtToken = getJwt(event);
+  return { event, prisma, token: jwtToken };
 };
 
 export type TRPCContext = inferAsyncReturnType<typeof createContext>;
@@ -22,6 +25,7 @@ export const router = trpc
   .merge('users:', users)
   .merge('votes:', votes)
   .merge('walkthroughs:', walkthroughs)
-  .merge('sudokus:', sudokus);
+  .merge('sudokus:', sudokus)
+  .merge('comments:', comments);
 
 export type Router = typeof router;

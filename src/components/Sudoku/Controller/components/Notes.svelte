@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { Position } from '$models/Sudoku';
   import { gameHistory, selectedCells } from '$stores/sudokuStore';
+  import Button from '$ui/Button.svelte';
   import Input from '$ui/Input.svelte';
   import deepCopy from '$utils/deepCopy';
 
@@ -32,7 +33,7 @@
   }
 </script>
 
-<div class="w-full h-full flex justify-center items-center p-2">
+<div class="w-full h-full flex flex-col justify-center items-center p-2">
   <Input
     bind:this={input}
     asTextarea
@@ -43,4 +44,6 @@
       ? 'Please selct only one cell to make a note on'
       : 'Write a note'}
   />
+
+  <Button on:click={() => (value = '')} class="mt-2 w-full">Clear note</Button>
 </div>

@@ -7,7 +7,6 @@ import { sendVerifyUserMail } from '$server/email';
 import pick from 'lodash/pick';
 import { UpdateUserSettingsValidator, UserSettingsValidator, UserValidator } from '$models/User';
 import { setCookie } from '$utils/jwt/setCookie';
-import { getJwt } from '$utils/jwt/getJwt';
 import type { Prisma } from '@prisma/client';
 
 export default trpc
@@ -96,13 +95,11 @@ export default trpc
   })
   .query('me', {
     resolve: async ({ ctx }) => {
-      const jwtToken = getJwt(ctx);
-
-      if (!jwtToken) {
+      if (!ctx.token) {
         return null;
       }
 
-      const user = await ctx.prisma.user.findUnique({ where: { id: jwtToken.id } });
+      const user = await ctx.prisma.user.findUnique({ where: { id: ctx.token.id } });
       if (user) {
         return pick(user, ['id', 'email', 'role', 'username']);
       }
