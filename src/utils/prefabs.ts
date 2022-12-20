@@ -120,6 +120,22 @@ export function pathDefaults(type?: PathType | 'CUSTOM' | null): {
         form: 'Round',
         width: 15
       };
+    case 'ProductSum':
+      return {
+        arrow: false,
+        color: 'Red',
+        fill: 'Solid',
+        form: 'Square',
+        width: 13
+      };
+    case 'Entropic':
+      return {
+        arrow: false,
+        color: 'Gray',
+        fill: 'Solid',
+        form: 'Round',
+        width: 15
+      };
     case 'Odd':
     case 'Even':
       return {
@@ -186,7 +202,8 @@ export function getPathsToDraw(path: Path): Path[] {
       break;
     }
     case 'Between':
-    case 'Lockout': {
+    case 'Lockout':
+    case 'ProductSum': {
       const firstPosition = path.positions[0];
       const lastPosition = path.positions[path.positions.length - 1];
 
@@ -196,9 +213,11 @@ export function getPathsToDraw(path: Path): Path[] {
           arrow: false,
           color: path.color ?? defaultSettings.color,
           fill: 'Hollow',
-          form: path.form ?? (path.type === 'Between' ? 'Round' : 'Diamond'),
+          form:
+            path.form ??
+            (path.type === 'Between' ? 'Round' : path.type === 'Lockout' ? 'Diamond' : 'Square'),
           positions: [bulbPosition],
-          width: 81
+          width: path.type === 'ProductSum' ? 70 : 81
         });
       }
       break;

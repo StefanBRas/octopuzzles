@@ -22,7 +22,7 @@
   import PuzzleLabel from '$ui/PuzzleLabel.svelte';
 
   export let sudokus:
-    | (Sudoku & { user?: Omit<User, 'password' | 'email' | 'verified'>; labels: Label[] })[]
+    | (Sudoku & { user?: Pick<User, 'id' | 'username' | 'role'>; labels: Label[] })[]
     | null;
   export let hasNextPage: boolean;
   export let loading: boolean;
@@ -36,11 +36,13 @@
   </div>
 {/if}
 {#if sudokus}
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 3xl:grid-cols-5 gap-4">
+  <div
+    class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 3xl:grid-cols-5 gap-8 p-4"
+  >
     {#each sudokus as sudoku (sudoku.id)}
       {#if sudoku}
         <a
-          class="shadow-md items-center col-span-1 flex flex-col border rounded-md m-4 overflow-hidden cursor-pointer"
+          class="shadow-md items-center col-span-1 flex flex-col border rounded-md overflow-hidden cursor-pointer"
           href="/sudoku/{sudoku.id}"
           data-sveltekit-preload-data
         >

@@ -92,6 +92,8 @@ export const PathTypeValidator = z.enum([
   'Palindrome',
   'AntiFactor',
   'EqualSum',
+  'ProductSum',
+  'Entropic',
   'Odd',
   'Even',
   'Pill'

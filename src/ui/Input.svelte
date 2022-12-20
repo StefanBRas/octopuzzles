@@ -64,7 +64,7 @@
   <!-- Error text -->
   <slot name="error" />
 </div>
-{#if hideHelpSlot}
+{#if !hideHelpSlot}
   <div class="my-1 text-xs text-gray-500">
     <!-- Help text. If the error slot is filled, this is not displayed -->
     <slot name="help" />

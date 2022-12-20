@@ -39,8 +39,8 @@
     {#if errors}
       <p class="text-sm text-red-500">{errors.message}</p>
     {/if}
-    <Input label="Username or Email" bind:value={usernameOrEmail} />
-    <Input label="Password" type="password" bind:value={password} />
+    <Input data-ignoreshortcuts label="Username or Email" bind:value={usernameOrEmail} />
+    <Input data-ignoreshortcuts label="Password" type="password" bind:value={password} />
     <Button variant="primary" class="mt-4 w-full" {loading}>Log In</Button>
   </form>
 

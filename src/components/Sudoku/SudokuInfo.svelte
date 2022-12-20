@@ -1,26 +1,28 @@
 <script lang="ts">
-  import classNames from 'classnames';
-  import CaretUp from 'phosphor-svelte/lib/CaretUp/CaretUp.svelte';
-  import CaretDown from 'phosphor-svelte/lib/CaretDown/CaretDown.svelte';
-  import FacebookLogo from 'phosphor-svelte/lib/FacebookLogo/FacebookLogo.svelte';
-  import RedditLogo from 'phosphor-svelte/lib/RedditLogo/RedditLogo.svelte';
-  import TwitterLogo from 'phosphor-svelte/lib/TwitterLogo/TwitterLogo.svelte';
-  import WhatsappLogo from 'phosphor-svelte/lib/WhatsappLogo/WhatsappLogo.svelte';
-  import Image from 'phosphor-svelte/lib/Image/Image.svelte';
-  import { formatDistanceToNowStrict } from 'date-fns';
-  import PuzzleLabel from '$ui/PuzzleLabel.svelte';
-  import TwitterLink from '$components/shareButtons/TwitterLink.svelte';
+  import Comments from '$components/comments/Comments.svelte';
   import FacebookLink from '$components/shareButtons/FacebookLink.svelte';
-  import WhatsAppLink from '$components/shareButtons/WhatsAppLink.svelte';
   import RedditLink from '$components/shareButtons/RedditLink.svelte';
+  import TwitterLink from '$components/shareButtons/TwitterLink.svelte';
+  import WhatsAppLink from '$components/shareButtons/WhatsAppLink.svelte';
+  import trpc from '$lib/client/trpc';
+  import type { Label } from '$models/Label';
   import type { Sudoku } from '$models/Sudoku';
   import type { User } from '$models/User';
   import type { Vote } from '$models/Vote';
-  import type { Label } from '$models/Label';
-  import trpc from '$lib/client/trpc';
+  import PuzzleLabel from '$ui/PuzzleLabel.svelte';
+  import classNames from 'classnames';
+  import { formatDistanceToNowStrict } from 'date-fns';
+  import CaretDown from 'phosphor-svelte/lib/CaretDown/CaretDown.svelte';
+  import CaretUp from 'phosphor-svelte/lib/CaretUp/CaretUp.svelte';
+  import FacebookLogo from 'phosphor-svelte/lib/FacebookLogo/FacebookLogo.svelte';
+  import Image from 'phosphor-svelte/lib/Image/Image.svelte';
+  import RedditLogo from 'phosphor-svelte/lib/RedditLogo/RedditLogo.svelte';
+  import TwitterLogo from 'phosphor-svelte/lib/TwitterLogo/TwitterLogo.svelte';
+  import WhatsappLogo from 'phosphor-svelte/lib/WhatsappLogo/WhatsappLogo.svelte';
+  import HtmlContent from './HTMLContent.svelte';
 
   export let sudoku: Sudoku & {
-    user?: User | null;
+    user?: Pick<User, 'id' | 'username' | 'role'> | null;
     userVote?: Vote | null;
     labels: Label[];
   };
@@ -48,7 +50,7 @@
 </script>
 
 <aside class="p-8">
-  <div class="mb-4 flex items-center justify-between">
+  <div class="mb-4 flex flex-wrap space-y-4 space-x-4 items-center justify-between">
     <div class="flex items-center">
       <div class="flex flex-col text-sm text-gray-500 items-center">
         <button
@@ -104,6 +106,15 @@
             {/if}
           </p>
         </div>
+        {#if sudoku.labels}
+          <div class="flex gap-2 pt-2">
+            {#each sudoku.labels as label}
+              <a href="/?label={label.id}">
+                <PuzzleLabel {label} class="hover:bg-gray-200 transition-colors" />
+              </a>
+            {/each}
+          </div>
+        {/if}
       </div>
     </div>
 
@@ -137,21 +148,14 @@
     </div>
   </div>
 
-  <hr />
+  <hr class="mb-4" />
 
-  {#if sudoku.labels}
-    <div class="flex gap-2 mb-4">
-      {#each sudoku.labels as label}
-        <a href="/?label={label.id}">
-          <PuzzleLabel {label} class="hover:bg-gray-200 transition-colors" />
-        </a>
-      {/each}
-    </div>
-  {/if}
-
-  <p class="whitespace-pre-line max-w-7xl">{sudoku.description}</p>
+  <HtmlContent content={sudoku.description} />
 
   {#if sudoku.solution == null}
     <p class="text-gray-800 text-sm mt-4">Info: No solution provided for this puzzle</p>
   {/if}
+
+  <h2 class="mt-8 font-semibold mb-2">Comments</h2>
+  <Comments sudokuId={sudoku.id} />
 </aside>
