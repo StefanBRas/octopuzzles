@@ -79,7 +79,11 @@
       dimensions: sud.dimensions,
       logic: sud.logic ?? undefined
     });
-    gameHistory.reset();
+    if (data.gameData) {
+      gameHistory.set(data.gameData);
+    } else {
+      gameHistory.reset();
+    }
   });
 
   let givens = editorHistory.getClue('givens');

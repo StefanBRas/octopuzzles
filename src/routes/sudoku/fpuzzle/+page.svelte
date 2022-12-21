@@ -5,6 +5,7 @@
   import { description, editorHistory, gameHistory, sudokuTitle } from '$stores/sudokuStore';
   import { decompressFromBase64 } from '$utils/compressor';
   import { defaultValues } from '$utils/defaults';
+  import type { FPuzzlesJson } from '$utils/fPuzzles';
   import { importFPuzzleIntoEditorHistory } from '$utils/importFPuzzleIntoEditor';
   import { onMount } from 'svelte';
   import { get } from 'svelte/store';
@@ -48,7 +49,7 @@
     }
     const withPlusses = encodedString.replace(/ /g, '+');
 
-    const jsonString = decompressFromBase64(withPlusses);
+    const jsonString = decompressFromBase64(withPlusses) as FPuzzlesJson;
 
     if (jsonString == null) {
       await goto('/');

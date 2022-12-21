@@ -1,5 +1,5 @@
 import { description, editorHistory, gameHistory, sudokuTitle } from '$stores/sudokuStore';
-import type { FPuzzlesJson, HexColor, PositionString } from './compressor';
+import type { FPuzzlesJson, HexColor, PositionString } from './fPuzzles';
 import { get } from 'svelte/store';
 import deepCopy from './deepCopy';
 import { defaultRegions } from './defaults';

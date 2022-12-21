@@ -1,6 +1,6 @@
 import { description, editorHistory, gameHistory, sudokuTitle } from '$stores/sudokuStore';
 import { closestColor } from './closestColor';
-import type { FPuzzlesJson, PositionString } from './compressor';
+import type { FPuzzlesJson, PositionString } from './fPuzzles';
 import deepCopy from './deepCopy';
 import { positionStringToPosition as _positionStringToPosition } from '$utils/positionStringToPositions';
 import {

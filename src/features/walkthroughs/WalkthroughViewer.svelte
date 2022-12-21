@@ -7,6 +7,8 @@
   import { page } from '$app/stores';
   import classNames from 'classnames';
   import HtmlContent from '$components/Sudoku/HTMLContent.svelte';
+  import { compressToBase64 } from '$utils/compressor';
+  import Play from 'phosphor-svelte/lib/Play/Play.svelte';
 
   const inModal = !$page.url.pathname.endsWith('/walkthrough');
 
@@ -33,6 +35,8 @@
       <a
         class="absolute right-1 top-1"
         href={`${$page.url.pathname}/walkthrough`}
+        target="_blank"
+        rel="noopener noreferrer"
         title="Open in another tab"><AppWindow /></a
       >
     {/if}
@@ -51,6 +55,17 @@
                 gameHistory.set(step);
               }}
               title="Reset to this step"><ArrowsCounterClockwise size={16} /></button
+            >
+          {:else}
+            <a
+              class="w-6 h-6 rounded-full p-1 hover:bg-gray-100 hover:text-gray-600"
+              href={`${$page.url.pathname.replace(
+                '/walkthrough',
+                '?data=' + compressToBase64(step)
+              )}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              title="Open puzzle at this step in new tab"><Play size={16} /></a
             >
           {/if}
         </div>

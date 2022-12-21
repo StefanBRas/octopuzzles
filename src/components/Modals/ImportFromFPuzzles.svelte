@@ -3,6 +3,7 @@
   import Button from '$ui/Button.svelte';
   import Input from '$ui/Input.svelte';
   import { decompressFromBase64 } from '$utils/compressor';
+  import type { FPuzzlesJson } from '$utils/fPuzzles';
   import { importFPuzzleIntoEditorHistory } from '$utils/importFPuzzleIntoEditor';
 
   export let isOpen: boolean;
@@ -20,7 +21,7 @@
 
     const importantPart = url.replace(/^.*f-puzzles\.com\/\?load=/, '');
 
-    const jsonString = decompressFromBase64(importantPart);
+    const jsonString = decompressFromBase64(importantPart) as FPuzzlesJson;
 
     if (jsonString == null) {
       error = 'Something went wrong when getting the data from f-puzzles. Please try again.';

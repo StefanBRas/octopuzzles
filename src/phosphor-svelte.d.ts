@@ -30,3 +30,4 @@ declare module 'phosphor-svelte/lib/ListBullets/ListBullets.svelte';
 declare module 'phosphor-svelte/lib/ListNumbers/ListNumbers.svelte';
 declare module 'phosphor-svelte/lib/TextStrikethrough/TextStrikethrough.svelte';
 declare module 'phosphor-svelte/lib/AppWindow/AppWindow.svelte';
+declare module 'phosphor-svelte/lib/Play/Play.svelte';
