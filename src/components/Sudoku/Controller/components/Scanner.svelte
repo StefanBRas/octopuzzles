@@ -9,7 +9,12 @@
   import RadioGroup from '$ui/RadioGroup.svelte';
   import Checkbox from '$ui/Checkbox.svelte';
   import { cageDefaults, pathDefaults, regionDefaults } from '$utils/prefabs';
-  import type { ScannerSettings } from '$models/User';
+  import type {
+    ScannerHighlightMode,
+    ScannerMode,
+    ScannerSettings,
+    ScannerSpeed
+  } from '$models/User';
 
   import { me } from '$stores/meStore';
   import { scanner } from '$stores/sudokuStore/scanner';
@@ -53,9 +58,9 @@
 
   function updateSettings(): void {
     scannerSettings = {
-      highlightMode,
-      mode,
-      scannerSpeed,
+      highlightMode: highlightMode as ScannerHighlightMode,
+      mode: mode as ScannerMode,
+      scannerSpeed: scannerSpeed as ScannerSpeed,
       autoScan,
       useCentreMarks,
       useCornerMarks,
