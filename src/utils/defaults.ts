@@ -99,7 +99,8 @@ export const defaultRegions = (
           positions,
           type: 'Normal',
           borders: undefined,
-          color: undefined
+          color: undefined,
+          uniqueDigits: undefined
         });
       }
     }

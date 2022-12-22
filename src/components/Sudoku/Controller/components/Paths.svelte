@@ -45,7 +45,7 @@
 
   let type: PathType | 'CUSTOM' = $paths[0]?.type ?? 'CUSTOM';
   let defaultSettings = pathDefaults(type);
-  let { color, width, form, fill, arrow } = defaultSettings;
+  let { color, width, form, fill, arrow, uniqueDigits } = defaultSettings;
   $: hollow = fill === 'Hollow';
 
   $: color, updateSelectedPath();
@@ -86,6 +86,7 @@
     fill = path.fill ?? defaultSettings.fill;
     hollow = fill === 'Hollow';
     arrow = path.arrow ?? defaultSettings.arrow;
+    uniqueDigits = path.uniqueDigits ?? defaultSettings.uniqueDigits;
   }
 
   function onChangeType() {
@@ -106,6 +107,12 @@
 
   function toggleArrow(): void {
     arrow = !arrow;
+
+    updateSelectedPath();
+  }
+
+  function toggleUniqueDigits(): void {
+    uniqueDigits = !uniqueDigits;
 
     updateSelectedPath();
   }
@@ -166,7 +173,9 @@
       width: type === 'CUSTOM' || width != defaultSettings.width ? width : undefined,
       form: type === 'CUSTOM' || form != defaultSettings.form ? form : undefined,
       fill: type === 'CUSTOM' || fill != defaultSettings.fill ? fill : undefined,
-      arrow: type === 'CUSTOM' || arrow != defaultSettings.arrow ? arrow : undefined
+      arrow: type === 'CUSTOM' || arrow != defaultSettings.arrow ? arrow : undefined,
+      uniqueDigits:
+        type === 'CUSTOM' || uniqueDigits != defaultSettings.uniqueDigits ? uniqueDigits : undefined
     };
   }
 
@@ -455,6 +464,14 @@
     <div class="grid grid-cols-2 grid-rows-1 gap-2">
       <Checkbox bind:checked={hollow} label="Hollow" on:change={() => toggleHollow()} />
       <Checkbox bind:checked={arrow} label="Arrow" on:change={() => toggleArrow()} />
+    </div>
+
+    <div>
+      <Checkbox
+        bind:checked={uniqueDigits}
+        label="Unique Digits"
+        on:change={() => toggleUniqueDigits()}
+      />
     </div>
   </div>
 </div>

@@ -37,6 +37,13 @@ model User {
   sudokus      Sudoku[]
   walkthroughs Walkthrough[]
   comments     Comment[]
+  UserSettings UserSettings?
+}
+
+model UserSettings {
+  userId  Int   @unique
+  user    User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  scanner Json?
 }
 
 enum TokenKind {
