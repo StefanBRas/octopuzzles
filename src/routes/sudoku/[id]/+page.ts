@@ -15,5 +15,11 @@ export const load: PageLoad = async ({ fetch, params, url }) => {
   if (sudoku == null) {
     throw error(404, 'Not found');
   }
-  return { sudoku, walkthrough, gameData: dataParam ? decompressFromBase64(dataParam.replace(/ /g, '+')) as SolutionStep : null };
+  return {
+    sudoku,
+    walkthrough,
+    gameData: dataParam
+      ? (decompressFromBase64(dataParam.replace(/ /g, '+')) as SolutionStep)
+      : null
+  };
 };
