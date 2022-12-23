@@ -6,6 +6,8 @@
   import { get } from 'svelte/store';
   import { isDeleteKey } from '$utils/isDeleteKey';
   import { hasOpenModals } from '$stores/modalStore';
+  import { me } from '$stores/meStore';
+  import { scanner } from '$stores/sudokuStore/scanner';
 
   function handleClick(newValue: string): void {
     const positions = get(selectedCells);
@@ -13,6 +15,8 @@
 
     const currentValues = get(gameHistory.getValue('values'));
     const newValues = deepCopy(currentValues);
+    const newCentermarks = deepCopy(get(gameHistory.getValue('centermarks')));
+    const newCornermarks = deepCopy(get(gameHistory.getValue('cornermarks')));
     const givens = get(editorHistory.getClue('givens'));
 
     // Check if we should clear all game cells
@@ -24,6 +28,7 @@
     } else {
       // Whether there has been any changes
       let anyChanges = false;
+      let runScan = false;
 
       for (const position of positions) {
         // don't put anything on top of a given
@@ -47,7 +52,10 @@
           } else {
             // Insert the number
             newValues[position.row][position.column] = newValue;
+            newCentermarks[position.row][position.column] = '';
+            newCornermarks[position.row][position.column] = '';
             anyChanges = true;
+            runScan = me.getSettings().scanner?.autoScan ?? false;
           }
         }
       }
@@ -55,6 +63,10 @@
       // If there has actually been any changes, update the game history
       if (anyChanges) {
         gameHistory.set({ values: newValues });
+
+        if (runScan) {
+          scanner.startScan(positions[0]);
+        }
       }
     }
   }

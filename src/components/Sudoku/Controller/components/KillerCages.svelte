@@ -35,12 +35,13 @@
   import moveArrayElement from '$utils/moveArrayElement';
   import type { CageType, Extendedcage, Position } from '$models/Sudoku';
   import { hasOpenModals } from '$stores/modalStore';
+  import Checkbox from '$ui/Checkbox.svelte';
 
   const cages = editorHistory.getClue('cages');
 
   let type: CageType | 'CUSTOM' = 'Killer';
-  let defaultSettings = cageDefaults();
-  let { text, color } = defaultSettings;
+  let defaultSettings = cageDefaults(type);
+  let { text, color, uniqueDigits } = defaultSettings;
 
   $: color, updateSelectedCage();
 
@@ -58,13 +59,20 @@
 
   function updateSettings(cage: Partial<Extendedcage>) {
     type = cage.type ?? 'CUSTOM';
-    defaultSettings = cageDefaults();
+    defaultSettings = cageDefaults(type);
     text = cage.text ?? defaultSettings.text;
     color = cage.color ?? defaultSettings.color;
+    uniqueDigits = cage.uniqueDigits ?? defaultSettings.uniqueDigits;
   }
 
   function changeType(type: CageType | 'CUSTOM') {
     updateSettings(type !== 'CUSTOM' ? { type } : {});
+    updateSelectedCage();
+  }
+
+  function toggleUniqueDigits(): void {
+    uniqueDigits = !uniqueDigits;
+
     updateSelectedCage();
   }
 
@@ -73,7 +81,8 @@
       positions,
       type: type !== 'CUSTOM' ? type : undefined,
       text: text != defaultSettings.text ? text : undefined,
-      color: color != defaultSettings.color ? color : undefined
+      color: color != defaultSettings.color ? color : undefined,
+      uniqueDigits: uniqueDigits != defaultSettings.uniqueDigits ? uniqueDigits : undefined
     };
   }
 
@@ -407,6 +416,14 @@
         on:blur={() => {
           $handleArrows = defaultHandleArrows;
         }}
+      />
+    </div>
+
+    <div>
+      <Checkbox
+        bind:checked={uniqueDigits}
+        label="Unique Digits"
+        on:change={() => toggleUniqueDigits()}
       />
     </div>
   </div>

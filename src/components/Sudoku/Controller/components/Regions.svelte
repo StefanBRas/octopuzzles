@@ -39,7 +39,7 @@
 
   let type: RegionType | 'CUSTOM' = 'Normal';
   let defaultSettings = regionDefaults(type);
-  let { borders, color } = defaultSettings;
+  let { borders, color, uniqueDigits } = defaultSettings;
 
   $: color, updateSelectedRegion();
 
@@ -60,6 +60,7 @@
     defaultSettings = regionDefaults(type);
     borders = region.borders ?? defaultSettings.borders;
     color = region.color ?? defaultSettings.color;
+    uniqueDigits = region.uniqueDigits ?? defaultSettings.uniqueDigits;
   }
 
   function changeType(type: RegionType | 'CUSTOM') {
@@ -69,6 +70,12 @@
 
   function toggleBorders(): void {
     borders = !borders;
+
+    updateSelectedRegion();
+  }
+
+  function toggleUniqueDigits(): void {
+    uniqueDigits = !uniqueDigits;
 
     updateSelectedRegion();
   }
@@ -99,7 +106,8 @@
       color:
         (type === 'CUSTOM' || color != defaultSettings.color) && color !== 'NONE'
           ? color
-          : undefined
+          : undefined,
+      uniqueDigits: uniqueDigits != defaultSettings.uniqueDigits ? uniqueDigits : undefined
     };
   }
 
@@ -438,6 +446,14 @@
 
     <div>
       <Checkbox bind:checked={borders} label="Borders" on:change={() => toggleBorders()} />
+    </div>
+
+    <div>
+      <Checkbox
+        bind:checked={uniqueDigits}
+        label="Unique Digits"
+        on:change={() => toggleUniqueDigits()}
+      />
     </div>
   </div>
 </div>

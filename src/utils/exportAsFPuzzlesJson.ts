@@ -23,6 +23,7 @@ export function exportAsFPuzzlesJson(): FPuzzlesJson {
   const paths = get(editorHistory.getClue('paths'));
   const dimensions = get(editorHistory.getClue('dimensions'));
   const logic = get(editorHistory.getClue('logic'));
+  const flags = logic.flags ?? [];
 
   const values = get(gameHistory.getValue('values'));
   const gameColors = get(gameHistory.getValue('colors'));
@@ -60,25 +61,22 @@ export function exportAsFPuzzlesJson(): FPuzzlesJson {
 
   const fPuzzle: FPuzzlesJson = {
     author: '',
-    antiking: logic.flags?.indexOf('Antiking') !== -1 ? true : undefined,
-    antiknight: logic.flags?.indexOf('Antiknight') !== -1 ? true : undefined,
+    antiking: flags.indexOf('Antiking') !== -1 ? true : undefined,
+    antiknight: flags.indexOf('Antiknight') !== -1 ? true : undefined,
     //author: string,
-    'diagonal+': logic.flags?.indexOf('DiagonalPos') !== -1 ? true : undefined,
-    'diagonal-': logic.flags?.indexOf('DiagonalNeg') !== -1 ? true : undefined,
-    disjointgroups: logic.flags?.indexOf('DisjointSets') !== -1 ? true : undefined,
+    'diagonal+': flags.indexOf('DiagonalPos') !== -1 ? true : undefined,
+    'diagonal-': flags.indexOf('DiagonalNeg') !== -1 ? true : undefined,
+    disjointgroups: flags.indexOf('DisjointSets') !== -1 ? true : undefined,
     grid,
-    negative: logic.flags?.some(
-      (f) => f === 'NegativeBlack' || f === 'NegativeX' || f === 'NegativeV'
-    )
+    negative: flags.some((f) => f === 'NegativeBlack' || f === 'NegativeX' || f === 'NegativeV')
       ? [
-          ...(logic.flags?.some((f) => f === 'NegativeBlack') ? ['ratio'] : []),
-          ...(logic.flags?.some((f) => f === 'NegativeX') &&
-          logic.flags?.some((f) => f === 'NegativeV')
+          ...(flags.some((f) => f === 'NegativeBlack') ? ['ratio'] : []),
+          ...(flags.some((f) => f === 'NegativeX') && flags.some((f) => f === 'NegativeV')
             ? ['xv']
             : [])
         ]
       : undefined,
-    nonconsecutive: logic.flags?.some((f) => f === 'Nonconsecutive' || f === 'NegativeWhite')
+    nonconsecutive: flags.some((f) => f === 'Nonconsecutive' || f === 'NegativeWhite')
       ? true
       : undefined,
     ruleset: get(description),
@@ -103,7 +101,7 @@ export function exportAsFPuzzlesJson(): FPuzzlesJson {
         fPuzzle.grid[gridRow][gridColumn].value = parseInt(givens[i][j]);
         fPuzzle.grid[gridRow][gridColumn].given = true;
       }
-      if (logic.flags?.some((f) => f === 'Indexed159') && (j === 0 || j === 4 || j === 8)) {
+      if (flags.some((f) => f === 'Indexed159') && (j === 0 || j === 4 || j === 8)) {
         fPuzzle.grid[gridRow][gridColumn].c = colorToHexColor.Red;
       }
       if (editorColors[i][j] !== null) {
