@@ -30,6 +30,8 @@ function createWalkthroughStore() {
     });
 
     steps.set(newSteps);
+
+    currentStepIndex.set(stepIndex);
   }
 
   function removeStep(stepIndex: number): void {
