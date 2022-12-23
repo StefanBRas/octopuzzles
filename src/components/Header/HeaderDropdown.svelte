@@ -11,7 +11,8 @@
 
   async function getMe() {
     const res = await trpc().query('users:me');
-    me.set(res);
+    const settings = await trpc().query('users:getSettings');
+    me.set(res, settings);
   }
 
   onMount(() => {

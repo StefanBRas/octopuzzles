@@ -13,6 +13,7 @@
   import CenterMarksIcon from '$icons/CenterMarks.svelte';
   import CellsIcon from '$icons/Cells.svelte';
   import NotesIcon from '$icons/Notes.svelte';
+  import ScannerIcon from '$icons/Scanner.svelte';
   import Numbers from './components/Numbers.svelte';
   import Regions from './components/Regions.svelte';
   import ArrowUUpLeft from 'phosphor-svelte/lib/ArrowUUpLeft/ArrowUUpLeft.svelte';
@@ -26,7 +27,13 @@
   import classNames from 'classnames';
   import BorderClues from './components/BorderClues.svelte';
   import CellClues from './components/CellClues.svelte';
-  import { editorHistory, gameHistory, inputMode } from '$stores/sudokuStore';
+  import {
+    editorHistory,
+    gameHistory,
+    highlightedCells,
+    inputMode,
+    selectedCells
+  } from '$stores/sudokuStore';
   import { onMount } from 'svelte';
   import Cells from './components/Cells.svelte';
   import EditorColors from './components/EditorColors.svelte';
@@ -50,6 +57,8 @@
   import { mode } from '$stores/sudokuStore';
   import { walkthroughStore } from '$stores/walkthroughStore';
   import type { EditorHistoryStep, GameHistoryStep, InputMode } from '$types';
+  import Scanner from './components/Scanner.svelte';
+  import { scanner } from '$stores/sudokuStore/scanner';
 
   $: canUndo = $mode === 'editor' ? editorHistory.canUndo : gameHistory.canUndo;
   $: canRedo = $mode === 'editor' ? editorHistory.canRedo : gameHistory.canRedo;
@@ -81,7 +90,8 @@
     cornermarks: { icon: CornerMarksIcon, controller: CornerMarks, label: 'Corner marks' },
     centermarks: { icon: CenterMarksIcon, controller: CenterMarks, label: 'Center marks' },
     colors: { icon: ColorPicker, controller: GameColors, label: 'Colors' },
-    notes: { icon: NotesIcon, controller: Notes, label: 'Notes' }
+    notes: { icon: NotesIcon, controller: Notes, label: 'Notes' },
+    scanner: { icon: ScannerIcon, controller: Scanner, label: 'Scanner' }
   } as Record<
     keyof GameHistoryStep,
     { icon: typeof NumbersIcon; controller: typeof Numbers; label: string }
@@ -150,6 +160,35 @@
           k.preventDefault();
           $inputMode = 'centermarks';
           break;
+        case 's':
+          k.preventDefault();
+          if (!scanner.isScanning()) {
+            scanner.startScan();
+          } else {
+            scanner.stopScan();
+          }
+          break;
+        case 'a':
+          k.preventDefault();
+          if (scanner.isScanning()) {
+            scanner.stopScan();
+          }
+          scanner.step();
+          break;
+        case 'h': {
+          k.preventDefault();
+          scanner.toggleSeen();
+
+          highlightedCells.set(scanner.getHighlightedCells(get(selectedCells)));
+          break;
+        }
+        case 't': {
+          k.preventDefault();
+          scanner.toggleTuples();
+
+          highlightedCells.set(scanner.getHighlightedCells(get(selectedCells)));
+          break;
+        }
       }
     }
     // TODO: Handle editor
