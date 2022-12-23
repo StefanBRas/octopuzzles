@@ -8,6 +8,7 @@
   import Swap from 'phosphor-svelte/lib/Swap/Swap.svelte';
   import ArrowsOutLineVertical from 'phosphor-svelte/lib/ArrowsOutLineVertical/ArrowsOutLineVertical.svelte';
   import RichTextEditor from '$components/RichTextEditor.svelte';
+  import { afterUpdate } from 'svelte';
 
   let givens = editorHistory.getClue('givens');
   let borderclues = editorHistory.getClue('borderclues');
@@ -24,6 +25,17 @@
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     walkthroughStore.changeDescriptionOfStep(step, html);
   }
+
+  function scrollToStep(stepNo: number): void {
+    const element = document.querySelector('#step' + stepNo);
+    if (element) {
+      element.scrollIntoView();
+    }
+  }
+
+  afterUpdate(() => {
+    scrollToStep(walkthroughStore.getCurrentStepNo());
+  });
 </script>
 
 <div class="h-full flex-1 overflow-y-hidden flex flex-col">
@@ -37,7 +49,7 @@
       <p class="text-gray-700">No steps added yet</p>
     {/if}
     {#each $walkthroughStore as { step, description }, i}
-      <div>
+      <div id={'step' + i}>
         <div>
           <div class="flex space-x-4 items-center mb-2 mt-2">
             <h4 class="font-medium">Step {i + 1}</h4>
